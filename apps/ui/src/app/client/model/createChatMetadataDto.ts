@@ -19,6 +19,7 @@ export interface CreateChatMetadataDto {
      * LLM model identifier used in this session
      */
     usedModel: string;
+    client: CreateChatMetadataDto.ClientEnum;
     /**
      * Reasoning mode (e.g. off / low / medium / high / on)
      */
@@ -28,4 +29,12 @@ export interface CreateChatMetadataDto {
      */
     tools?: Array<EphemeralMcpIntegrationDto>;
 }
+export namespace CreateChatMetadataDto {
+    export const ClientEnum = {
+        Openai: 'OPENAI',
+        Lmstudio: 'LMSTUDIO'
+    } as const;
+    export type ClientEnum = typeof ClientEnum[keyof typeof ClientEnum];
+}
+
 

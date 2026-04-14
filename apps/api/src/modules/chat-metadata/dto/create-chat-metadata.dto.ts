@@ -1,5 +1,6 @@
 import {
   IsArray,
+  IsIn,
   IsOptional,
   IsString,
   ValidateNested,
@@ -17,7 +18,13 @@ export class CreateChatMetadataDto {
   @IsString()
   usedModel: string;
 
-  @ApiProperty({ description: 'Reasoning mode (e.g. off / low / medium / high / on)' })
+  @ApiProperty({ enum: ['OPENAI', 'LMSTUDIO'] })
+  @IsIn(['OPENAI', 'LMSTUDIO'])
+  client: 'OPENAI' | 'LMSTUDIO';
+
+  @ApiProperty({
+    description: 'Reasoning mode (e.g. off / low / medium / high / on)',
+  })
   @IsString()
   reasoningMode: string;
 

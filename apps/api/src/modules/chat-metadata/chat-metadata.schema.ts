@@ -2,9 +2,13 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { EphemeralMcpIntegrationDto } from '../lm-studio/dto/chat.dto';
+import { IsIn } from 'class-validator';
 
 export type ChatMetadataDocument = ChatMetadata & Document;
-
+export enum ChatClient {
+  OPENAI = 'OPENAI',
+  LMSTUDIO = 'LMSTUDIO'
+}
 @Schema({ collection: 'chat_metadata', timestamps: true })
 export class ChatMetadata {
   /** Human-readable name for this chat session */
@@ -20,6 +24,10 @@ export class ChatMetadata {
   /** Which LLM model was used for this session */
   @Prop({ required: true, type: String })
   usedModel: string;
+
+  /** Which Client model was used for this session */
+  @Prop({ required: true, type: String })
+  client: ChatClient;
 
   /** Owner — ObjectId of the authenticated user who created this metadata */
   @Prop({ required: true, type: Types.ObjectId, index: true, ref: 'User' })
@@ -51,6 +59,10 @@ export class ChatMetadataDto {
 
   @ApiProperty()
   name: string;
+
+  @ApiProperty({ enum: ['OPENAI', 'LMSTUDIO'] })
+  @IsIn(['OPENAI', 'LMSTUDIO'])
+  client: 'OPENAI' | 'LMSTUDIO';
 
   @ApiProperty()
   usedModel: string;

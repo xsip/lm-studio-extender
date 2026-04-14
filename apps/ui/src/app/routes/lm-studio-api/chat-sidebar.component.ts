@@ -7,7 +7,8 @@ import {
   ViewChild,
 } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { ChatMetadataDto } from '../../client';
+import { ChatMetadataDto, CreateChatMetadataDto } from '../../client';
+import ClientEnum = CreateChatMetadataDto.ClientEnum;
 
 @Component({
   selector: 'app-chat-sidebar',
@@ -28,7 +29,7 @@ import { ChatMetadataDto } from '../../client';
       </div>
 
       <div class="flex-1 overflow-y-auto py-1 min-h-0">
-        @if (chatList().length === 0 && !chatsLoading()) {
+        @if (filteredChats.length === 0 && !chatsLoading()) {
           <div
             class="flex items-center justify-center h-full text-xs text-text-muted tracking-wide px-3 text-center"
           >
@@ -36,7 +37,7 @@ import { ChatMetadataDto } from '../../client';
           </div>
         }
 
-        @for (chat of chatList(); track chat._id) {
+        @for (chat of filteredChats; track chat._id) {
           @if (renamingChatId() === chat._id) {
             <div class="px-2 py-1.5">
               <input
@@ -184,6 +185,7 @@ import { ChatMetadataDto } from '../../client';
   `,
 })
 export class ChatSidebarComponent {
+  readonly client = input.required<ClientEnum>();
   readonly chatList = input.required<ChatMetadataDto[]>();
   readonly chatsLoading = input.required<boolean>();
   readonly currentChatId = input.required<string | null>();
@@ -255,5 +257,11 @@ export class ChatSidebarComponent {
     this.renameValue.set(this.chatNameById(chatId));
     this.renamingChatId.set(chatId);
     setTimeout(() => this.renameInputRef?.nativeElement?.select(), 0);
+  }
+
+  get filteredChats() {
+    return this.chatList().filter((chat: ChatMetadataDto) => {
+      return chat.client === this.client();
+    });
   }
 }

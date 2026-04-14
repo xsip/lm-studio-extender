@@ -23,6 +23,7 @@ import { TokenLimitService } from '../token-limit/token-limit.service';
 // SSE event shapes we care about
 // ---------------------------------------------------------------------------
 import OpenAI from 'openai';
+import { ChatClient } from '../chat-metadata/chat-metadata.schema';
 
 interface ChatEndEvent {
   type: 'chat.end';
@@ -141,6 +142,7 @@ export class LmStudioService {
       resolvedChatMetaId = await this.chatMetadataService.createAndReturnId(
         userId,
         {
+          client: ChatClient.LMSTUDIO,
           name: name ?? chatId,
           usedModel: dto.model,
           reasoningMode: dto.reasoning ?? 'off',

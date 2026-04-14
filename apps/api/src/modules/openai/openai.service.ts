@@ -27,6 +27,7 @@ import { ResponseCreateParamsDto } from './dto/create-response-dtos/ResponseCrea
 import { ResponseStreamEvent } from 'openai/resources/responses/responses';
 import { Stream } from 'openai/streaming';
 import dayjs from 'dayjs';
+import { ChatClient } from '../chat-metadata/chat-metadata.schema';
 
 interface ChatEndEvent {
   type: 'chat.end';
@@ -147,6 +148,7 @@ export class OpenAiService {
       resolvedChatMetaId = await this.chatMetadataService.createAndReturnId(
         userId,
         {
+          client: ChatClient.OPENAI,
           name: chatId,
           usedModel: dto.model!,
           reasoningMode: dto.reasoning?.effort ?? 'off',

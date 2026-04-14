@@ -107,6 +107,7 @@ import { InfoComponent } from './lm-studio-api/info.component';
       <div class="flex flex-1 overflow-hidden relative min-h-0 bg-surface-base">
         @if (showChatsSidebar()) {
           <app-chat-sidebar
+            client="OPENAI"
             [chatList]="chatList()"
             [chatsLoading]="chatsLoading()"
             [currentChatId]="chatService.currentChatId()"

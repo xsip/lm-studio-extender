@@ -38,16 +38,26 @@ import { LmStudioEvent } from '../lmstudio-stream.service';
   ],
   providers: [ChatService],
   template: `
-    <div class="h-screen bg-surface-base text-text-primary flex flex-col overflow-hidden transition-colors duration-200">
+    <div
+      class="h-screen bg-surface-base text-text-primary flex flex-col overflow-hidden transition-colors duration-200"
+    >
       <!-- ── Top bar ── -->
-      <div class="flex items-center gap-3 border-b border-border-default px-3 py-2.5 shrink-0 bg-surface-raised">
+      <div
+        class="flex items-center gap-3 border-b border-border-default px-3 py-2.5 shrink-0 bg-surface-raised"
+      >
         <button
           type="button"
           (click)="showChatsSidebar.set(!showChatsSidebar())"
           class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs border border-border-default rounded-lg text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors"
           title="Toggle chat history"
         >
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <svg
+            class="w-3.5 h-3.5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M3 12h18M3 18h18" />
           </svg>
           <span class="hidden sm:inline">Chats</span>
@@ -61,11 +71,13 @@ import { LmStudioEvent } from '../lmstudio-stream.service';
           <a
             routerLink="/chat-lm-studio"
             class="px-2.5 py-1 text-[11px] rounded-md font-medium border border-accent text-accent bg-accent/10 transition-colors"
-          >LM Studio</a>
+            >LM Studio</a
+          >
           <a
             routerLink="/chat-openai"
             class="px-2.5 py-1 text-[11px] rounded-md font-medium border border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors"
-          >OpenAI</a>
+            >OpenAI</a
+          >
         </div>
 
         <div class="relative ml-auto">
@@ -84,7 +96,13 @@ import { LmStudioEvent } from '../lmstudio-stream.service';
           class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs border border-border-default rounded-lg text-text-secondary hover:border-accent hover:text-accent transition-colors"
           title="New chat"
         >
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <svg
+            class="w-3.5 h-3.5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
           </svg>
           <span class="hidden sm:inline">New</span>
@@ -111,11 +129,25 @@ import { LmStudioEvent } from '../lmstudio-stream.service';
           type="button"
           (click)="showInfoPanel.set(!showInfoPanel())"
           class="flex items-center justify-center w-8 h-8 rounded-lg border transition-colors"
-          [class]="showInfoPanel() ? 'border-accent text-accent bg-accent/10' : 'border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary'"
+          [class]="
+            showInfoPanel()
+              ? 'border-accent text-accent bg-accent/10'
+              : 'border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary'
+          "
           title="User info"
         >
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          <svg
+            class="w-3.5 h-3.5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            />
           </svg>
         </button>
       </div>
@@ -124,6 +156,7 @@ import { LmStudioEvent } from '../lmstudio-stream.service';
       <div class="flex flex-1 overflow-hidden relative min-h-0 bg-surface-base">
         @if (showChatsSidebar()) {
           <app-chat-sidebar
+            client="LMSTUDIO"
             [chatList]="chatList()"
             [chatsLoading]="chatsLoading()"
             [currentChatId]="chatService.currentChatId()"
@@ -159,15 +192,16 @@ import { LmStudioEvent } from '../lmstudio-stream.service';
         </div>
 
         @if (showEventPanel()) {
-          <app-event-log
-            [events]="events()"
-            (closed)="showEventPanel.set(false)"
-          />
+          <app-event-log [events]="events()" (closed)="showEventPanel.set(false)" />
         }
 
         @if (showInfoPanel()) {
-          <div class="w-72 shrink-0 border-l border-border-default bg-surface-raised flex flex-col overflow-hidden">
-            <div class="flex items-center justify-between px-3 py-2 border-b border-border-default shrink-0">
+          <div
+            class="w-72 shrink-0 border-l border-border-default bg-surface-raised flex flex-col overflow-hidden"
+          >
+            <div
+              class="flex items-center justify-between px-3 py-2 border-b border-border-default shrink-0"
+            >
               <span class="text-xs font-semibold text-text-primary">Info</span>
               <button
                 type="button"
@@ -175,7 +209,13 @@ import { LmStudioEvent } from '../lmstudio-stream.service';
                 class="flex items-center justify-center w-6 h-6 rounded-md text-text-muted hover:text-text-primary hover:bg-surface-overlay transition-colors"
                 title="Close"
               >
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <svg
+                  class="w-3.5 h-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
                   <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -232,7 +272,7 @@ export class LmStudioApi implements OnDestroy, OnInit {
     effect(() => {
       const cap = this.modelReasoningCap();
       if (!cap && this.reasoning()) this.reasoning.set(undefined);
-      if (!this.chatService.hasChatOpen()) this.reasoning.set(cap?.default as any ?? undefined);
+      if (!this.chatService.hasChatOpen()) this.reasoning.set((cap?.default as any) ?? undefined);
     });
   }
 
@@ -259,12 +299,18 @@ export class LmStudioApi implements OnDestroy, OnInit {
     try {
       const raw = localStorage.getItem(LmStudioApi.MODEL_STORAGE_KEY);
       return raw ? (JSON.parse(raw) as ModelDto) : null;
-    } catch { return null; }
+    } catch {
+      return null;
+    }
   }
 
   selectModel(model: ModelDto): void {
     this.selectedModel.set(model);
-    try { localStorage.setItem(LmStudioApi.MODEL_STORAGE_KEY, JSON.stringify(model)); } catch { /* ignore */ }
+    try {
+      localStorage.setItem(LmStudioApi.MODEL_STORAGE_KEY, JSON.stringify(model));
+    } catch {
+      /* ignore */
+    }
   }
 
   private loadModels(): void {
@@ -329,7 +375,11 @@ export class LmStudioApi implements OnDestroy, OnInit {
     this.chatsApi.getChatEntries(chatId).subscribe((res) => {
       const messages: any[] = [];
       for (const entry of res) {
-        messages.push({ role: 'user', text: entry.request.input as string, date: new Date(entry.createdAt) });
+        messages.push({
+          role: 'user',
+          text: entry.request.input as string,
+          date: new Date(entry.createdAt),
+        });
 
         const statsStr = entry.response.stats
           ? `${entry.response.stats.input_tokens} in · ${entry.response.stats.total_output_tokens} out · ${entry.response.stats.tokens_per_second?.toFixed(1)} tok/s`
@@ -337,26 +387,39 @@ export class LmStudioApi implements OnDestroy, OnInit {
 
         for (const output of entry.response.output) {
           if (output.type === 'reasoning') {
-            messages.push({ role: 'reasoning', text: (output as any).content ?? '', date: new Date(entry.createdAt), collapsed: true });
+            messages.push({
+              role: 'reasoning',
+              text: (output as any).content ?? '',
+              date: new Date(entry.createdAt),
+              collapsed: true,
+            });
           } else if (output.type === 'tool_call') {
             const tc = output as any;
             let parsedOutput: string = tc.output ?? '';
             try {
               const arr = JSON.parse(parsedOutput);
               if (Array.isArray(arr) && arr[0]?.text != null) parsedOutput = arr[0].text;
-            } catch { /* leave as-is */ }
+            } catch {
+              /* leave as-is */
+            }
             messages.push({
               role: 'tool_call',
               text: tc.tool ?? '',
               toolName: tc.tool ?? '',
               toolArguments: tc.arguments ?? {},
               toolOutput: parsedOutput,
-              providerLabel: tc.provider_info?.server_label ?? tc.provider_info?.plugin_id ?? undefined,
+              providerLabel:
+                tc.provider_info?.server_label ?? tc.provider_info?.plugin_id ?? undefined,
               date: new Date(entry.createdAt),
               collapsed: true,
             });
           } else if (output.type === 'message') {
-            messages.push({ role: 'ai', text: (output as any).content ?? '', date: new Date(entry.createdAt), stats: statsStr });
+            messages.push({
+              role: 'ai',
+              text: (output as any).content ?? '',
+              date: new Date(entry.createdAt),
+              stats: statsStr,
+            });
           }
         }
       }
@@ -387,18 +450,14 @@ export class LmStudioApi implements OnDestroy, OnInit {
   // ── Messaging ─────────────────────────────────────────────────────────────
 
   submit(): void {
-    this.chatService.submit(
-      this.selectedModel()?.key ?? '',
-      this.reasoning(),
-      () => this.loadChatList(),
+    this.chatService.submit(this.selectedModel()?.key ?? '', this.reasoning(), () =>
+      this.loadChatList(),
     );
   }
 
   resend(): void {
-    this.chatService.resend(
-      this.selectedModel()?.key ?? '',
-      this.reasoning(),
-      () => this.loadChatList(),
+    this.chatService.resend(this.selectedModel()?.key ?? '', this.reasoning(), () =>
+      this.loadChatList(),
     );
   }
 
@@ -417,7 +476,9 @@ export class LmStudioApi implements OnDestroy, OnInit {
     if (!trimmed) return;
     this.chatMetaService.updateChatMetadata(chatId, { name: trimmed }).subscribe({
       next: () => {
-        this.chatList.update((list) => list.map((c) => (c._id === chatId ? { ...c, name: trimmed } : c)));
+        this.chatList.update((list) =>
+          list.map((c) => (c._id === chatId ? { ...c, name: trimmed } : c)),
+        );
       },
     });
   }
@@ -437,14 +498,20 @@ export class LmStudioApi implements OnDestroy, OnInit {
     try {
       const stored = localStorage.getItem(LmStudioApi.THEME_STORAGE_KEY);
       return stored ? stored === 'dark' : true; // default dark
-    } catch { return true; }
+    } catch {
+      return true;
+    }
   }
 
   toggleDarkMode(): void {
     const next = !this.isDark();
     this.isDark.set(next);
     document.documentElement.classList.toggle('dark', next);
-    try { localStorage.setItem(LmStudioApi.THEME_STORAGE_KEY, next ? 'dark' : 'light'); } catch { /* ignore */ }
+    try {
+      localStorage.setItem(LmStudioApi.THEME_STORAGE_KEY, next ? 'dark' : 'light');
+    } catch {
+      /* ignore */
+    }
   }
 
   // ── Utilities ─────────────────────────────────────────────────────────────

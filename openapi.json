@@ -1510,6 +1510,13 @@
             "type": "string",
             "description": "LLM model identifier used in this session"
           },
+          "client": {
+            "type": "string",
+            "enum": [
+              "OPENAI",
+              "LMSTUDIO"
+            ]
+          },
           "reasoningMode": {
             "type": "string",
             "description": "Reasoning mode (e.g. off / low / medium / high / on)"
@@ -1525,6 +1532,7 @@
         "required": [
           "name",
           "usedModel",
+          "client",
           "reasoningMode"
         ]
       },
@@ -1537,6 +1545,13 @@
           },
           "name": {
             "type": "string"
+          },
+          "client": {
+            "type": "string",
+            "enum": [
+              "OPENAI",
+              "LMSTUDIO"
+            ]
           },
           "usedModel": {
             "type": "string"
@@ -1570,6 +1585,7 @@
         "required": [
           "_id",
           "name",
+          "client",
           "usedModel",
           "userId",
           "reasoningMode",

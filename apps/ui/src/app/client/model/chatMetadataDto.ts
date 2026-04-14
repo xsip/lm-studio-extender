@@ -16,6 +16,7 @@ export interface ChatMetadataDto {
      */
     _id: string;
     name: string;
+    client: ChatMetadataDto.ClientEnum;
     usedModel: string;
     /**
      * ObjectId of the owning user
@@ -27,4 +28,12 @@ export interface ChatMetadataDto {
     updatedAt: string;
     lastMessageSentAt: string;
 }
+export namespace ChatMetadataDto {
+    export const ClientEnum = {
+        Openai: 'OPENAI',
+        Lmstudio: 'LMSTUDIO'
+    } as const;
+    export type ClientEnum = typeof ClientEnum[keyof typeof ClientEnum];
+}
+
 
