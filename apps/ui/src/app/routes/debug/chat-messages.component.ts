@@ -112,7 +112,7 @@ import { MarkdownPipe, StripMarkdownPipe } from './markdown.pipe';
         </div>
 
       } @else if (msg.role === 'prompt_processing') {
-        <div class="flex flex-col items-start gap-1 max-w-[85%]">
+        <div class="flex flex-col items-start gap-1 max-w-[85%] mb-1 ">
           <div
             class="flex items-center gap-2.5 px-3 py-2 rounded-xl rounded-bl-sm text-xs border"
             [class]="msg.streaming
