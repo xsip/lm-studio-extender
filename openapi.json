@@ -1,0 +1,1626 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/tools/sse": {
+      "get": {
+        "operationId": "SseController_sse",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Sse"
+        ]
+      }
+    },
+    "/tools/messages": {
+      "post": {
+        "operationId": "SseController_messages",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Sse"
+        ]
+      }
+    },
+    "/tools/mcp": {
+      "post": {
+        "operationId": "StreamableHttpController_handlePostRequest",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "StreamableHttp"
+        ]
+      },
+      "get": {
+        "operationId": "StreamableHttpController_handleGetRequest",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "StreamableHttp"
+        ]
+      },
+      "delete": {
+        "operationId": "StreamableHttpController_handleDeleteRequest",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "StreamableHttp"
+        ]
+      }
+    },
+    "/lmstudio/models": {
+      "get": {
+        "operationId": "getModels",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List all available models (LLMs and embedding models)",
+        "tags": [
+          "LM Studio"
+        ]
+      }
+    },
+    "/lmstudio/chat": {
+      "post": {
+        "operationId": "chat",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Send a chat message to a locally loaded model",
+        "tags": [
+          "LM Studio"
+        ]
+      }
+    },
+    "/lmstudio/chat-stream": {
+      "post": {
+        "description": "Streams the LM Studio response as Server-Sent Events. Each exchange is persisted in MongoDB under the given `internalChatId`. If `internalChatId` is supplied, the latest `response_id` for that session is fetched from the DB and set as `previous_response_id` on the request so LM Studio maintains conversation context. If `internalChatId` is omitted a new session is created and its generated ID is returned via a `created_chat` SSE event before the stream closes.",
+        "operationId": "chatStream",
+        "parameters": [
+          {
+            "name": "internalChatId",
+            "required": false,
+            "in": "query",
+            "description": "MD5 hex string identifying an existing chat session. Omit to start a new session.",
+            "schema": {
+              "example": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4",
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "required": false,
+            "in": "query",
+            "description": "Optional human-readable label for this chat session.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Server-Sent Events stream. When no `internalChatId` was supplied, a synthetic `event: created_chat / data: {\"type\":\"created_chat\",\"result\":\"<md5>\"}` event is emitted just before the stream closes.",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Stream a chat response via SSE",
+        "tags": [
+          "LM Studio"
+        ]
+      }
+    },
+    "/chats": {
+      "get": {
+        "operationId": "listChats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "internalChatId": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "lastActivity": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List all chat sessions belonging to the authenticated user",
+        "tags": [
+          "Chats"
+        ]
+      }
+    },
+    "/chats/{internalChatId}": {
+      "get": {
+        "operationId": "getChatEntries",
+        "parameters": [
+          {
+            "name": "internalChatId",
+            "required": true,
+            "in": "path",
+            "description": "MD5 chat session hash",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChatEntryDto"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Session belongs to a different user"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all entries for a chat session (must belong to the authenticated user)",
+        "tags": [
+          "Chats"
+        ]
+      }
+    },
+    "/chats-metadata": {
+      "post": {
+        "operationId": "createChatMetadata",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateChatMetadataDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatMetadataDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new chat metadata entry",
+        "tags": [
+          "Chat Metadata"
+        ]
+      },
+      "get": {
+        "operationId": "listChatMetadata",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChatMetadataDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List all chat metadata entries belonging to the authenticated user",
+        "tags": [
+          "Chat Metadata"
+        ]
+      }
+    },
+    "/chats-metadata/{id}": {
+      "get": {
+        "operationId": "getChatMetadata",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ChatMetadata ObjectId",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatMetadataDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Belongs to a different user"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a single chat metadata entry (must belong to the authenticated user)",
+        "tags": [
+          "Chat Metadata"
+        ]
+      },
+      "patch": {
+        "operationId": "updateChatMetadata",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ChatMetadata ObjectId",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateChatMetadataDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatMetadataDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Belongs to a different user"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a chat metadata entry",
+        "tags": [
+          "Chat Metadata"
+        ]
+      },
+      "delete": {
+        "operationId": "deleteChatMetadata",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ChatMetadata ObjectId",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted (cascade includes chat messages)"
+          },
+          "403": {
+            "description": "Belongs to a different user"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a chat metadata entry and all associated messages in the chats collection",
+        "tags": [
+          "Chat Metadata"
+        ]
+      }
+    },
+    "/token-limit-configs": {
+      "post": {
+        "operationId": "createTokenLimitConfig",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTokenLimitConfigDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a token-limit config for a subscription tier",
+        "tags": [
+          "Token Limit Config"
+        ]
+      },
+      "get": {
+        "operationId": "findAllTokenLimitConfigs",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List all token-limit configs",
+        "tags": [
+          "Token Limit Config"
+        ]
+      }
+    },
+    "/token-limit-configs/subscription/{subscription}": {
+      "get": {
+        "operationId": "findTokenLimitConfigBySubscription",
+        "parameters": [
+          {
+            "name": "subscription",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "enum": [
+                "free",
+                "basic"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the token-limit config for a specific subscription tier",
+        "tags": [
+          "Token Limit Config"
+        ]
+      }
+    },
+    "/token-limit-configs/{id}": {
+      "get": {
+        "operationId": "findTokenLimitConfigById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a token-limit config by id",
+        "tags": [
+          "Token Limit Config"
+        ]
+      },
+      "put": {
+        "operationId": "updateTokenLimitConfig",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTokenLimitConfigDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a token-limit config",
+        "tags": [
+          "Token Limit Config"
+        ]
+      },
+      "delete": {
+        "operationId": "deleteTokenLimitConfig",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a token-limit config",
+        "tags": [
+          "Token Limit Config"
+        ]
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "operationId": "getMe",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returns public user profile data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the currently authenticated user",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns a signed JWT string"
+          },
+          "401": {
+            "description": "Wrong username or password"
+          }
+        },
+        "summary": "Log in and receive a JWT",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "description": "Requires a valid `REGISTER_SECRET` env value in the request body to prevent open registration. Returns the generated activation hash (to be sent via email in a real deployment).",
+        "operationId": "register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created — returns the activation hash in dev mode"
+          },
+          "401": {
+            "description": "Invalid register secret"
+          },
+          "409": {
+            "description": "Username or email already taken"
+          }
+        },
+        "summary": "Register a new user",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/activate": {
+      "get": {
+        "description": "Verifies the activation hash and marks the account as active. Returns a signed JWT so the user is immediately logged in after activation.",
+        "operationId": "activateAccount",
+        "parameters": [
+          {
+            "name": "hash",
+            "required": true,
+            "in": "query",
+            "description": "The MD5 activation hash from the registration response",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account activated — returns a signed JWT"
+          },
+          "404": {
+            "description": "Invalid or already-used activation hash"
+          }
+        },
+        "summary": "Activate a user account",
+        "tags": [
+          "auth"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "LMStudio Wrapper API",
+    "description": "REST API for LM Studio Wrapper",
+    "version": "2.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "TextInputDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "message"
+            ]
+          },
+          "content": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "content"
+        ]
+      },
+      "ImageInputDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "image"
+            ]
+          },
+          "data_url": {
+            "type": "string",
+            "description": "Base64-encoded data URL of the image"
+          }
+        },
+        "required": [
+          "type",
+          "data_url"
+        ]
+      },
+      "PluginIntegrationDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "plugin"
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "allowed_tools": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ]
+      },
+      "EphemeralMcpIntegrationDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "ephemeral_mcp"
+            ]
+          },
+          "server_label": {
+            "type": "string"
+          },
+          "server_url": {
+            "type": "string"
+          },
+          "allowed_tools": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "headers": {
+            "type": "object",
+            "description": "Custom HTTP headers sent to the MCP server"
+          }
+        },
+        "required": [
+          "type",
+          "server_label",
+          "server_url"
+        ]
+      },
+      "QuantizationDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "object",
+            "nullable": true
+          },
+          "bits_per_weight": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "name",
+          "bits_per_weight"
+        ]
+      },
+      "LoadedInstanceConfigDto": {
+        "type": "object",
+        "properties": {
+          "context_length": {
+            "type": "number"
+          },
+          "eval_batch_size": {
+            "type": "number"
+          },
+          "flash_attention": {
+            "type": "boolean"
+          },
+          "num_experts": {
+            "type": "number"
+          },
+          "offload_kv_cache_to_gpu": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "context_length"
+        ]
+      },
+      "LoadedInstanceDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "config": {
+            "$ref": "#/components/schemas/LoadedInstanceConfigDto"
+          }
+        },
+        "required": [
+          "id",
+          "config"
+        ]
+      },
+      "ModelCapabilitiesDto": {
+        "type": "object",
+        "properties": {
+          "vision": {
+            "type": "boolean"
+          },
+          "trained_for_tool_use": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "vision",
+          "trained_for_tool_use"
+        ]
+      },
+      "ModelDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "llm",
+              "embedding"
+            ]
+          },
+          "publisher": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "architecture": {
+            "type": "object",
+            "nullable": true
+          },
+          "quantization": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QuantizationDto"
+              }
+            ]
+          },
+          "size_bytes": {
+            "type": "number"
+          },
+          "params_string": {
+            "type": "object",
+            "nullable": true
+          },
+          "loaded_instances": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LoadedInstanceDto"
+            }
+          },
+          "max_context_length": {
+            "type": "number"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "gguf",
+              "mlx"
+            ],
+            "nullable": true
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/ModelCapabilitiesDto"
+          },
+          "description": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "type",
+          "publisher",
+          "key",
+          "display_name",
+          "quantization",
+          "size_bytes",
+          "params_string",
+          "loaded_instances",
+          "max_context_length",
+          "format"
+        ]
+      },
+      "ModelsResponseDto": {
+        "type": "object",
+        "properties": {
+          "models": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ModelDto"
+            }
+          }
+        },
+        "required": [
+          "models"
+        ]
+      },
+      "ChatRequestDto": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "Unique identifier for the model to use"
+          },
+          "input": {
+            "description": "Message(s) to send to the model",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/TextInputDto"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ImageInputDto"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "system_prompt": {
+            "type": "string",
+            "description": "System prompt that sets model behaviour"
+          },
+          "integrations": {
+            "type": "array",
+            "description": "Integrations (plugins / ephemeral MCP servers) to enable",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/PluginIntegrationDto"
+                },
+                {
+                  "$ref": "#/components/schemas/EphemeralMcpIntegrationDto"
+                }
+              ]
+            }
+          },
+          "stream": {
+            "type": "boolean",
+            "description": "Stream partial outputs via SSE",
+            "default": false
+          },
+          "temperature": {
+            "type": "number",
+            "description": "Sampling temperature [0,1]"
+          },
+          "top_p": {
+            "type": "number",
+            "description": "Nucleus sampling probability [0,1]"
+          },
+          "top_k": {
+            "type": "number",
+            "description": "Top-k most probable tokens"
+          },
+          "min_p": {
+            "type": "number",
+            "description": "Minimum base probability for token selection [0,1]"
+          },
+          "repeat_penalty": {
+            "type": "number",
+            "description": "Repetition penalty (1 = no penalty)"
+          },
+          "max_output_tokens": {
+            "type": "number",
+            "description": "Maximum number of tokens to generate"
+          },
+          "reasoning": {
+            "type": "string",
+            "enum": [
+              "off",
+              "low",
+              "medium",
+              "high",
+              "on"
+            ],
+            "description": "Reasoning effort level"
+          },
+          "context_length": {
+            "type": "number",
+            "description": "Context length in tokens (recommended to raise for MCP usage)"
+          },
+          "store": {
+            "type": "boolean",
+            "description": "Whether to persist the chat and return a response_id",
+            "default": true
+          },
+          "previous_response_id": {
+            "type": "string",
+            "description": "Previous response ID to continue a stored conversation (must start with \"resp_\")"
+          }
+        },
+        "required": [
+          "model",
+          "input"
+        ]
+      },
+      "MessageOutputDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "message"
+            ]
+          },
+          "content": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "content"
+        ]
+      },
+      "ProviderInfoDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "plugin",
+              "ephemeral_mcp"
+            ]
+          },
+          "plugin_id": {
+            "type": "string"
+          },
+          "server_label": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "ToolCallOutputDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "tool_call"
+            ]
+          },
+          "tool": {
+            "type": "string"
+          },
+          "arguments": {
+            "type": "object"
+          },
+          "output": {
+            "type": "string"
+          },
+          "provider_info": {
+            "$ref": "#/components/schemas/ProviderInfoDto"
+          }
+        },
+        "required": [
+          "type",
+          "tool",
+          "arguments",
+          "output",
+          "provider_info"
+        ]
+      },
+      "ReasoningOutputDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "reasoning"
+            ]
+          },
+          "content": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "content"
+        ]
+      },
+      "InvalidToolCallMetadataDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "invalid_name",
+              "invalid_arguments"
+            ]
+          },
+          "tool_name": {
+            "type": "string"
+          },
+          "arguments": {
+            "type": "object"
+          },
+          "provider_info": {
+            "$ref": "#/components/schemas/ProviderInfoDto"
+          }
+        },
+        "required": [
+          "type",
+          "tool_name"
+        ]
+      },
+      "InvalidToolCallOutputDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "invalid_tool_call"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/InvalidToolCallMetadataDto"
+          }
+        },
+        "required": [
+          "type",
+          "reason",
+          "metadata"
+        ]
+      },
+      "ChatStatsDto": {
+        "type": "object",
+        "properties": {
+          "input_tokens": {
+            "type": "number",
+            "description": "Number of input tokens (includes formatting, tool defs, prior messages)"
+          },
+          "total_output_tokens": {
+            "type": "number",
+            "description": "Total output tokens generated"
+          },
+          "reasoning_output_tokens": {
+            "type": "number",
+            "description": "Tokens used for reasoning"
+          },
+          "tokens_per_second": {
+            "type": "number",
+            "description": "Generation speed in tokens/s"
+          },
+          "time_to_first_token_seconds": {
+            "type": "number",
+            "description": "Seconds to first token"
+          },
+          "model_load_time_seconds": {
+            "type": "number",
+            "description": "Model load time in seconds (present only when model was not already loaded)"
+          }
+        },
+        "required": [
+          "input_tokens",
+          "total_output_tokens",
+          "reasoning_output_tokens",
+          "tokens_per_second",
+          "time_to_first_token_seconds"
+        ]
+      },
+      "ChatResponseDto": {
+        "type": "object",
+        "properties": {
+          "model_instance_id": {
+            "type": "string",
+            "description": "Loaded model instance that generated the response"
+          },
+          "output": {
+            "description": "Array of output items",
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/MessageOutputDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ToolCallOutputDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ReasoningOutputDto"
+                },
+                {
+                  "$ref": "#/components/schemas/InvalidToolCallOutputDto"
+                }
+              ]
+            }
+          },
+          "stats": {
+            "$ref": "#/components/schemas/ChatStatsDto"
+          },
+          "response_id": {
+            "type": "string",
+            "description": "Response ID for subsequent requests (present when store=true)"
+          }
+        },
+        "required": [
+          "model_instance_id",
+          "output",
+          "stats"
+        ]
+      },
+      "ChatEntryDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "ObjectId of the owning user"
+          },
+          "internalChatId": {
+            "type": "string"
+          },
+          "chatInternalId": {
+            "type": "object",
+            "nullable": true,
+            "description": "ChatMetadata ObjectId reference"
+          },
+          "name": {
+            "type": "object",
+            "nullable": true
+          },
+          "request": {
+            "$ref": "#/components/schemas/ChatRequestDto"
+          },
+          "response": {
+            "$ref": "#/components/schemas/ChatResponseDto"
+          },
+          "previousResponseId": {
+            "type": "object",
+            "nullable": true,
+            "description": "LM Studio response ID of the previous turn"
+          },
+          "responseId": {
+            "type": "object",
+            "nullable": true,
+            "description": "LM Studio response ID returned for this turn"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "userId",
+          "internalChatId",
+          "request",
+          "response",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CreateChatMetadataDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Human-readable name for this chat session"
+          },
+          "usedModel": {
+            "type": "string",
+            "description": "LLM model identifier used in this session"
+          },
+          "reasoningMode": {
+            "type": "string",
+            "description": "Reasoning mode (e.g. off / low / medium / high / on)"
+          },
+          "tools": {
+            "description": "MCP integrations to associate with this session",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EphemeralMcpIntegrationDto"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "usedModel",
+          "reasoningMode"
+        ]
+      },
+      "ChatMetadataDto": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "MongoDB ObjectId — use as chatInternalId when fetching messages"
+          },
+          "name": {
+            "type": "string"
+          },
+          "usedModel": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string",
+            "description": "ObjectId of the owning user"
+          },
+          "reasoningMode": {
+            "type": "string"
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EphemeralMcpIntegrationDto"
+            }
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "_id",
+          "name",
+          "usedModel",
+          "userId",
+          "reasoningMode",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpdateChatMetadataDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "usedModel": {
+            "type": "string"
+          },
+          "reasoningMode": {
+            "type": "string"
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EphemeralMcpIntegrationDto"
+            }
+          }
+        }
+      },
+      "CreateTokenLimitConfigDto": {
+        "type": "object",
+        "properties": {
+          "minutesTillReset": {
+            "type": "number",
+            "example": 1
+          },
+          "tokensPerIntervall": {
+            "type": "number",
+            "example": 9000
+          },
+          "subscription": {
+            "type": "string",
+            "enum": [
+              "free",
+              "basic"
+            ],
+            "example": "basic"
+          }
+        },
+        "required": [
+          "minutesTillReset",
+          "tokensPerIntervall",
+          "subscription"
+        ]
+      },
+      "UpdateTokenLimitConfigDto": {
+        "type": "object",
+        "properties": {
+          "minutesTillReset": {
+            "type": "number",
+            "example": 1
+          },
+          "tokensPerIntervall": {
+            "type": "number",
+            "example": 9000
+          },
+          "subscription": {
+            "type": "string",
+            "enum": [
+              "free",
+              "basic"
+            ],
+            "example": "basic"
+          }
+        }
+      },
+      "MeDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "subscription": {
+            "type": "string"
+          },
+          "isActivated": {
+            "type": "boolean"
+          },
+          "usedTokens": {
+            "type": "number"
+          },
+          "tokenCountResetDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "tokenLimit": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "username",
+          "role",
+          "subscription",
+          "isActivated",
+          "usedTokens",
+          "tokenCountResetDate",
+          "tokenLimit"
+        ]
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "string",
+            "example": "admin"
+          },
+          "password": {
+            "type": "string",
+            "example": "hunter2"
+          }
+        },
+        "required": [
+          "user",
+          "password"
+        ]
+      },
+      "RegisterDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "admin",
+            "description": "Unique username"
+          },
+          "password": {
+            "type": "string",
+            "example": "hunter2",
+            "description": "Password (min 8 chars)"
+          },
+          "registerSecret": {
+            "type": "string",
+            "example": "SUPER_SECRET_REGISTER_KEY",
+            "description": "Server-side registration secret from env REGISTER_SECRET"
+          }
+        },
+        "required": [
+          "username",
+          "password",
+          "registerSecret"
+        ]
+      }
+    }
+  }
+}

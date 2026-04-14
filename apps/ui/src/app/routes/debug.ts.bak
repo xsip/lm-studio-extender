@@ -1,0 +1,543 @@
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  computed,
+  effect,
+  ElementRef,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+  ViewChild,
+} from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Subscription } from 'rxjs';
+import {
+  LmStudioEvent,
+  LmStudioStreamService,
+  StreamError2Event,
+  StreamErrorEvent,
+} from '../lmstudio-stream.service';
+import { ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
+import { ChatsService } from '../client';
+
+interface EventEntry {
+  id: number;
+  event: LmStudioEvent;
+  timestamp: Date;
+}
+
+interface ChatMessage {
+  role: 'user' | 'ai' | 'error' | 'info';
+  text: string;
+  date?: Date;
+  stats?: string;
+  streaming?: boolean;
+}
+
+@Component({
+  selector: 'app-debug',
+  imports: [CommonModule, ReactiveFormsModule, DatePipe],
+  template: `
+    <div class="h-screen bg-zinc-950 text-zinc-100 font-mono flex flex-col overflow-hidden">
+      <!-- Header -->
+      <div class="flex items-center gap-3 border-b border-zinc-800 px-4 py-3 shrink-0">
+        <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+        <span class="text-xs text-zinc-500 tracking-widest uppercase">LM Studio Stream</span>
+        <span class="ml-auto text-xs text-zinc-600">{{ modelLabel }}</span>
+        <!-- Mobile: event log toggle -->
+        @if (events().length > 0) {
+          <button
+            type="button"
+            class="lg:hidden ml-2 px-3 py-1 text-xs border border-zinc-700 rounded-full text-zinc-400 hover:border-zinc-500 transition-colors"
+            (click)="showEventPanel.set(!showEventPanel())"
+          >
+            Events · {{ events().length }}
+          </button>
+        }
+      </div>
+
+      <!-- Main layout -->
+      <div class="flex flex-1 overflow-hidden relative min-h-0">
+        <!-- ── LEFT: Chat ── -->
+        <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
+          <!-- Message history -->
+          <div #messageContainer class="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3">
+            @if (chatMessages().length === 0 && !streaming()) {
+              <div
+                class="flex-1 flex items-center justify-center text-xs text-zinc-700 tracking-widest uppercase"
+              >
+                No messages yet
+              </div>
+            }
+
+            @for (msg of chatMessages(); track $index) {
+              @if (msg.role === 'user') {
+                <div class="flex flex-col items-end gap-1">
+                  <div
+                    class="max-w-[75%] bg-zinc-800 text-zinc-100 rounded-2xl rounded-br-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap"
+                  >
+                    {{ msg.text }}
+                  </div>
+                  @if (msg.date) {
+                    <span class="text-xs text-zinc-700">{{ msg.date | date: 'HH:mm' }}</span>
+                  }
+                </div>
+              } @else if (msg.role === 'error') {
+                <div class="flex flex-col items-start gap-1">
+                  <div
+                    class="max-w-[80%] bg-red-950/40 border border-red-800 text-red-300 rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap flex items-start gap-2"
+                  >
+                    <span class="shrink-0 mt-0.5 text-red-500">&#9888;</span>
+                    <span>{{ msg.text }}</span>
+                  </div>
+                  @if (msg.date) {
+                    <span class="text-xs text-zinc-700">{{ msg.date | date: 'HH:mm' }}</span>
+                  }
+                </div>
+              } @else if (msg.role === 'info') {
+                <div class="flex flex-col items-start gap-1">
+                  <div
+                    class="max-w-[80%] bg-blue-950/40 border border-blue-800 text-blue-300 rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap flex items-start gap-2"
+                  >
+                    <span class="shrink-0 mt-0.5 text-blue-500">&#9888;</span>
+                    <span>{{ msg.text }}</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    @if (msg.date) {
+                      <span class="text-xs text-zinc-700">{{ msg.date | date: 'HH:mm' }}</span>
+                    }
+                    @if ($last && showResend()) {
+                      <button
+                        type="button"
+                        (click)="resend()"
+                        class="px-3 py-1 text-xs tracking-widest uppercase border border-blue-700 hover:border-blue-400 hover:text-blue-300 text-blue-500 rounded-lg transition-colors"
+                      >
+                        ↺ Resend
+                      </button>
+                    }
+                  </div>
+                </div>
+              } @else {
+                <div class="flex flex-col items-start gap-1">
+                  <div
+                    class="max-w-[80%] bg-zinc-900 border border-zinc-800 text-zinc-100 rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap"
+                  >
+                    {{ msg.text }}
+                    @if (msg.streaming) {
+                      <span
+                        class="inline-block w-1.5 h-4 bg-emerald-400 animate-pulse ml-0.5 align-middle rounded-sm"
+                      ></span>
+                    }
+                  </div>
+                  @if (msg.stats) {
+                    <span class="text-xs text-zinc-700">{{ msg.stats }}</span>
+                  }
+                </div>
+              }
+            }
+          </div>
+
+          <!-- Input area -->
+          <div class="shrink-0 border-t border-zinc-800 px-4 py-3">
+            <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-2">
+              <textarea
+                formControlName="input"
+                rows="3"
+                placeholder="Enter your prompt..."
+                class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-3 text-sm text-zinc-100 placeholder-zinc-600 resize-none focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                (keydown.ctrl.enter)="submit()"
+                (keydown.meta.enter)="submit()"
+              ></textarea>
+
+              <div class="flex items-center gap-2">
+                <button
+                  type="submit"
+                  [disabled]="form.invalid || streaming()"
+                  class="px-5 py-1.5 text-xs tracking-widest uppercase bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors font-semibold"
+                >
+                  {{ streaming() ? 'Streaming...' : 'Send' }}
+                </button>
+
+                @if (streaming()) {
+                  <button
+                    type="button"
+                    (click)="reset()"
+                    class="px-4 py-1.5 text-xs tracking-widest uppercase border border-zinc-700 hover:border-red-500 hover:text-red-400 text-zinc-500 rounded-lg transition-colors"
+                  >
+                    Reset
+                  </button>
+                }
+
+                @if (form.get('input')?.invalid && form.get('input')?.touched) {
+                  <p class="text-xs text-red-400">Prompt is required.</p>
+                }
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- ── RIGHT: Event log (desktop sidebar) ── -->
+        <div class="hidden lg:flex flex-col w-80 border-l border-zinc-800 shrink-0 min-h-0">
+          <div
+            class="flex items-center justify-between px-3 py-2.5 border-b border-zinc-800 shrink-0"
+          >
+            <span class="text-xs text-zinc-600 uppercase tracking-widest">Event Log</span>
+            <span class="text-xs text-zinc-700">{{ events().length }} events</span>
+          </div>
+
+          <div #eventContainer class="flex-1 overflow-y-auto px-2 py-2 flex flex-col gap-1 min-h-0">
+            @if (events().length === 0) {
+              <div
+                class="flex items-center justify-center h-full text-xs text-zinc-800 uppercase tracking-widest"
+              >
+                No events
+              </div>
+            }
+            @for (entry of events(); track entry.id) {
+              <div
+                class="flex items-start gap-2 px-2.5 py-1.5 rounded text-xs border-l-2"
+                [class]="eventRowClass(entry.event)"
+              >
+                <span
+                  class="shrink-0 font-semibold w-44 truncate"
+                  [class]="eventTypeClass(entry.event)"
+                >
+                  {{ entry.event.type }}
+                </span>
+                <span class="text-zinc-500 truncate flex-1">{{ eventSummary(entry.event) }}</span>
+                <span class="shrink-0 text-zinc-700 tabular-nums">{{
+                  entry.timestamp | date: 'HH:mm:ss'
+                }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- ── Mobile: Event log slide-up panel ── -->
+        @if (showEventPanel()) {
+          <div
+            class="lg:hidden absolute inset-0 z-20 flex flex-col bg-zinc-950"
+            (click.self)="showEventPanel.set(false)"
+          >
+            <div
+              class="flex items-center justify-between px-4 py-3 border-b border-zinc-800 shrink-0"
+            >
+              <span class="text-xs text-zinc-500 uppercase tracking-widest"
+                >Event Log · {{ events().length }}</span
+              >
+              <button
+                type="button"
+                class="text-xs text-zinc-500 border border-zinc-700 px-3 py-1 rounded hover:border-zinc-500 transition-colors"
+                (click)="showEventPanel.set(false)"
+              >
+                Close
+              </button>
+            </div>
+
+            <div
+              #mobileEventContainer
+              class="flex-1 overflow-y-auto px-3 py-2 flex flex-col gap-1 min-h-0"
+            >
+              @for (entry of events(); track entry.id) {
+                <div
+                  class="flex items-start gap-2 px-2.5 py-1.5 rounded text-xs border-l-2"
+                  [class]="eventRowClass(entry.event)"
+                >
+                  <span
+                    class="shrink-0 font-semibold w-40 truncate"
+                    [class]="eventTypeClass(entry.event)"
+                  >
+                    {{ entry.event.type }}
+                  </span>
+                  <span class="text-zinc-500 truncate flex-1">{{ eventSummary(entry.event) }}</span>
+                  <span class="shrink-0 text-zinc-700 tabular-nums">{{
+                    entry.timestamp | date: 'HH:mm:ss'
+                  }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  `,
+})
+export class Debug implements OnDestroy, OnInit {
+  private readonly streamService = inject(LmStudioStreamService);
+  private readonly fb = inject(FormBuilder);
+  private readonly route = inject(ActivatedRoute);
+  private readonly location = inject(Location);
+  private readonly chatsService = inject(ChatsService);
+  private sub?: Subscription;
+
+  @ViewChild('messageContainer') messageContainer?: ElementRef<HTMLElement>;
+  @ViewChild('eventContainer') eventContainer?: ElementRef<HTMLElement>;
+  @ViewChild('mobileEventContainer') mobileEventContainer?: ElementRef<HTMLElement>;
+
+  readonly form = this.fb.group({
+    input: ['', [Validators.required, Validators.minLength(1)]],
+  });
+
+  readonly events = signal<EventEntry[]>([]);
+  readonly streaming = signal(false);
+  readonly chatMessages = signal<ChatMessage[]>([]);
+  readonly showEventPanel = signal(false);
+
+  private readonly currentChatId = signal<string | null>(null);
+  private eventCounter = 0;
+  readonly modelLabel = 'google/gemma-4-e4b';
+
+  private readonly lastUserInput = signal<string>('');
+
+  /** True when the last message is an info bubble AND no chat.end event was received. */
+  readonly showResend = computed(() => {
+    const msgs = this.chatMessages();
+    const last = msgs[msgs.length - 1];
+    if (!last || last.role !== 'info') return false;
+    const hasChatEnd = this.events().some((e) => e.event.type === 'chat.end');
+    return !hasChatEnd && !!this.lastUserInput();
+  });
+
+  constructor() {
+    // Auto-scroll chat on new messages
+    effect(() => {
+      this.chatMessages(); // track signal
+      this.scrollToBottom(this.messageContainer);
+    });
+
+    // Auto-scroll event log on new events
+    effect(() => {
+      this.events(); // track signal
+      this.scrollToBottom(this.eventContainer);
+      this.scrollToBottom(this.mobileEventContainer);
+    });
+  }
+
+  private scrollToBottom(ref?: ElementRef<HTMLElement>): void {
+    if (!ref?.nativeElement) return;
+    const el = ref.nativeElement;
+    const threshold = 50; // px from bottom — don't force-scroll if user scrolled up
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    if (distanceFromBottom <= threshold) {
+      // Already near bottom or this is a new append — scroll down
+      setTimeout(() => el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' }), 0);
+    }
+  }
+
+  ngOnInit(): void {
+    const chatId = this.route.snapshot.paramMap.get('chatId');
+    this.currentChatId.set(chatId);
+
+    if (chatId) {
+      this.chatsService.getChatEntries(chatId).subscribe((res) => {
+        const messages: ChatMessage[] = [];
+        for (const entry of res) {
+          messages.push({
+            role: 'user',
+            text: entry.request.input as string,
+            date: new Date(entry.createdAt),
+          });
+          const aiMsg = entry.response.output.find((r) => r.type === 'message');
+          if (aiMsg) {
+            messages.push({
+              role: 'ai',
+              text: (aiMsg as any).content ?? '',
+              date: new Date(entry.createdAt),
+              stats: entry.response.stats
+                ? `${entry.response.stats.input_tokens} in · ${entry.response.stats.total_output_tokens} out · ${entry.response.stats.tokens_per_second?.toFixed(1)} tok/s`
+                : undefined,
+            });
+          }
+        }
+        this.chatMessages.set(messages);
+      });
+    }
+  }
+
+  submit(): void {
+    if (this.form.invalid || this.streaming()) return;
+
+    const input = this.form.getRawValue().input!.trim();
+    this.lastUserInput.set(input);
+    this.form.reset();
+    this.events.set([]);
+    this.streaming.set(true);
+
+    // Append user message immediately
+    this.chatMessages.update((msgs) => [...msgs, { role: 'user', text: input, date: new Date() }]);
+
+    // Add a placeholder AI message that will stream into
+    this.chatMessages.update((msgs) => [...msgs, { role: 'ai', text: '', streaming: true }]);
+
+    this.streamService.reset();
+
+    this.sub?.unsubscribe();
+    this.sub = this.streamService.events$.subscribe({
+      next: (event) => {
+        this.events.update((list) => [
+          ...list,
+          { id: this.eventCounter++, event, timestamp: new Date() },
+        ]);
+
+        if (event.type === 'error') {
+          // Remove any incomplete streaming placeholder, then append the error
+          this.chatMessages.update((msgs) => {
+            const filtered = msgs[msgs.length - 1]?.streaming ? msgs.slice(0, -1) : msgs;
+            return [
+              ...filtered,
+              {
+                role: 'error',
+                text:
+                  (event as StreamErrorEvent).message ??
+                  (event as StreamError2Event).error?.message,
+                date: new Date(),
+              },
+            ];
+          });
+          this.streaming.set(false);
+        }
+        if (event.type === 'api.info') {
+          // Remove any incomplete streaming placeholder, then append the error
+          this.chatMessages.update((msgs) => {
+            const filtered = msgs[msgs.length - 1]?.streaming ? msgs.slice(0, -1) : msgs;
+            return [...filtered, { role: 'info', text: event.message, date: new Date() }];
+          });
+        }
+      },
+      complete: () => this.streaming.set(false),
+      error: () => this.streaming.set(false),
+    });
+
+    this.streamService.messageDelta$.subscribe((chunk) => {
+      this.chatMessages.update((msgs) => {
+        const copy = [...msgs];
+        const last = copy[copy.length - 1];
+        if (last?.role === 'ai') {
+          copy[copy.length - 1] = { ...last, text: last.text + chunk };
+        }
+        return copy;
+      });
+    });
+
+    this.streamService.chatEnd$.subscribe((result) => {
+      const stats = `${result.stats.input_tokens} in · ${result.stats.total_output_tokens} out · ${result.stats.tokens_per_second.toFixed(1)} tok/s`;
+      this.chatMessages.update((msgs) => {
+        const copy = [...msgs];
+        const last = copy[copy.length - 1];
+        if (last?.role === 'ai') {
+          copy[copy.length - 1] = { ...last, streaming: false, stats };
+        }
+        return copy;
+      });
+    });
+
+    this.streamService.newChatCreated$.subscribe((result) => {
+      if (this.currentChatId() !== result) {
+        this.currentChatId.set(result);
+        this.location.replaceState(`/chat/${result}`);
+      }
+    });
+
+    this.streamService.chat(
+      { model: this.modelLabel, input, store: true },
+      this.currentChatId() ?? undefined,
+    );
+  }
+
+  resend(): void {
+    const input = this.lastUserInput();
+    if (!input || this.streaming()) return;
+    this.form.setValue({ input });
+    this.submit();
+  }
+
+  reset(): void {
+    this.sub?.unsubscribe();
+    this.streamService.reset();
+    this.streaming.set(false);
+    this.events.set([]);
+    // Remove the incomplete streaming AI message if present
+    this.chatMessages.update((msgs) => {
+      const last = msgs[msgs.length - 1];
+      return last?.streaming ? msgs.slice(0, -1) : msgs;
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
+  }
+
+  eventRowClass(event: LmStudioEvent): string {
+    const base = 'border-l-2 ';
+    switch (true) {
+      case event.type.startsWith('chat.'):
+        return base + 'bg-zinc-900 border-zinc-600';
+      case event.type.startsWith('message.'):
+        return base + 'bg-emerald-950/30 border-emerald-700';
+      case event.type.startsWith('tool_call.'):
+        return base + 'bg-sky-950/30 border-sky-700';
+      case event.type.startsWith('prompt_processing.'):
+        return base + 'bg-zinc-900 border-zinc-700';
+      case event.type.startsWith('reasoning.'):
+        return base + 'bg-violet-950/30 border-violet-700';
+      case event.type.startsWith('model_load.'):
+        return base + 'bg-amber-950/30 border-amber-700';
+      case event.type === 'error':
+        return base + 'bg-red-950/30 border-red-600';
+      default:
+        return base + 'bg-zinc-900 border-zinc-800';
+    }
+  }
+
+  eventTypeClass(event: LmStudioEvent): string {
+    switch (true) {
+      case event.type.startsWith('message.'):
+        return 'text-emerald-400';
+      case event.type.startsWith('tool_call.'):
+        return 'text-sky-400';
+      case event.type.startsWith('prompt_processing.'):
+        return 'text-zinc-500';
+      case event.type.startsWith('reasoning.'):
+        return 'text-violet-400';
+      case event.type.startsWith('model_load.'):
+        return 'text-amber-400';
+      case event.type === 'error':
+        return 'text-red-400';
+      default:
+        return 'text-zinc-400';
+    }
+  }
+
+  eventSummary(event: LmStudioEvent): string {
+    switch (event.type) {
+      case 'chat.start':
+        return `model: ${event.model_instance_id}`;
+      case 'prompt_processing.progress':
+        return `${(event.progress * 100).toFixed(0)}%`;
+      case 'tool_call.name':
+        return `${event.tool_name} via ${event.provider_info.plugin_id ?? event.provider_info.server_label}`;
+      case 'tool_call.arguments':
+        return JSON.stringify(event.arguments);
+      case 'tool_call.success':
+        return `${event.tool} → ${event.output.slice(0, 80)}`;
+      case 'tool_call.failure':
+        return `${event.tool} — ${event.error}`;
+      case 'message.delta':
+        return JSON.stringify(event.content);
+      case 'reasoning.delta':
+        return event.content.slice(0, 80);
+      case 'model_load.progress':
+        return `${(event.progress * 100).toFixed(0)}%`;
+      case 'chat.end':
+        return `${event.result.stats.total_output_tokens} tokens · ${event.result.stats.tokens_per_second.toFixed(1)} tok/s`;
+      case 'error':
+        return (event as StreamErrorEvent).message ?? (event as StreamError2Event).error?.message;
+      default:
+        return '';
+    }
+  }
+}

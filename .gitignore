@@ -1,0 +1,36 @@
+# NX
+.nx/cache
+.nx/workspace-data
+
+# Build outputs
+dist/
+tmp/
+
+# Node
+node_modules/
+
+# Coverage
+coverage/
+
+# Angular
+.angular/
+
+# NestJS
+*.js.map
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.local
+
+# Logs
+*.log

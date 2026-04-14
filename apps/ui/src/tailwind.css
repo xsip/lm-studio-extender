@@ -1,0 +1,242 @@
+@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── Google Fonts ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ── Base font ── */
+:root {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+pre, code, kbd, .font-mono {
+  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace !important;
+}
+
+/* ─────────────────────────────────────────────────────
+   Light theme tokens
+───────────────────────────────────────────────────── */
+:root {
+  --color-surface-base:     #ffffff;
+  --color-surface-raised:   #f8f9fa;
+  --color-surface-overlay:  #f1f3f5;
+  --color-surface-sunken:   #e9ecef;
+
+  --color-border-subtle:    rgba(0, 0, 0, 0.07);
+  --color-border-default:   rgba(0, 0, 0, 0.12);
+  --color-border-strong:    rgba(0, 0, 0, 0.20);
+
+  --color-text-primary:     #0f1117;
+  --color-text-secondary:   #4b5563;
+  --color-text-muted:       #9ca3af;
+  --color-text-disabled:    #d1d5db;
+
+  --color-accent:           #4f46e5;
+  --color-accent-hover:     #4338ca;
+  --color-accent-subtle:    #eef2ff;
+  --color-accent-text:      #3730a3;
+
+  --color-reasoning-bg:     rgba(139, 92, 246, 0.08);
+  --color-reasoning-border: rgba(139, 92, 246, 0.30);
+  --color-reasoning-text:   #7c3aed;
+  --color-reasoning-muted:  #a78bfa;
+
+  --color-tool-bg:          rgba(14, 165, 233, 0.07);
+  --color-tool-border:      rgba(14, 165, 233, 0.25);
+  --color-tool-text:        #0369a1;
+  --color-tool-muted:       #38bdf8;
+
+  --color-error-bg:         rgba(244, 63, 94, 0.07);
+  --color-error-border:     rgba(244, 63, 94, 0.25);
+  --color-error-text:       #be123c;
+  --color-error-muted:      #fb7185;
+
+  --color-success-bg:       rgba(16, 185, 129, 0.07);
+  --color-success-border:   rgba(16, 185, 129, 0.25);
+  --color-success-text:     #059669;
+  --color-success-muted:    #34d399;
+
+  --color-warn-bg:          rgba(245, 158, 11, 0.07);
+  --color-warn-border:      rgba(245, 158, 11, 0.25);
+  --color-warn-text:        #b45309;
+  --color-warn-muted:       #fbbf24;
+
+  --color-info-bg:          rgba(59, 130, 246, 0.07);
+  --color-info-border:      rgba(59, 130, 246, 0.25);
+  --color-info-text:        #1d4ed8;
+  --color-info-muted:       #60a5fa;
+
+  --color-scrollbar-bg:     #e5e7eb;
+  --color-scrollbar-thumb:  #9ca3af;
+
+  --color-primary:          var(--color-surface-base);
+  --color-primary-2:        var(--color-surface-raised);
+  --color-secondary:        var(--color-text-primary);
+  --color-error:            #be123c;
+}
+
+/* ─────────────────────────────────────────────────────
+   Dark theme tokens
+───────────────────────────────────────────────────── */
+.dark {
+  --color-surface-base:     #0d0f12;
+  --color-surface-raised:   #161b22;
+  --color-surface-overlay:  #1e2530;
+  --color-surface-sunken:   #252d3a;
+
+  --color-border-subtle:    rgba(255, 255, 255, 0.05);
+  --color-border-default:   rgba(255, 255, 255, 0.09);
+  --color-border-strong:    rgba(255, 255, 255, 0.16);
+
+  --color-text-primary:     #e6edf3;
+  --color-text-secondary:   #8b949e;
+  --color-text-muted:       #484f58;
+  --color-text-disabled:    #30363d;
+
+  --color-accent:           #6366f1;
+  --color-accent-hover:     #818cf8;
+  --color-accent-subtle:    rgba(99, 102, 241, 0.15);
+  --color-accent-text:      #a5b4fc;
+
+  --color-reasoning-bg:     rgba(139, 92, 246, 0.10);
+  --color-reasoning-border: rgba(139, 92, 246, 0.25);
+  --color-reasoning-text:   #c4b5fd;
+  --color-reasoning-muted:  #7c3aed;
+
+  --color-tool-bg:          rgba(14, 165, 233, 0.08);
+  --color-tool-border:      rgba(14, 165, 233, 0.20);
+  --color-tool-text:        #7dd3fc;
+  --color-tool-muted:       #0369a1;
+
+  --color-error-bg:         rgba(244, 63, 94, 0.08);
+  --color-error-border:     rgba(244, 63, 94, 0.22);
+  --color-error-text:       #fda4af;
+  --color-error-muted:      #be123c;
+
+  --color-success-bg:       rgba(16, 185, 129, 0.08);
+  --color-success-border:   rgba(16, 185, 129, 0.20);
+  --color-success-text:     #6ee7b7;
+  --color-success-muted:    #059669;
+
+  --color-warn-bg:          rgba(245, 158, 11, 0.08);
+  --color-warn-border:      rgba(245, 158, 11, 0.20);
+  --color-warn-text:        #fcd34d;
+  --color-warn-muted:       #b45309;
+
+  --color-info-bg:          rgba(59, 130, 246, 0.08);
+  --color-info-border:      rgba(59, 130, 246, 0.20);
+  --color-info-text:        #93c5fd;
+  --color-info-muted:       #1d4ed8;
+
+  --color-scrollbar-bg:     #1e2530;
+  --color-scrollbar-thumb:  #30363d;
+
+  --color-primary:          var(--color-surface-base);
+  --color-primary-2:        var(--color-surface-raised);
+  --color-secondary:        var(--color-text-primary);
+  --color-error:            #fda4af;
+}
+
+/* ─────────────────────────────────────────────────────
+   Tailwind theme registration
+───────────────────────────────────────────────────── */
+@theme {
+  --color-primary:           var(--color-primary);
+  --color-primary-2:         var(--color-primary-2);
+  --color-secondary:         var(--color-secondary);
+  --color-error:             var(--color-error);
+
+  --color-surface-base:      var(--color-surface-base);
+  --color-surface-raised:    var(--color-surface-raised);
+  --color-surface-overlay:   var(--color-surface-overlay);
+  --color-surface-sunken:    var(--color-surface-sunken);
+
+  --color-border-subtle:     var(--color-border-subtle);
+  --color-border-default:    var(--color-border-default);
+  --color-border-strong:     var(--color-border-strong);
+
+  --color-text-primary:      var(--color-text-primary);
+  --color-text-secondary:    var(--color-text-secondary);
+  --color-text-muted:        var(--color-text-muted);
+  --color-text-disabled:     var(--color-text-disabled);
+
+  --color-accent:            var(--color-accent);
+  --color-accent-hover:      var(--color-accent-hover);
+  --color-accent-subtle:     var(--color-accent-subtle);
+  --color-accent-text:       var(--color-accent-text);
+
+  --color-reasoning-bg:      var(--color-reasoning-bg);
+  --color-reasoning-border:  var(--color-reasoning-border);
+  --color-reasoning-text:    var(--color-reasoning-text);
+  --color-reasoning-muted:   var(--color-reasoning-muted);
+
+  --color-tool-bg:           var(--color-tool-bg);
+  --color-tool-border:       var(--color-tool-border);
+  --color-tool-text:         var(--color-tool-text);
+  --color-tool-muted:        var(--color-tool-muted);
+
+  --color-error-bg:          var(--color-error-bg);
+  --color-error-border:      var(--color-error-border);
+  --color-error-text:        var(--color-error-text);
+  --color-error-muted:       var(--color-error-muted);
+
+  --color-success-bg:        var(--color-success-bg);
+  --color-success-border:    var(--color-success-border);
+  --color-success-text:      var(--color-success-text);
+  --color-success-muted:     var(--color-success-muted);
+
+  --color-warn-bg:           var(--color-warn-bg);
+  --color-warn-border:       var(--color-warn-border);
+  --color-warn-text:         var(--color-warn-text);
+  --color-warn-muted:        var(--color-warn-muted);
+
+  --color-info-bg:           var(--color-info-bg);
+  --color-info-border:       var(--color-info-border);
+  --color-info-text:         var(--color-info-text);
+  --color-info-muted:        var(--color-info-muted);
+
+  --color-scrollbar-track:   var(--color-scrollbar-bg);
+  --color-scrollbar-thumb:   var(--color-scrollbar-thumb);
+
+  --animate-marquee:        marquee 250s linear infinite;
+  --animate-marquee2:       marquee2 250s linear infinite;
+  --animate-marquee-slow:   marquee 2500s linear infinite;
+  --animate-marquee-slow2:  marquee2 2500s linear infinite;
+  --animate-spin-slow:      spin 10s linear infinite;
+  --animate-spin-slower:    spin 18s linear infinite;
+
+  @keyframes marquee {
+    0%, 100% { transform: translateX(0%); }
+    100%      { transform: translateX(-100%); }
+  }
+  @keyframes marquee2 {
+    0%, 100% { transform: translateX(100%); }
+    100%      { transform: translateX(0%); }
+  }
+}
+
+/* ─────────────────────────────────────────────────────
+   Scrollbar
+───────────────────────────────────────────────────── */
+::-webkit-scrollbar        { @apply w-2 h-2; }
+::-webkit-scrollbar-track  { @apply bg-scrollbar-track; }
+::-webkit-scrollbar-corner { @apply bg-scrollbar-track; }
+::-webkit-scrollbar-thumb  { @apply bg-scrollbar-thumb rounded-full; }
+
+/* ─────────────────────────────────────────────────────
+   Utilities
+───────────────────────────────────────────────────── */
+@utility animation-pause {
+  animation-play-state: paused !important;
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}

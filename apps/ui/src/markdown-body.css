@@ -1,0 +1,149 @@
+/* ── Markdown body ──────────────────────────────────────────────────────────
+   Used by .markdown-body inside AI and reasoning message bubbles.
+   Scoped so it never bleeds into the rest of the UI.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+@layer components {
+  .markdown-body {
+    /* Inherit the bubble's text colour & font-size */
+    color: inherit;
+    font-size: inherit;
+    line-height: 1.6;
+
+    /* ── Block spacing ── */
+    > * + * { margin-top: 0.6em; }
+
+    p { margin: 0; }
+    p + p { margin-top: 0.5em; }
+
+    /* ── Headings ── */
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: 600;
+      line-height: 1.25;
+      margin-top: 1em;
+      margin-bottom: 0.25em;
+    }
+    h1 { font-size: 1.15em; }
+    h2 { font-size: 1.05em; }
+    h3, h4, h5, h6 { font-size: 1em; }
+
+    /* ── Lists ── */
+    ul, ol {
+      padding-left: 1.4em;
+      margin: 0.4em 0;
+    }
+    ul { list-style-type: disc; }
+    ol { list-style-type: decimal; }
+    li + li { margin-top: 0.2em; }
+    li > p { margin: 0; }
+
+    /* ── Inline code ── */
+    code:not(pre code) {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.82em;
+      padding: 0.15em 0.35em;
+      border-radius: 4px;
+      background-color: rgba(255, 255, 255, 0.08);
+      color: #a5f3fc; /* sky-200 */
+    }
+
+    /* ── Code blocks ── */
+    pre {
+      margin: 0.5em 0;
+      padding: 0.75em 1em;
+      border-radius: 8px;
+      background-color: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      overflow-x: auto;
+    }
+    pre code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.8em;
+      line-height: 1.55;
+      color: #e2e8f0; /* slate-200 */
+      background: none;
+      padding: 0;
+    }
+
+    /* ── Blockquote ── */
+    blockquote {
+      border-left: 3px solid rgba(255, 255, 255, 0.2);
+      padding-left: 0.75em;
+      margin: 0.5em 0;
+      color: rgba(255, 255, 255, 0.55);
+      font-style: italic;
+    }
+
+    /* ── Horizontal rule ── */
+    hr {
+      border: none;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin: 0.75em 0;
+    }
+
+    /* ── Links ── */
+    a {
+      color: #67e8f9; /* cyan-300 */
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      &:hover { color: #a5f3fc; }
+    }
+
+    /* ── Strong / em ── */
+    strong { font-weight: 600; color: #f1f5f9; }
+    em { font-style: italic; color: inherit; }
+
+    /* ── Tables ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85em;
+      margin: 0.5em 0;
+    }
+    th, td {
+      padding: 0.3em 0.6em;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      text-align: left;
+    }
+    th {
+      background-color: rgba(255, 255, 255, 0.06);
+      font-weight: 600;
+    }
+  }
+
+  /* Reasoning variant — tint code blocks and links violet */
+  .markdown-body--violet {
+    code:not(pre code) {
+      background-color: rgba(167, 139, 250, 0.15); /* violet tint */
+      color: #ddd6fe; /* violet-200 */
+    }
+    pre {
+      background-color: rgba(0, 0, 0, 0.5);
+      border-color: rgba(167, 139, 250, 0.15);
+    }
+    a { color: #c4b5fd; } /* violet-300 */
+    blockquote { border-left-color: rgba(167, 139, 250, 0.35); }
+  }
+}
+
+/* ── KaTeX math ─────────────────────────────────────────────────────────────
+   Scoped inside .markdown-body so it doesn't affect the rest of the UI.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+@layer components {
+  .math-block {
+    overflow-x: auto;
+    padding: 0.5em 0;
+    text-align: center;
+  }
+
+  .math-error {
+    color: #f87171; /* red-400 */
+    font-family: ui-monospace, monospace;
+    font-size: 0.8em;
+  }
+
+  /* KaTeX colours: inherit so they match the bubble text colour */
+  .katex { color: inherit; font-size: 1em; }
+  .katex-display { margin: 0.25em 0; }
+}
