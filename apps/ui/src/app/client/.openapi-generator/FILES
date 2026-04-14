@@ -7,6 +7,7 @@ api/auth.service.ts
 api/chatMetadata.service.ts
 api/chats.service.ts
 api/lMStudio.service.ts
+api/openAI.service.ts
 api/sse.service.ts
 api/streamableHttp.service.ts
 api/tokenLimitConfig.service.ts
@@ -23,6 +24,7 @@ model/chatRequestDtoIntegrationsInner.ts
 model/chatResponseDto.ts
 model/chatResponseDtoOutputInner.ts
 model/chatStatsDto.ts
+model/chatStreamOpenAiRequest.ts
 model/createChatMetadataDto.ts
 model/createTokenLimitConfigDto.ts
 model/ephemeralMcpIntegrationDto.ts
@@ -37,6 +39,7 @@ model/meDto.ts
 model/messageOutputDto.ts
 model/modelCapabilitiesDto.ts
 model/modelDto.ts
+model/modelOpenAiDto.ts
 model/models.ts
 model/modelsResponseDto.ts
 model/pluginIntegrationDto.ts
@@ -44,6 +47,12 @@ model/providerInfoDto.ts
 model/quantizationDto.ts
 model/reasoningOutputDto.ts
 model/registerDto.ts
+model/responseCreateParamsDto.ts
+model/responseCreateParamsNonStreamingDto.ts
+model/responseCreateParamsStreamingDto.ts
+model/responseFormatTextConfigDto.ts
+model/responseTextConfigDto.ts
+model/responsesModelDto.ts
 model/textInputDto.ts
 model/toolCallOutputDto.ts
 model/updateChatMetadataDto.ts

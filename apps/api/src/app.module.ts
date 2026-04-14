@@ -13,6 +13,7 @@ import { JwtAuthGuard } from './modules/auth/api-key.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './modules/auth/roles.guard';
 import { TokenLimitModule } from './modules/token-limit/token-limit.module';
+import { OpenaiModule } from './modules/openai/openai.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { TokenLimitModule } from './modules/token-limit/token-limit.module';
       },
     }),
     LmStudioModule,
+    OpenaiModule,
     ChatsModule,
     ChatMetadataModule,
     AuthModule,
