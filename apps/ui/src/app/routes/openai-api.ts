@@ -1,6 +1,5 @@
 import {
   Component,
-  computed,
   effect,
   ElementRef,
   inject,
@@ -12,19 +11,20 @@ import {
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { ChatRequestDto, ChatMetadataService, ChatsService, ModelDto } from '../client';
-import { LMStudioService } from '../client/api/lMStudio.service';
-import { ChatService } from './lm-studio-api/chat.service';
+import { ChatMetadataService, ChatsService } from '../client';
+import { OpenAIService } from '../client/api/openAI.service';
+import { ModelOpenAiDto } from '../client/model/modelOpenAiDto';
+import { ChatService } from './openai-api/chat.service';
+import { OpenAiModelSelectorComponent } from './openai-api/model-selector.component';
+
+// Re-use the shared sub-components from lm-studio-api — they are generic enough
 import { ChatSidebarComponent } from './lm-studio-api/chat-sidebar.component';
 import { ChatMessagesComponent } from './lm-studio-api/chat-messages.component';
 import { ChatInputComponent } from './lm-studio-api/chat-input.component';
-import { EventLogComponent, EventEntry } from './lm-studio-api/event-log.component';
-import { ModelSelectorComponent, ModelReasoningCapability } from './lm-studio-api/model-selector.component';
 import { InfoComponent } from './lm-studio-api/info.component';
-import { LmStudioEvent } from '../lmstudio-stream.service';
 
 @Component({
-  selector: 'app-debug',
+  selector: 'app-openai-api',
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -32,8 +32,7 @@ import { LmStudioEvent } from '../lmstudio-stream.service';
     ChatSidebarComponent,
     ChatMessagesComponent,
     ChatInputComponent,
-    EventLogComponent,
-    ModelSelectorComponent,
+    OpenAiModelSelectorComponent,
     InfoComponent,
   ],
   providers: [ChatService],
@@ -54,22 +53,22 @@ import { LmStudioEvent } from '../lmstudio-stream.service';
         </button>
 
         <div class="w-1.5 h-1.5 rounded-full bg-success-muted animate-pulse ml-1"></div>
-        <span class="text-xs text-text-muted tracking-wide font-medium">LM Studio Extender</span>
+        <span class="text-xs text-text-muted tracking-wide font-medium">OpenAI Extender</span>
 
         <!-- Provider tabs -->
         <div class="flex items-center gap-1 ml-1">
           <a
             routerLink="/chat-lm-studio"
-            class="px-2.5 py-1 text-[11px] rounded-md font-medium border border-accent text-accent bg-accent/10 transition-colors"
+            class="px-2.5 py-1 text-[11px] rounded-md font-medium border border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors"
           >LM Studio</a>
           <a
             routerLink="/chat-openai"
-            class="px-2.5 py-1 text-[11px] rounded-md font-medium border border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors"
+            class="px-2.5 py-1 text-[11px] rounded-md font-medium border border-accent text-accent bg-accent/10 transition-colors"
           >OpenAI</a>
         </div>
 
         <div class="relative ml-auto">
-          <app-model-selector
+          <app-openai-model-selector
             [models]="models()"
             [modelsLoading]="modelsLoading()"
             [selectedModel]="selectedModel()"
@@ -89,22 +88,6 @@ import { LmStudioEvent } from '../lmstudio-stream.service';
           </svg>
           <span class="hidden sm:inline">New</span>
         </button>
-
-        <!--<button
-          type="button"
-          (click)="showEventPanel.set(!showEventPanel())"
-          class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs border rounded-lg transition-colors"
-          [class]="showEventPanel() ? 'border-tool-border text-tool-text bg-tool-bg' : 'border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary'"
-          title="Toggle event log"
-        >
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-3-3v6M4.5 12a7.5 7.5 0 1115 0 7.5 7.5 0 01-15 0z" />
-          </svg>
-          <span class="hidden sm:inline">Events</span>
-          @if (events().length > 0) {
-            <span class="text-text-muted">{{ events().length }}</span>
-          }
-        </button>!-->
 
         <!-- User / Info panel toggle -->
         <button
@@ -138,7 +121,7 @@ import { LmStudioEvent } from '../lmstudio-stream.service';
           <div class="flex flex-col flex-1 min-h-0 overflow-hidden max-w-3xl w-full mx-auto">
             <div #messageContainer class="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3">
               <app-chat-messages
-                [messages]="chatService.chatMessages()"
+                [messages]="$any(chatService.chatMessages())"
                 [streaming]="chatService.streaming()"
                 [showResend]="chatService.showResend()"
                 (toggleCollapsed)="chatService.toggleCollapsed($event)"
@@ -149,21 +132,14 @@ import { LmStudioEvent } from '../lmstudio-stream.service';
             <app-chat-input
               [form]="chatService.form"
               [streaming]="chatService.streaming()"
-              [reasoning]="reasoning()"
-              [modelReasoningCap]="modelReasoningCap()"
+              [reasoning]="undefined"
+              [modelReasoningCap]="null"
               (submitted)="submit()"
               (reset)="chatService.reset()"
-              (reasoningChanged)="selectReasoning($event)"
+              (reasoningChanged)="$event"
             />
           </div>
         </div>
-
-        @if (showEventPanel()) {
-          <app-event-log
-            [events]="events()"
-            (closed)="showEventPanel.set(false)"
-          />
-        }
 
         @if (showInfoPanel()) {
           <div class="w-72 shrink-0 border-l border-border-default bg-surface-raised flex flex-col overflow-hidden">
@@ -189,50 +165,31 @@ import { LmStudioEvent } from '../lmstudio-stream.service';
     </div>
   `,
 })
-export class LmStudioApi implements OnDestroy, OnInit {
+export class OpenAiApi implements OnDestroy, OnInit {
   readonly chatService = inject(ChatService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly chatsApi = inject(ChatsService);
   private readonly chatMetaService = inject(ChatMetadataService);
-  private readonly lmStudioService = inject(LMStudioService);
+  private readonly openAiService = inject(OpenAIService);
 
   @ViewChild('messageContainer') private messageContainer?: ElementRef<HTMLElement>;
 
-  readonly showEventPanel = signal(false);
   readonly showChatsSidebar = signal(true);
   readonly showInfoPanel = signal(false);
-  readonly isDark = signal(this.readStoredTheme());
   readonly chatList = signal<any[]>([]);
   readonly chatsLoading = signal(false);
-  readonly events = signal<EventEntry[]>([]);
-  readonly reasoning = signal<ChatRequestDto.ReasoningEnum | undefined>(undefined);
 
-  readonly models = signal<ModelDto[]>([]);
+  readonly models = signal<ModelOpenAiDto[]>([]);
   readonly modelsLoading = signal(false);
-  readonly selectedModel = signal<ModelDto | null>(this.loadStoredModel());
+  readonly selectedModel = signal<ModelOpenAiDto | null>(this.loadStoredModel());
 
-  private static readonly MODEL_STORAGE_KEY = 'lmstudio_selected_model';
-  private static readonly THEME_STORAGE_KEY = 'theme';
-  private pendingModelKey: string | null = null;
-  private eventCounter = 0;
-
-  readonly modelReasoningCap = computed<ModelReasoningCapability | null>(() => {
-    const cap = (this.selectedModel()?.capabilities as any)?.reasoning as
-      | ModelReasoningCapability
-      | undefined;
-    return cap ?? null;
-  });
+  private static readonly MODEL_STORAGE_KEY = 'openai-model';
 
   constructor() {
     effect(() => {
       this.chatService.chatMessages();
       this.scrollToBottom(this.messageContainer);
-    });
-    effect(() => {
-      const cap = this.modelReasoningCap();
-      if (!cap && this.reasoning()) this.reasoning.set(undefined);
-      if (!this.chatService.hasChatOpen()) this.reasoning.set(cap?.default as any ?? undefined);
     });
   }
 
@@ -245,7 +202,6 @@ export class LmStudioApi implements OnDestroy, OnInit {
 
     if (chatId) {
       this.loadChatHistory(chatId);
-      this.loadChatMeta(chatId);
     }
   }
 
@@ -255,30 +211,29 @@ export class LmStudioApi implements OnDestroy, OnInit {
 
   // ── Model management ──────────────────────────────────────────────────────
 
-  private loadStoredModel(): ModelDto | null {
+  private loadStoredModel(): ModelOpenAiDto | null {
     try {
-      const raw = localStorage.getItem(LmStudioApi.MODEL_STORAGE_KEY);
-      return raw ? (JSON.parse(raw) as ModelDto) : null;
+      const raw = localStorage.getItem(OpenAiApi.MODEL_STORAGE_KEY);
+      return raw ? (JSON.parse(raw) as ModelOpenAiDto) : null;
     } catch { return null; }
   }
 
-  selectModel(model: ModelDto): void {
+  selectModel(model: ModelOpenAiDto): void {
     this.selectedModel.set(model);
-    try { localStorage.setItem(LmStudioApi.MODEL_STORAGE_KEY, JSON.stringify(model)); } catch { /* ignore */ }
+    try { localStorage.setItem(OpenAiApi.MODEL_STORAGE_KEY, JSON.stringify(model)); } catch { /* ignore */ }
   }
 
   private loadModels(): void {
     this.modelsLoading.set(true);
-    this.lmStudioService.getModels().subscribe({
-      next: (res) => {
-        const llms = res.models.filter((m) => m.type === ModelDto.TypeEnum.Llm);
-        this.models.set(llms);
-        if (this.pendingModelKey) {
-          const match = llms.find((m) => m.key === this.pendingModelKey);
+    this.openAiService.getModelsOpenAi().subscribe({
+      next: (models) => {
+        this.models.set(models);
+        if (!this.selectedModel() && models.length > 0) {
+          this.selectModel(models[0]);
+        } else if (this.selectedModel()) {
+          // Re-validate stored selection still exists
+          const match = models.find((m) => m.id === this.selectedModel()!.id);
           if (match) this.selectModel(match);
-          this.pendingModelKey = null;
-        } else if (!this.selectedModel() && llms.length > 0) {
-          this.selectModel(llms[0]);
         }
         this.modelsLoading.set(false);
       },
@@ -304,59 +259,44 @@ export class LmStudioApi implements OnDestroy, OnInit {
     });
   }
 
-  private loadChatMeta(chatId: string): void {
-    this.chatMetaService.getChatMetadata(chatId).subscribe({
-      next: (meta) => {
-        if (meta.usedModel) {
-          const modelList = this.models();
-          if (modelList.length > 0) {
-            const match = modelList.find((m) => m.key === meta.usedModel);
-            if (match) this.selectModel(match);
-          } else {
-            this.pendingModelKey = meta.usedModel;
-          }
-        }
-        const reasoningValue = meta.reasoningMode as ChatRequestDto.ReasoningEnum | undefined;
-        const allowed = this.modelReasoningCap()?.allowed_options;
-        if (reasoningValue && (!allowed || allowed.includes(reasoningValue))) {
-          this.reasoning.set(reasoningValue);
-        }
-      },
-    });
-  }
-
   private loadChatHistory(chatId: string): void {
     this.chatsApi.getChatEntries(chatId).subscribe((res) => {
       const messages: any[] = [];
       for (const entry of res) {
         messages.push({ role: 'user', text: entry.request.input as string, date: new Date(entry.createdAt) });
 
-        const statsStr = entry.response.stats
-          ? `${entry.response.stats.input_tokens} in · ${entry.response.stats.total_output_tokens} out · ${entry.response.stats.tokens_per_second?.toFixed(1)} tok/s`
+        const u = (entry.response as any)?.usage;
+        const statsStr = u
+          ? `${u.input_tokens} in · ${u.output_tokens} out${u.output_tokens_details?.reasoning_tokens ? ` · ${u.output_tokens_details.reasoning_tokens} reasoning` : ''}`
           : undefined;
 
         for (const output of entry.response.output) {
           if (output.type === 'reasoning') {
-            messages.push({ role: 'reasoning', text: (output as any).content ?? '', date: new Date(entry.createdAt), collapsed: true });
-          } else if (output.type === 'tool_call') {
-            const tc = output as any;
-            let parsedOutput: string = tc.output ?? '';
-            try {
-              const arr = JSON.parse(parsedOutput);
-              if (Array.isArray(arr) && arr[0]?.text != null) parsedOutput = arr[0].text;
-            } catch { /* leave as-is */ }
-            messages.push({
-              role: 'tool_call',
-              text: tc.tool ?? '',
-              toolName: tc.tool ?? '',
-              toolArguments: tc.arguments ?? {},
-              toolOutput: parsedOutput,
-              providerLabel: tc.provider_info?.server_label ?? tc.provider_info?.plugin_id ?? undefined,
-              date: new Date(entry.createdAt),
-              collapsed: true,
-            });
-          } else if (output.type === 'message') {
-            messages.push({ role: 'ai', text: (output as any).content ?? '', date: new Date(entry.createdAt), stats: statsStr });
+            // Reasoning content is in content[0].text for OpenAI Responses API
+            const content = (output as any).content?.[0]?.text ?? (output as any).summary?.[0]?.text ?? '';
+            messages.push({ role: 'reasoning', text: content, date: new Date(entry.createdAt), collapsed: true });
+          } else { // @ts-ignore
+            if (output.type === 'mcp_call' || output.type === 'tool_call') {
+                        const tc = output as any;
+                        let parsedOutput: string = tc.output ?? '';
+                        try {
+                          const arr = JSON.parse(parsedOutput);
+                          if (Array.isArray(arr) && arr[0]?.text != null) parsedOutput = arr[0].text;
+                        } catch { /* leave as-is */ }
+                        messages.push({
+                          role: 'tool_call',
+                          text: tc.name ?? tc.tool ?? '',
+                          toolName: tc.name ?? tc.tool ?? '',
+                          toolArguments: tc.arguments ? (typeof tc.arguments === 'string' ? JSON.parse(tc.arguments) : tc.arguments) : undefined,
+                          toolOutput: parsedOutput || undefined,
+                          providerLabel: tc.server_label ?? tc.provider_info?.server_label ?? undefined,
+                          date: new Date(entry.createdAt),
+                          collapsed: true,
+                        });
+                      } else if (output.type === 'message') {
+                        const content = (output as any).content?.[0]?.text ?? (output as any).content ?? '';
+                        messages.push({ role: 'ai', text: typeof content === 'string' ? content : JSON.stringify(content), date: new Date(entry.createdAt), stats: statsStr });
+                      }
           }
         }
       }
@@ -369,45 +309,32 @@ export class LmStudioApi implements OnDestroy, OnInit {
   openChat(chatId: string): void {
     if (this.chatService.streaming()) return;
     this.chatService.chatMessages.set([]);
-    this.events.set([]);
     this.chatService.currentChatId.set(chatId);
-    this.router.navigate(['/chat-lm-studio', chatId]);
+    this.router.navigate(['/chat-openai', chatId]);
     this.loadChatHistory(chatId);
-    this.loadChatMeta(chatId);
   }
 
   newChat(): void {
     if (this.chatService.streaming()) return;
     this.chatService.chatMessages.set([]);
-    this.events.set([]);
     this.chatService.currentChatId.set(null);
-    this.router.navigate(['/chat-lm-studio']);
+    this.router.navigate(['/chat-openai']);
   }
 
   // ── Messaging ─────────────────────────────────────────────────────────────
 
   submit(): void {
     this.chatService.submit(
-      this.selectedModel()?.key ?? '',
-      this.reasoning(),
+      this.selectedModel()?.id ?? '',
       () => this.loadChatList(),
     );
   }
 
   resend(): void {
     this.chatService.resend(
-      this.selectedModel()?.key ?? '',
-      this.reasoning(),
+      this.selectedModel()?.id ?? '',
       () => this.loadChatList(),
     );
-  }
-
-  selectReasoning(value: ChatRequestDto.ReasoningEnum): void {
-    this.reasoning.set(value);
-    const chatId = this.chatService.currentChatId();
-    if (chatId) {
-      this.chatMetaService.updateChatMetadata(chatId, { reasoningMode: value }).subscribe();
-    }
   }
 
   // ── Chat rename / delete ──────────────────────────────────────────────────
@@ -429,22 +356,6 @@ export class LmStudioApi implements OnDestroy, OnInit {
         if (this.chatService.currentChatId() === chatId) this.newChat();
       },
     });
-  }
-
-  // ── Theme ────────────────────────────────────────────────────────────────
-
-  private readStoredTheme(): boolean {
-    try {
-      const stored = localStorage.getItem(LmStudioApi.THEME_STORAGE_KEY);
-      return stored ? stored === 'dark' : true; // default dark
-    } catch { return true; }
-  }
-
-  toggleDarkMode(): void {
-    const next = !this.isDark();
-    this.isDark.set(next);
-    document.documentElement.classList.toggle('dark', next);
-    try { localStorage.setItem(LmStudioApi.THEME_STORAGE_KEY, next ? 'dark' : 'light'); } catch { /* ignore */ }
   }
 
   // ── Utilities ─────────────────────────────────────────────────────────────

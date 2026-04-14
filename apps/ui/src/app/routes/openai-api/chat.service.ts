@@ -1,0 +1,341 @@
+import { computed, inject, Injectable, signal } from '@angular/core';
+import { Location } from '@angular/common';
+import { FormBuilder, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import {
+  OpenAiStreamService,
+  OpenAiStreamErrorEvent,
+  OpenAiStreamApiInfoEvent,
+  ResponseOutputItemAddedEvent,
+  ResponseOutputItemDoneEvent,
+  ResponseOutputTextDeltaEvent,
+  ResponseReasoningTextDeltaEvent,
+  McpItemTracking,
+} from '../../openai-stream.service';
+import { ChatMetadataService } from '../../client';
+
+export interface ChatMessage {
+  role: 'user' | 'ai' | 'error' | 'info' | 'tool_call' | 'reasoning' | 'mcp_list_tools';
+  text: string;
+  date?: Date;
+  stats?: string;
+  streaming?: boolean;
+  toolName?: string;
+  toolArguments?: object;
+  toolOutput?: string;
+  toolFailed?: boolean;
+  providerLabel?: string;
+  collapsed?: boolean;
+  itemId?: string; // track by OpenAI item id
+}
+
+@Injectable()
+export class ChatService {
+  private readonly streamService = inject(OpenAiStreamService);
+  private readonly location = inject(Location);
+  private readonly router = inject(Router);
+  private readonly chatMetaService = inject(ChatMetadataService);
+  readonly fb = inject(FormBuilder);
+
+  readonly form = this.fb.group({
+    input: ['', [Validators.required, Validators.minLength(1)]],
+  });
+
+  readonly streaming = signal(false);
+  readonly chatMessages = signal<ChatMessage[]>([]);
+  readonly currentChatId = signal<string | null>(null);
+
+  private readonly lastUserInput = signal<string>('');
+  private sub?: Subscription;
+
+  // Tracks in-flight MCP tool call items (keyed by item id)
+  private mcpTracking = new Map<string, McpItemTracking>();
+
+  readonly showResend = computed(() => {
+    const msgs = this.chatMessages();
+    const last = msgs[msgs.length - 1];
+    if (!last || last.role !== 'info') return false;
+    return !!this.lastUserInput();
+  });
+
+  readonly hasChatOpen = computed(() => this.currentChatId() !== null);
+
+  toggleCollapsed(index: number): void {
+    this.chatMessages.update((msgs) => {
+      const copy = [...msgs];
+      copy[index] = { ...copy[index], collapsed: !copy[index].collapsed };
+      return copy;
+    });
+  }
+
+  lastIndexWhere(msgs: ChatMessage[], pred: (m: ChatMessage) => boolean): number {
+    for (let i = msgs.length - 1; i >= 0; i--) {
+      if (pred(msgs[i])) return i;
+    }
+    return -1;
+  }
+
+  patchLast(pred: (m: ChatMessage) => boolean, patch: Partial<ChatMessage>): void {
+    this.chatMessages.update((msgs) => {
+      const idx = this.lastIndexWhere(msgs, pred);
+      if (idx === -1) return msgs;
+      const copy = [...msgs];
+      copy[idx] = { ...copy[idx], ...patch };
+      return copy;
+    });
+  }
+
+  patchByItemId(itemId: string, patch: Partial<ChatMessage>): void {
+    this.chatMessages.update((msgs) => {
+      const idx = this.lastIndexWhere(msgs, (m) => m.itemId === itemId);
+      if (idx === -1) return msgs;
+      const copy = [...msgs];
+      copy[idx] = { ...copy[idx], ...patch };
+      return copy;
+    });
+  }
+
+  submit(selectedModelId: string, onChatListRefresh: () => void): void {
+    if (this.form.invalid || this.streaming()) return;
+
+    const input = this.form.getRawValue().input!.trim();
+    this.lastUserInput.set(input);
+    this.form.reset();
+    this.streaming.set(true);
+    this.mcpTracking.clear();
+
+    this.chatMessages.update((msgs) => [...msgs, { role: 'user', text: input, date: new Date() }]);
+
+    this.streamService.reset();
+    this.sub?.unsubscribe();
+
+    this.sub = this.streamService.events$.subscribe({
+      next: (event) => {
+        switch (event.type) {
+
+          // ── A new output item starts ──────────────────────────────────────
+          case 'response.output_item.added': {
+            const e = event as ResponseOutputItemAddedEvent;
+            const item = e.item as any;
+
+            if (item.type === 'reasoning') {
+              this.chatMessages.update((msgs) => [
+                ...msgs,
+                { role: 'reasoning', text: '', streaming: true, collapsed: false, date: new Date(), itemId: item.id },
+              ]);
+            } else if (item.type === 'message') {
+              this.chatMessages.update((msgs) => [
+                ...msgs,
+                { role: 'ai', text: '', streaming: true, itemId: item.id },
+              ]);
+            } else if (item.type === 'mcp_list_tools') {
+              // Track but don't show in chat
+            } else if (item.type === 'mcp_call') {
+              const serverLabel = item.server_label ?? item.name ?? undefined;
+              this.mcpTracking.set(item.id, {
+                itemId: item.id,
+                serverLabel,
+                toolName: item.name ?? undefined,
+                outputIndex: e.output_index,
+              });
+              this.chatMessages.update((msgs) => [
+                ...msgs,
+                {
+                  role: 'tool_call',
+                  text: '',
+                  streaming: true,
+                  collapsed: false,
+                  date: new Date(),
+                  itemId: item.id,
+                  toolName: item.name ?? '…',
+                  providerLabel: serverLabel,
+                },
+              ]);
+            }
+            break;
+          }
+
+          // ── An output item is fully done ─────────────────────────────────
+          case 'response.output_item.done': {
+            const e = event as ResponseOutputItemDoneEvent;
+            const item = e.item as any;
+
+            if (item.type === 'reasoning') {
+              this.patchByItemId(item.id, { streaming: false, collapsed: true });
+            } else if (item.type === 'message') {
+              // stats will be applied by response.completed
+              this.patchByItemId(item.id, { streaming: false });
+            } else if (item.type === 'mcp_call') {
+              const tracking = this.mcpTracking.get(item.id);
+              if (item.status === 'completed') {
+                // Extract output from item.output if present
+                let outputText: string = item.output ?? '';
+                try {
+                  const parsed = JSON.parse(outputText);
+                  if (Array.isArray(parsed) && parsed[0]?.text != null) outputText = parsed[0].text;
+                  else if (typeof parsed === 'object' && parsed !== null) outputText = JSON.stringify(parsed, null, 2);
+                } catch { /* leave as-is */ }
+                this.patchByItemId(item.id, {
+                  toolOutput: outputText || undefined,
+                  toolName: tracking?.toolName ?? item.name ?? '…',
+                  toolArguments: item.arguments ? this.safeParseJson(item.arguments) : undefined,
+                  providerLabel: tracking?.serverLabel ?? item.server_label,
+                  streaming: false,
+                  collapsed: true,
+                });
+              } else if (item.status === 'failed' || item.status === 'incomplete') {
+                this.patchByItemId(item.id, {
+                  toolOutput: item.error ?? 'Tool call failed',
+                  toolFailed: true,
+                  streaming: false,
+                  collapsed: true,
+                });
+              }
+              this.mcpTracking.delete(item.id);
+            }
+            break;
+          }
+
+          // ── MCP tool call in progress — extract tool name / args ──────────
+          case 'response.mcp_call.in_progress': {
+            const e = event as any;
+            // item details come through in in_progress for some servers
+            if (e.item) {
+              const item = e.item;
+              const tracking = this.mcpTracking.get(e.item_id ?? item.id);
+              if (tracking) {
+                tracking.toolName = item.name ?? tracking.toolName;
+                tracking.serverLabel = item.server_label ?? tracking.serverLabel;
+              }
+              this.patchByItemId(e.item_id ?? item.id, {
+                toolName: item.name ?? undefined,
+                providerLabel: item.server_label ?? undefined,
+              });
+            }
+            break;
+          }
+
+          // ── Reasoning text delta ──────────────────────────────────────────
+          case 'response.reasoning_text.delta': {
+            const e = event as ResponseReasoningTextDeltaEvent;
+            this.chatMessages.update((msgs) => {
+              const idx = this.lastIndexWhere(msgs, (m) => m.itemId === e.item_id);
+              if (idx === -1) return msgs;
+              const copy = [...msgs];
+              copy[idx] = { ...copy[idx], text: copy[idx].text + e.delta };
+              return copy;
+            });
+            break;
+          }
+
+          // ── Text output delta (handled via messageDelta$ for efficiency) ──
+          // response.output_text.delta is dispatched through messageDelta$
+
+          // ── Stream errors ─────────────────────────────────────────────────
+          case 'error': {
+            const e = event as OpenAiStreamErrorEvent;
+            this.chatMessages.update((msgs) => {
+              const filtered = msgs[msgs.length - 1]?.streaming ? msgs.slice(0, -1) : msgs;
+              return [
+                ...filtered,
+                {
+                  role: 'error' as const,
+                  text: e.message ?? e.error?.message ?? 'Unknown error',
+                  date: new Date(),
+                },
+              ];
+            });
+            this.streaming.set(false);
+            break;
+          }
+
+          case 'api.info': {
+            const e = event as OpenAiStreamApiInfoEvent;
+            this.chatMessages.update((msgs) => {
+              const filtered = msgs[msgs.length - 1]?.streaming ? msgs.slice(0, -1) : msgs;
+              return [...filtered, { role: 'info' as const, text: e.message, date: new Date() }];
+            });
+            break;
+          }
+
+          case 'response.failed': {
+            const e = event as any;
+            const msg = e.response?.error?.message ?? 'Response failed';
+            this.chatMessages.update((msgs) => {
+              const filtered = msgs[msgs.length - 1]?.streaming ? msgs.slice(0, -1) : msgs;
+              return [...filtered, { role: 'error' as const, text: msg, date: new Date() }];
+            });
+            this.streaming.set(false);
+            break;
+          }
+        }
+      },
+      complete: () => this.streaming.set(false),
+      error: () => this.streaming.set(false),
+    });
+
+    // Text deltas arrive through the dedicated subject
+    this.streamService.messageDelta$.subscribe((chunk) => {
+      this.chatMessages.update((msgs) => {
+        const copy = [...msgs];
+        const idx = this.lastIndexWhere(copy, (m) => m.role === 'ai' && !!m.streaming);
+        if (idx !== -1) copy[idx] = { ...copy[idx], text: copy[idx].text + chunk };
+        return copy;
+      });
+    });
+
+    this.streamService.chatEnd$.subscribe((result) => {
+      const u = result.usage;
+      const stats = u
+        ? `${u.input_tokens} in · ${u.output_tokens} out${u.output_tokens_details?.reasoning_tokens ? ` · ${u.output_tokens_details.reasoning_tokens} reasoning` : ''}`
+        : undefined;
+      this.chatMessages.update((msgs) =>
+        msgs.map((m) => {
+          if (m.role === 'ai' && m.streaming) return { ...m, streaming: false, stats };
+          if ((m.role === 'tool_call' || m.role === 'reasoning') && m.streaming) {
+            return { ...m, streaming: false, collapsed: true };
+          }
+          return m;
+        }),
+      );
+      onChatListRefresh();
+    });
+
+    this.streamService.newChatCreated$.subscribe((result) => {
+      if (this.currentChatId() !== result) {
+        this.currentChatId.set(result);
+        this.location.replaceState(`/chat-openai/${result}`);
+      }
+    });
+
+    this.streamService.chat(
+      { model: selectedModelId, input, store: true },
+      this.currentChatId() ?? undefined,
+    );
+  }
+
+  resend(selectedModelId: string, onChatListRefresh: () => void): void {
+    const input = this.lastUserInput();
+    if (!input || this.streaming()) return;
+    this.form.setValue({ input });
+    this.submit(selectedModelId, onChatListRefresh);
+  }
+
+  reset(): void {
+    this.sub?.unsubscribe();
+    this.streamService.reset();
+    this.streaming.set(false);
+    this.chatMessages.update((msgs) => msgs.filter((m) => !m.streaming));
+  }
+
+  destroy(): void {
+    this.sub?.unsubscribe();
+  }
+
+  private safeParseJson(value: unknown): object | undefined {
+    if (typeof value === 'object' && value !== null) return value as object;
+    if (typeof value !== 'string') return undefined;
+    try { return JSON.parse(value); } catch { return undefined; }
+  }
+}
