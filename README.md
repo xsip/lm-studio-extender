@@ -4,6 +4,11 @@ A full-stack wrapper around the [LM Studio](https://lmstudio.ai/) local inferenc
 
 ---
 
+![Header](https://raw.githubusercontent.com/xsip/lm-studio-extender/refs/heads/main/preview.png)
+
+![Header](https://raw.githubusercontent.com/xsip/lm-studio-extender/refs/heads/main/img.png)
+
+
 ## Overview
 
 LM Studio exposes a raw OpenAI-compatible REST API with no auth, no persistence, and no multi-user support. This project sits in front of it and provides all of that, turning a single-user local inference server into a proper multi-user application.
