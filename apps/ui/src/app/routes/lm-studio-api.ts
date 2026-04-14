@@ -14,13 +14,13 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ChatRequestDto, ChatMetadataService, ChatsService, ModelDto } from '../client';
 import { LMStudioService } from '../client/api/lMStudio.service';
-import { ChatService } from './debug/chat.service';
-import { ChatSidebarComponent } from './debug/chat-sidebar.component';
-import { ChatMessagesComponent } from './debug/chat-messages.component';
-import { ChatInputComponent } from './debug/chat-input.component';
-import { EventLogComponent, EventEntry } from './debug/event-log.component';
-import { ModelSelectorComponent, ModelReasoningCapability } from './debug/model-selector.component';
-import { InfoComponent } from './debug/info.component';
+import { ChatService } from './lm-studio-api/chat.service';
+import { ChatSidebarComponent } from './lm-studio-api/chat-sidebar.component';
+import { ChatMessagesComponent } from './lm-studio-api/chat-messages.component';
+import { ChatInputComponent } from './lm-studio-api/chat-input.component';
+import { EventLogComponent, EventEntry } from './lm-studio-api/event-log.component';
+import { ModelSelectorComponent, ModelReasoningCapability } from './lm-studio-api/model-selector.component';
+import { InfoComponent } from './lm-studio-api/info.component';
 import { LmStudioEvent } from '../lmstudio-stream.service';
 
 @Component({
@@ -176,7 +176,7 @@ import { LmStudioEvent } from '../lmstudio-stream.service';
     </div>
   `,
 })
-export class Debug implements OnDestroy, OnInit {
+export class LmStudioApi implements OnDestroy, OnInit {
   readonly chatService = inject(ChatService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -244,14 +244,14 @@ export class Debug implements OnDestroy, OnInit {
 
   private loadStoredModel(): ModelDto | null {
     try {
-      const raw = localStorage.getItem(Debug.MODEL_STORAGE_KEY);
+      const raw = localStorage.getItem(LmStudioApi.MODEL_STORAGE_KEY);
       return raw ? (JSON.parse(raw) as ModelDto) : null;
     } catch { return null; }
   }
 
   selectModel(model: ModelDto): void {
     this.selectedModel.set(model);
-    try { localStorage.setItem(Debug.MODEL_STORAGE_KEY, JSON.stringify(model)); } catch { /* ignore */ }
+    try { localStorage.setItem(LmStudioApi.MODEL_STORAGE_KEY, JSON.stringify(model)); } catch { /* ignore */ }
   }
 
   private loadModels(): void {
@@ -358,7 +358,7 @@ export class Debug implements OnDestroy, OnInit {
     this.chatService.chatMessages.set([]);
     this.events.set([]);
     this.chatService.currentChatId.set(chatId);
-    this.router.navigate(['/chat', chatId]);
+    this.router.navigate(['/chat-lm-studio', chatId]);
     this.loadChatHistory(chatId);
     this.loadChatMeta(chatId);
   }
@@ -368,7 +368,7 @@ export class Debug implements OnDestroy, OnInit {
     this.chatService.chatMessages.set([]);
     this.events.set([]);
     this.chatService.currentChatId.set(null);
-    this.router.navigate(['/chat']);
+    this.router.navigate(['/chat-lm-studio']);
   }
 
   // ── Messaging ─────────────────────────────────────────────────────────────
@@ -422,7 +422,7 @@ export class Debug implements OnDestroy, OnInit {
 
   private readStoredTheme(): boolean {
     try {
-      const stored = localStorage.getItem(Debug.THEME_STORAGE_KEY);
+      const stored = localStorage.getItem(LmStudioApi.THEME_STORAGE_KEY);
       return stored ? stored === 'dark' : true; // default dark
     } catch { return true; }
   }
@@ -431,7 +431,7 @@ export class Debug implements OnDestroy, OnInit {
     const next = !this.isDark();
     this.isDark.set(next);
     document.documentElement.classList.toggle('dark', next);
-    try { localStorage.setItem(Debug.THEME_STORAGE_KEY, next ? 'dark' : 'light'); } catch { /* ignore */ }
+    try { localStorage.setItem(LmStudioApi.THEME_STORAGE_KEY, next ? 'dark' : 'light'); } catch { /* ignore */ }
   }
 
   // ── Utilities ─────────────────────────────────────────────────────────────

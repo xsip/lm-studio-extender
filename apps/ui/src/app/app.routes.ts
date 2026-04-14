@@ -1,23 +1,23 @@
 import { Routes } from '@angular/router';
-import { Debug } from './routes/debug';
+import { LmStudioApi } from './routes/lm-studio-api';
 import { Login } from './routes/login';
 
 export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'chat',
+    redirectTo: 'chat-lm-studio',
   },
   {
-    path: 'chat',
+    path: 'chat-lm-studio',
     pathMatch: 'full',
-    component: Debug,
+    component: LmStudioApi,
   },
   {
-    path: 'chat/:chatId',
+    path: 'chat-lm-studio/:chatId',
     pathMatch: 'full',
     runGuardsAndResolvers: 'paramsChange',
-    component: Debug,
+    component: LmStudioApi,
   },
   {
     path: 'login',
