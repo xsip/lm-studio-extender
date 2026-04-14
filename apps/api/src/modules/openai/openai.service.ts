@@ -26,6 +26,7 @@ import {
 import { ResponseCreateParamsDto } from './dto/create-response-dtos/ResponseCreateParamsDto';
 import { ResponseStreamEvent } from 'openai/resources/responses/responses';
 import { Stream } from 'openai/streaming';
+import dayjs from 'dayjs';
 
 interface ChatEndEvent {
   type: 'chat.end';
@@ -166,7 +167,7 @@ export class OpenAiService {
         chatId,
       );
       if (previousResponseId) {
-        dto.previous_response_id = previousResponseId;
+        mappedDto.previous_response_id = previousResponseId;
       }
     }
 
@@ -196,12 +197,12 @@ export class OpenAiService {
           name,
           resolvedChatMetaId,
         );
-      /*
+
         // ── Token accounting via TokenLimitService ──────────────────────
         const tokensUsed =
-          chatEndEvent.result.stats.input_tokens +
-          chatEndEvent.result.stats.total_output_tokens +
-          (chatEndEvent.result.stats.reasoning_output_tokens || 0);
+          (event.response.usage?.input_tokens  ?? 0)+
+          (event.response.usage?.total_tokens ?? 0) +
+          (event.response.usage?.output_tokens_details?.reasoning_tokens || 0);
 
         const updatedUser = await this.tokenLimitService.updateUsedTokens(
           userId,
@@ -217,12 +218,8 @@ export class OpenAiService {
             type: 'api.info',
             message: `Rate limit reached. Resets at ${dayjs(updatedUser.tokenCountResetDate).toString()}`,
           });
-        }*/
+        }
         // ───────────────────────────────────────────────────────────────
-      } else {
-        this.logger.warn(
-          `No chat.end event found in stream for chatId=${chatId}`,
-        );
       }
     }
 
