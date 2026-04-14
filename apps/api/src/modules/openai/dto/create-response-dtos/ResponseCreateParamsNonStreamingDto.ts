@@ -532,7 +532,7 @@ We support the following categories of tools:
   @IsOptional()
   @IsArray()
   tools?:
-    | FunctionToolDto
+    (FunctionToolDto
     | FileSearchToolDto
     | ComputerToolDto
     | ComputerUsePreviewToolDto
@@ -546,7 +546,7 @@ We support the following categories of tools:
     | NamespaceToolDto
     | ToolSearchToolDto
     | WebSearchPreviewToolDto
-    | ApplyPatchToolDto[];
+    | ApplyPatchToolDto)[];
 
   /** An alternative to sampling with temperature, called nucleus sampling, where the
 model considers the results of the tokens with top_p probability mass. So 0.1

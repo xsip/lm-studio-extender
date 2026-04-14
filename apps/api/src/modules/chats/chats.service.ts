@@ -1,9 +1,18 @@
-import { Injectable, Logger, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Chat, ChatDocument, ChatEntryDto } from './chat.schema';
 import { ChatRequestDto } from '../lm-studio/dto/chat.dto';
 import { ChatResponseDto } from '../lm-studio/dto/chat-response.dto';
+import { ResponseCreateParamsNonStreamingDto } from '../openai/dto/create-response-dtos';
+import { ResponseCreateParamsStreamingDto } from '../openai/dto/create-response-dtos/ResponseCreateParamsStreamingDto';
+import { ResponseCreateParamsDto } from '../openai/dto/create-response-dtos/ResponseCreateParamsDto';
+import { ResponseDto } from '../openai/dto/get-response-dtos';
 
 @Injectable()
 export class ChatsService {
@@ -20,8 +29,12 @@ export class ChatsService {
   async saveEntry(
     userId: Types.ObjectId,
     internalChatId: string,
-    request: ChatRequestDto,
-    response: ChatResponseDto,
+    request:
+      | ChatRequestDto
+      | ResponseCreateParamsNonStreamingDto
+      | ResponseCreateParamsStreamingDto
+      | ResponseCreateParamsDto,
+    response: ChatResponseDto | ResponseDto,
     name?: string,
     chatInternalId?: string,
   ): Promise<ChatDocument> {
@@ -32,11 +45,16 @@ export class ChatsService {
       request,
       response,
       previousResponseId: request.previous_response_id ?? null,
-      responseId: response.response_id ?? null,
+      responseId:
+        (response as ChatResponseDto).response_id ??
+        (response as ResponseDto).id ??
+        null,
       chatInternalId: chatInternalId ?? null,
     });
     const saved = await doc.save();
-    this.logger.log(`Saved chat entry — user=${userId} chatId=${internalChatId}`);
+    this.logger.log(
+      `Saved chat entry — user=${userId} chatId=${internalChatId}`,
+    );
     return saved;
   }
 
@@ -65,7 +83,11 @@ export class ChatsService {
       );
     }
 
-    return (latest.response as ChatResponseDto).response_id ?? null;
+    return (
+      (latest.response as ChatResponseDto).response_id ??
+      (latest.response as ResponseDto).id ??
+      null
+    );
   }
 
   /**
@@ -96,7 +118,9 @@ export class ChatsService {
   /** Return all unique chat sessions belonging to this user, newest-first. */
   async listChats(
     userId: Types.ObjectId,
-  ): Promise<{ internalChatId: string; name: string | null; lastActivity: Date }[]> {
+  ): Promise<
+    { internalChatId: string; name: string | null; lastActivity: Date }[]
+  > {
     return this.chatModel
       .aggregate([
         { $match: { userId } },

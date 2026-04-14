@@ -406,7 +406,7 @@ We support the following categories of tools:
   You can also use custom tools to call your own code.`, isArray: true })
   @IsOptional()
   @IsArray()
-  tools?: FunctionToolDto | FileSearchToolDto | ComputerToolDto | ComputerUsePreviewToolDto | WebSearchToolDto | McpDto | CodeInterpreterDto | ImageGenerationDto | LocalShellDto | FunctionShellToolDto | CustomToolDto | NamespaceToolDto | ToolSearchToolDto | WebSearchPreviewToolDto | ApplyPatchToolDto[];
+  tools?: (FunctionToolDto | FileSearchToolDto | ComputerToolDto | ComputerUsePreviewToolDto | WebSearchToolDto | McpDto | CodeInterpreterDto | ImageGenerationDto | LocalShellDto | FunctionShellToolDto | CustomToolDto | NamespaceToolDto | ToolSearchToolDto | WebSearchPreviewToolDto | ApplyPatchToolDto)[];
 
   /** An alternative to sampling with temperature, called nucleus sampling, where the
 model considers the results of the tokens with top_p probability mass. So 0.1

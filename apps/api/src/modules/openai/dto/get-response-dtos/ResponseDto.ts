@@ -107,10 +107,10 @@ available models. */
 wide range of models with different capabilities, performance characteristics,
 and price points. Refer to the
 [model guide](https://platform.openai.com/docs/models) to browse and compare
-available models.`, type: () => ResponsesModelDto })
+available models.`, type: () => String })
   @ValidateNested()
-  @Type(() => ResponsesModelDto)
-  model!: ResponsesModelDto;
+  @Type(() => String)
+  model!: string;
 
   /** The object type of this resource - always set to `response`. */
   @ApiProperty({ description: `The object type of this resource - always set to \`response\`.`, example: 'response' })

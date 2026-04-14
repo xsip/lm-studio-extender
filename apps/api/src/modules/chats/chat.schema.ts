@@ -3,6 +3,10 @@ import { Document, Types } from 'mongoose';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ChatRequestDto } from '../lm-studio/dto/chat.dto';
 import { ChatResponseDto } from '../lm-studio/dto/chat-response.dto';
+import { ResponseCreateParamsNonStreamingDto } from '../openai/dto/create-response-dtos';
+import { ResponseCreateParamsStreamingDto } from '../openai/dto/create-response-dtos/ResponseCreateParamsStreamingDto';
+import { ResponseCreateParamsDto } from '../openai/dto/create-response-dtos/ResponseCreateParamsDto';
+import { ResponseDto } from '../openai/dto/get-response-dtos';
 
 export type ChatDocument = Chat & Document;
 
@@ -30,11 +34,15 @@ export class Chat {
 
   /** Snapshot of the request that produced this entry */
   @Prop({ required: true, type: Object })
-  request: ChatRequestDto;
+  request:
+    | ChatRequestDto
+    | ResponseCreateParamsNonStreamingDto
+    | ResponseCreateParamsStreamingDto
+    | ResponseCreateParamsDto;
 
   /** Snapshot of the response (extracted from the SSE stream) */
   @Prop({ required: true, type: Object })
-  response: ChatResponseDto;
+  response: ChatResponseDto | ResponseDto;
 
   /**
    * LM Studio response ID from the previous turn — taken from request.previous_response_id.
@@ -67,7 +75,10 @@ export class ChatEntryDto {
   @ApiProperty()
   internalChatId: string;
 
-  @ApiPropertyOptional({ nullable: true, description: 'ChatMetadata ObjectId reference' })
+  @ApiPropertyOptional({
+    nullable: true,
+    description: 'ChatMetadata ObjectId reference',
+  })
   chatInternalId: string | null;
 
   @ApiPropertyOptional({ nullable: true })
@@ -79,10 +90,16 @@ export class ChatEntryDto {
   @ApiProperty()
   response: ChatResponseDto;
 
-  @ApiPropertyOptional({ nullable: true, description: 'LM Studio response ID of the previous turn' })
+  @ApiPropertyOptional({
+    nullable: true,
+    description: 'LM Studio response ID of the previous turn',
+  })
   previousResponseId: string | null;
 
-  @ApiPropertyOptional({ nullable: true, description: 'LM Studio response ID returned for this turn' })
+  @ApiPropertyOptional({
+    nullable: true,
+    description: 'LM Studio response ID returned for this turn',
+  })
   responseId: string | null;
 
   @ApiProperty()

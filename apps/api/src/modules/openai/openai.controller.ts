@@ -145,39 +145,19 @@ export class OpenaiController {
         );
       }
     }
+
+    return this.openAiService.chatStream(
+      userId,
+      dto,
+      res,
+      token,
+      internalChatId,
+      '',
+      internalChatId,
+    );
     // ───────────────────────────────────────────────────────────────────────
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.flushHeaders();
 
-    const stream = await this.openAiService.openAi.responses.create({
-      model: dto.model,
-      input: dto.input as string,
-      reasoning: {
-        summary: 'auto',
-        effort: 'medium',
-      },
-      stream: true,
-      tools: [
-        {
-          type: 'mcp',
-          server_label: 'my-toolbox',
-          server_url: this.openAiService.selfMcpUrl,
-          headers: {
-            authorization: `Bearer ${token}`,
-          },
-          allowed_tools: ['greeting-tool', 'get-token-usage-tool'],
-        },
-      ],
-      previous_response_id: dto.previous_response_id,
-      store: true,
-    });
-    for await (const event of stream) {
-      res.write(`data: ${JSON.stringify(event)}\n\n`);
-    }
 
-    res.write('data: [DONE]\n\n');
-    res.end();
+
   }
 }

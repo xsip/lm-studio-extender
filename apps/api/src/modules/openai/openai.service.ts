@@ -19,8 +19,13 @@ import OpenAI from 'openai';
 import { ModelOpenAiDto } from './dto/model-dtos';
 
 import { ResponseCreateParamsStreamingDto } from './dto/create-response-dtos/ResponseCreateParamsStreamingDto';
-import { ResponseCreateParamsNonStreamingDto } from './dto/create-response-dtos';
+import {
+  McpDto,
+  ResponseCreateParamsNonStreamingDto,
+} from './dto/create-response-dtos';
 import { ResponseCreateParamsDto } from './dto/create-response-dtos/ResponseCreateParamsDto';
+import { ResponseStreamEvent } from 'openai/resources/responses/responses';
+import { Stream } from 'openai/streaming';
 
 interface ChatEndEvent {
   type: 'chat.end';
@@ -107,6 +112,123 @@ export class OpenAiService {
     name?: string,
     chatMetaId?: string,
   ): Promise<void> {
+    const mappedDto:
+      | ResponseCreateParamsNonStreamingDto
+      | ResponseCreateParamsStreamingDto
+      | ResponseCreateParamsDto = {
+      model: dto.model,
+      input: dto.input as string,
+      reasoning: {
+        summary: 'auto',
+        effort: 'medium',
+      },
+      stream: true,
+      tools: [
+        {
+          type: 'mcp',
+          server_label: 'my-toolbox',
+          server_url: this.selfMcpUrl,
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+          allowed_tools: ['greeting-tool', 'get-token-usage-tool'],
+        } as any,
+      ],
+      previous_response_id: dto.previous_response_id,
+      store: true,
+    };
+
+    const isNewChat = !internalChatId;
+    const chatId = internalChatId ?? this.generateChatId();
+
+    let resolvedChatMetaId: string | undefined = chatMetaId;
+    if (isNewChat && !resolvedChatMetaId) {
+      resolvedChatMetaId = await this.chatMetadataService.createAndReturnId(
+        userId,
+        {
+          name: chatId,
+          usedModel: dto.model!,
+          reasoningMode: dto.reasoning?.effort ?? 'off',
+          tools: (mappedDto.tools?.filter(
+            (i) => typeof i === 'object' && (i as any).type === 'mcp',
+          ) ?? []) as any,
+        },
+      );
+    } else if (!isNewChat && resolvedChatMetaId) {
+      await this.chatMetadataService.update(userId, resolvedChatMetaId, {
+        lastMessageSentAt: new Date(),
+      });
+    }
+
+    if (!isNewChat) {
+      const previousResponseId = await this.chatsService.getLatestResponseId(
+        userId,
+        chatId,
+      );
+      if (previousResponseId) {
+        dto.previous_response_id = previousResponseId;
+      }
+    }
+
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
+
+    const stream: Stream<ResponseStreamEvent> =
+      (await this.openAi.responses.create(mappedDto as any)) as any;
+    for await (const event of stream) {
+      res.write(`data: ${JSON.stringify(event)}\n\n`);
+      if (isNewChat) {
+        this.writeSseEvent(res, 'created_chat', {
+          type: 'created_chat',
+          result: chatId,
+        });
+      }
+
+
+      if (event.type === 'response.completed') {
+        await this.chatsService.saveEntry(
+          userId,
+          chatId,
+          dto,
+          event.response as any,
+          name,
+          resolvedChatMetaId,
+        );
+      /*
+        // ── Token accounting via TokenLimitService ──────────────────────
+        const tokensUsed =
+          chatEndEvent.result.stats.input_tokens +
+          chatEndEvent.result.stats.total_output_tokens +
+          (chatEndEvent.result.stats.reasoning_output_tokens || 0);
+
+        const updatedUser = await this.tokenLimitService.updateUsedTokens(
+          userId,
+          tokensUsed,
+        );
+
+        const limit = await this.tokenLimitService.getTokensPerIntervall(
+          updatedUser.subscription,
+        );
+
+        if (updatedUser.usedTokens >= limit) {
+          this.writeSseEvent(res, 'api.info', {
+            type: 'api.info',
+            message: `Rate limit reached. Resets at ${dayjs(updatedUser.tokenCountResetDate).toString()}`,
+          });
+        }*/
+        // ───────────────────────────────────────────────────────────────
+      } else {
+        this.logger.warn(
+          `No chat.end event found in stream for chatId=${chatId}`,
+        );
+      }
+    }
+
+    res.write('data: [DONE]\n\n');
+    res.end();
+
     /*dto.integrations = [
       {
         type: 'ephemeral_mcp',

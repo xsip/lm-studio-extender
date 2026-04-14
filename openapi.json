@@ -1797,7 +1797,7 @@
             "description": "An array of tools the model may call while generating a response. You can\nspecify which tool to use by setting the `tool_choice` parameter.\n\nWe support the following categories of tools:\n\n- **Built-in tools**: Tools that are provided by OpenAI that extend the model's\n  capabilities, like\n  [web search](https://platform.openai.com/docs/guides/tools-web-search) or\n  [file search](https://platform.openai.com/docs/guides/tools-file-search).\n  Learn more about\n  [built-in tools](https://platform.openai.com/docs/guides/tools).\n- **MCP Tools**: Integrations with third-party systems via custom MCP servers or\n  predefined connectors such as Google Drive and SharePoint. Learn more about\n  [MCP Tools](https://platform.openai.com/docs/guides/tools-connectors-mcp).\n- **Function calls (custom tools)**: Functions that are defined by you, enabling\n  the model to call your own code with strongly typed arguments and outputs.\n  Learn more about\n  [function calling](https://platform.openai.com/docs/guides/function-calling).\n  You can also use custom tools to call your own code.",
             "type": "array",
             "items": {
-              "type": "object"
+              "type": "array"
             }
           },
           "top_p": {
@@ -1920,7 +1920,7 @@
             "description": "An array of tools the model may call while generating a response. You can\nspecify which tool to use by setting the `tool_choice` parameter.\n\nWe support the following categories of tools:\n\n- **Built-in tools**: Tools that are provided by OpenAI that extend the model's\n  capabilities, like\n  [web search](https://platform.openai.com/docs/guides/tools-web-search) or\n  [file search](https://platform.openai.com/docs/guides/tools-file-search).\n  Learn more about\n  [built-in tools](https://platform.openai.com/docs/guides/tools).\n- **MCP Tools**: Integrations with third-party systems via custom MCP servers or\n  predefined connectors such as Google Drive and SharePoint. Learn more about\n  [MCP Tools](https://platform.openai.com/docs/guides/tools-connectors-mcp).\n- **Function calls (custom tools)**: Functions that are defined by you, enabling\n  the model to call your own code with strongly typed arguments and outputs.\n  Learn more about\n  [function calling](https://platform.openai.com/docs/guides/function-calling).\n  You can also use custom tools to call your own code.",
             "type": "array",
             "items": {
-              "type": "object"
+              "type": "array"
             }
           },
           "top_p": {
@@ -2043,7 +2043,7 @@
             "description": "An array of tools the model may call while generating a response. You can\nspecify which tool to use by setting the `tool_choice` parameter.\n\nWe support the following categories of tools:\n\n- **Built-in tools**: Tools that are provided by OpenAI that extend the model's\n  capabilities, like\n  [web search](https://platform.openai.com/docs/guides/tools-web-search) or\n  [file search](https://platform.openai.com/docs/guides/tools-file-search).\n  Learn more about\n  [built-in tools](https://platform.openai.com/docs/guides/tools).\n- **MCP Tools**: Integrations with third-party systems via custom MCP servers or\n  predefined connectors such as Google Drive and SharePoint. Learn more about\n  [MCP Tools](https://platform.openai.com/docs/guides/tools-connectors-mcp).\n- **Function calls (custom tools)**: Functions that are defined by you, enabling\n  the model to call your own code with strongly typed arguments and outputs.\n  Learn more about\n  [function calling](https://platform.openai.com/docs/guides/function-calling).\n  You can also use custom tools to call your own code.",
             "type": "array",
             "items": {
-              "type": "object"
+              "type": "array"
             }
           },
           "top_p": {
