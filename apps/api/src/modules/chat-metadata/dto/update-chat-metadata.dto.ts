@@ -1,5 +1,6 @@
 import {
   IsArray,
+  IsDate,
   IsOptional,
   IsString,
   ValidateNested,
@@ -30,4 +31,9 @@ export class UpdateChatMetadataDto {
   @ValidateNested({ each: true })
   @Type(() => EphemeralMcpIntegrationDto)
   tools?: EphemeralMcpIntegrationDto[];
+
+  @ApiPropertyOptional({ type: Date })
+  @IsOptional()
+  @IsDate()
+  lastMessageSentAt: Date;
 }

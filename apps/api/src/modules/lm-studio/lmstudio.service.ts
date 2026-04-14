@@ -142,6 +142,10 @@ export class LmStudioService {
           ) ?? []) as any,
         },
       );
+    } else if (!isNewChat && resolvedChatMetaId) {
+      await this.chatMetadataService.update(userId, resolvedChatMetaId, {
+        lastMessageSentAt: new Date(),
+      });
     }
 
     if (!isNewChat) {

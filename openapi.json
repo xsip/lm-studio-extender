@@ -1464,6 +1464,10 @@
           "updatedAt": {
             "format": "date-time",
             "type": "string"
+          },
+          "lastMessageSentAt": {
+            "format": "date-time",
+            "type": "string"
           }
         },
         "required": [
@@ -1473,7 +1477,8 @@
           "userId",
           "reasoningMode",
           "createdAt",
-          "updatedAt"
+          "updatedAt",
+          "lastMessageSentAt"
         ]
       },
       "UpdateChatMetadataDto": {
@@ -1493,6 +1498,10 @@
             "items": {
               "$ref": "#/components/schemas/EphemeralMcpIntegrationDto"
             }
+          },
+          "lastMessageSentAt": {
+            "format": "date-time",
+            "type": "string"
           }
         }
       },

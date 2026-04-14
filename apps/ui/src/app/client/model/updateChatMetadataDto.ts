@@ -15,5 +15,6 @@ export interface UpdateChatMetadataDto {
     usedModel?: string;
     reasoningMode?: string;
     tools?: Array<EphemeralMcpIntegrationDto>;
+    lastMessageSentAt?: string;
 }
 

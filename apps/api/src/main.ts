@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import path from 'node:path';
 import * as fs from 'node:fs';
+import dayjs from 'dayjs';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

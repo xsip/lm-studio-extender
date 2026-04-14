@@ -26,13 +26,15 @@ export class ChatMetadata {
   userId: Types.ObjectId;
 
   /** Reasoning mode identifier (e.g. "off", "low", "medium", "high", "on") */
-  @Prop({ required: true, type: String })
-  reasoningMode: string;
+  @Prop({ required: false, type: String })
+  reasoningMode?: string;
 
   /** MCP tool integrations configured for this session */
   @Prop({ required: false, default: [], type: [Object] })
   tools: EphemeralMcpIntegrationDto[];
 
+  @Prop({ required: false, type: Date })
+  lastMessageSentAt: Date;
   // `createdAt` / `updatedAt` injected automatically
 }
 
@@ -41,7 +43,10 @@ export const ChatMetadataSchema = SchemaFactory.createForClass(ChatMetadata);
 // ── Swagger-friendly response DTO ────────────────────────────────────────────
 
 export class ChatMetadataDto {
-  @ApiProperty({ description: 'MongoDB ObjectId — use as chatInternalId when fetching messages' })
+  @ApiProperty({
+    description:
+      'MongoDB ObjectId — use as chatInternalId when fetching messages',
+  })
   _id: string;
 
   @ApiProperty()
@@ -54,7 +59,7 @@ export class ChatMetadataDto {
   userId: string;
 
   @ApiProperty()
-  reasoningMode: string;
+  reasoningMode?: string;
 
   @ApiPropertyOptional({ type: [EphemeralMcpIntegrationDto] })
   tools: EphemeralMcpIntegrationDto[];
@@ -64,4 +69,7 @@ export class ChatMetadataDto {
 
   @ApiProperty()
   updatedAt: Date;
+
+  @ApiProperty()
+  lastMessageSentAt?: Date;
 }

@@ -25,5 +25,6 @@ export interface ChatMetadataDto {
     tools?: Array<EphemeralMcpIntegrationDto>;
     createdAt: string;
     updatedAt: string;
+    lastMessageSentAt: string;
 }
 
