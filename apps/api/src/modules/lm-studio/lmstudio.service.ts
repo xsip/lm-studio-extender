@@ -22,6 +22,7 @@ import { TokenLimitService } from '../token-limit/token-limit.service';
 // ---------------------------------------------------------------------------
 // SSE event shapes we care about
 // ---------------------------------------------------------------------------
+import OpenAI from 'openai';
 
 interface ChatEndEvent {
   type: 'chat.end';
@@ -34,9 +35,9 @@ interface ChatEndEvent {
 export class LmStudioService {
   private readonly logger = new Logger(LmStudioService.name);
   private readonly baseUrl: string;
-  private readonly selfMcpUrl: string;
+  public readonly selfMcpUrl: string;
   private readonly apiToken: string;
-
+  public readonly openAi: OpenAI;
   constructor(
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
@@ -49,6 +50,12 @@ export class LmStudioService {
       'http://localhost:1234',
     );
     this.apiToken = this.configService.get<string>('LM_STUDIO_API_TOKEN', '');
+
+    this.openAi = new OpenAI({
+      apiKey: this.apiToken,
+      baseURL: this.baseUrl + '/v1',
+    });
+
 
     this.selfMcpUrl = this.configService.get<string>(
       'SELF_MCP_URL',
