@@ -57,7 +57,6 @@ export class LmStudioService {
       baseURL: this.baseUrl + '/v1',
     });
 
-
     this.selfMcpUrl = this.configService.get<string>(
       'SELF_MCP_URL',
       'http://192.128.0.34:8888/tools/mcp',

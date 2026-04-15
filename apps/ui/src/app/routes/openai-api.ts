@@ -11,7 +11,19 @@ import {
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { ChatMetadataService, ChatsService } from '../client';
+import {
+  ChatMetadataService,
+  ChatsService,
+  ContentDto,
+  EasyInputMessageDtoContentInner,
+  MessageDtoContentInner,
+  ResponseInputFileDto,
+  ResponseInputImageDto,
+  ResponseInputTextDto,
+  ResponseOutputMessageDtoContentInner,
+  ResponseOutputRefusalDto,
+  ResponseOutputTextDto,
+} from '../client';
 import { OpenAIService } from '../client/api/openAI.service';
 import { ModelOpenAiDto } from '../client/model/modelOpenAiDto';
 import { ChatService } from './openai-api/chat.service';
@@ -37,16 +49,26 @@ import { InfoComponent } from './lm-studio-api/info.component';
   ],
   providers: [ChatService],
   template: `
-    <div class="h-screen bg-surface-base text-text-primary flex flex-col overflow-hidden transition-colors duration-200">
+    <div
+      class="h-screen bg-surface-base text-text-primary flex flex-col overflow-hidden transition-colors duration-200"
+    >
       <!-- ── Top bar ── -->
-      <div class="flex items-center gap-3 border-b border-border-default px-3 py-2.5 shrink-0 bg-surface-raised">
+      <div
+        class="flex items-center gap-3 border-b border-border-default px-3 py-2.5 shrink-0 bg-surface-raised"
+      >
         <button
           type="button"
           (click)="showChatsSidebar.set(!showChatsSidebar())"
           class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs border border-border-default rounded-lg text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors"
           title="Toggle chat history"
         >
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <svg
+            class="w-3.5 h-3.5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M3 12h18M3 18h18" />
           </svg>
           <span class="hidden sm:inline">Chats</span>
@@ -60,11 +82,13 @@ import { InfoComponent } from './lm-studio-api/info.component';
           <a
             routerLink="/chat-lm-studio"
             class="px-2.5 py-1 text-[11px] rounded-md font-medium border border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors"
-          >LM Studio</a>
+            >LM Studio</a
+          >
           <a
             routerLink="/chat-openai"
             class="px-2.5 py-1 text-[11px] rounded-md font-medium border border-accent text-accent bg-accent/10 transition-colors"
-          >OpenAI</a>
+            >OpenAI</a
+          >
         </div>
 
         <div class="relative ml-auto">
@@ -83,7 +107,13 @@ import { InfoComponent } from './lm-studio-api/info.component';
           class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs border border-border-default rounded-lg text-text-secondary hover:border-accent hover:text-accent transition-colors"
           title="New chat"
         >
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <svg
+            class="w-3.5 h-3.5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
           </svg>
           <span class="hidden sm:inline">New</span>
@@ -94,11 +124,25 @@ import { InfoComponent } from './lm-studio-api/info.component';
           type="button"
           (click)="showInfoPanel.set(!showInfoPanel())"
           class="flex items-center justify-center w-8 h-8 rounded-lg border transition-colors"
-          [class]="showInfoPanel() ? 'border-accent text-accent bg-accent/10' : 'border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary'"
+          [class]="
+            showInfoPanel()
+              ? 'border-accent text-accent bg-accent/10'
+              : 'border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary'
+          "
           title="User info"
         >
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          <svg
+            class="w-3.5 h-3.5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            />
           </svg>
         </button>
       </div>
@@ -137,14 +181,18 @@ import { InfoComponent } from './lm-studio-api/info.component';
               [modelReasoningCap]="null"
               (submitted)="submit()"
               (reset)="chatService.reset()"
-              (reasoningChanged)="$event"
+              (reasoningChanged)="($event)"
             />
           </div>
         </div>
 
         @if (showInfoPanel()) {
-          <div class="w-72 shrink-0 border-l border-border-default bg-surface-raised flex flex-col overflow-hidden">
-            <div class="flex items-center justify-between px-3 py-2 border-b border-border-default shrink-0">
+          <div
+            class="w-72 shrink-0 border-l border-border-default bg-surface-raised flex flex-col overflow-hidden"
+          >
+            <div
+              class="flex items-center justify-between px-3 py-2 border-b border-border-default shrink-0"
+            >
               <span class="text-xs font-semibold text-text-primary">Info</span>
               <button
                 type="button"
@@ -152,7 +200,13 @@ import { InfoComponent } from './lm-studio-api/info.component';
                 class="flex items-center justify-center w-6 h-6 rounded-md text-text-muted hover:text-text-primary hover:bg-surface-overlay transition-colors"
                 title="Close"
               >
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <svg
+                  class="w-3.5 h-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
                   <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -216,12 +270,18 @@ export class OpenAiApi implements OnDestroy, OnInit {
     try {
       const raw = localStorage.getItem(OpenAiApi.MODEL_STORAGE_KEY);
       return raw ? (JSON.parse(raw) as ModelOpenAiDto) : null;
-    } catch { return null; }
+    } catch {
+      return null;
+    }
   }
 
   selectModel(model: ModelOpenAiDto): void {
     this.selectedModel.set(model);
-    try { localStorage.setItem(OpenAiApi.MODEL_STORAGE_KEY, JSON.stringify(model)); } catch { /* ignore */ }
+    try {
+      localStorage.setItem(OpenAiApi.MODEL_STORAGE_KEY, JSON.stringify(model));
+    } catch {
+      /* ignore */
+    }
   }
 
   private loadModels(): void {
@@ -260,11 +320,63 @@ export class OpenAiApi implements OnDestroy, OnInit {
     });
   }
 
+  private fromContentToText(
+    content:
+      | string
+      | Array<EasyInputMessageDtoContentInner>
+      | Array<MessageDtoContentInner>
+      | Array<ResponseOutputMessageDtoContentInner>
+      | Array<ContentDto>,
+  ) {
+    if(typeof content === 'string') {
+      return content;
+    }
+    if(typeof content === 'object' && Array.isArray(content)) {
+      return content.map(c => {
+        if(typeof c === 'string') {
+          return c;
+        }
+        if (c.type === ResponseInputTextDto.TypeEnum.InputText) {
+          return c.text;
+        } else if (c.type === ResponseOutputRefusalDto.TypeEnum.Refusal) {
+          return c.refusal;
+        } else if (c.type === ContentDto.TypeEnum.ReasoningText) {
+          return c.text;
+        } else if (c.type === ResponseInputImageDto.TypeEnum.InputImage) {
+          return c.image_url;
+        } else if (c.type === ResponseOutputTextDto.TypeEnum.OutputText) {
+          return c.text;
+        } else if (c.type === ResponseInputFileDto.TypeEnum.InputFile) {
+          return c.file_data ?? c.file_url;
+        }
+        return JSON.stringify(c);
+      }).join(`  \n`);
+    }
+
+    return JSON.stringify(content);
+  }
+
   private loadChatHistory(chatId: string): void {
     this.chatsApi.getChatEntries(chatId).subscribe((res) => {
       const messages: any[] = [];
       for (const entry of res) {
-        messages.push({ role: 'user', text: entry.request.input as string, date: new Date(entry.createdAt) });
+        if (typeof entry.request.input === 'string')
+          messages.push({
+            role: 'user',
+            text: entry.request.input as string,
+            date: new Date(entry.createdAt),
+          });
+        else if (typeof entry.request.input === 'object' && Array.isArray(entry.request.input)) {
+          for (const inputEntry of entry.request.input) {
+            if (inputEntry.type === 'message' || !inputEntry.type) {
+              messages.push({
+                role: 'user',
+                text: this.fromContentToText(inputEntry.content),
+                date: new Date(entry.createdAt),
+              });
+            }
+          }
+        }
 
         const u = (entry.response as any)?.usage;
         const statsStr = u
@@ -274,30 +386,48 @@ export class OpenAiApi implements OnDestroy, OnInit {
         for (const output of entry.response.output) {
           if (output.type === 'reasoning') {
             // Reasoning content is in content[0].text for OpenAI Responses API
-            const content = (output as any).content?.[0]?.text ?? (output as any).summary?.[0]?.text ?? '';
-            messages.push({ role: 'reasoning', text: content, date: new Date(entry.createdAt), collapsed: true });
-          } else { // @ts-ignore
+            const content =
+              (output as any).content?.[0]?.text ?? (output as any).summary?.[0]?.text ?? '';
+            messages.push({
+              role: 'reasoning',
+              text: content,
+              date: new Date(entry.createdAt),
+              collapsed: true,
+            });
+          } else {
+            // @ts-ignore
             if (output.type === 'mcp_call' || output.type === 'tool_call') {
-                        const tc = output as any;
-                        let parsedOutput: string = tc.output ?? '';
-                        try {
-                          const arr = JSON.parse(parsedOutput);
-                          if (Array.isArray(arr) && arr[0]?.text != null) parsedOutput = arr[0].text;
-                        } catch { /* leave as-is */ }
-                        messages.push({
-                          role: 'tool_call',
-                          text: tc.name ?? tc.tool ?? '',
-                          toolName: tc.name ?? tc.tool ?? '',
-                          toolArguments: tc.arguments ? (typeof tc.arguments === 'string' ? JSON.parse(tc.arguments) : tc.arguments) : undefined,
-                          toolOutput: parsedOutput || undefined,
-                          providerLabel: tc.server_label ?? tc.provider_info?.server_label ?? undefined,
-                          date: new Date(entry.createdAt),
-                          collapsed: true,
-                        });
-                      } else if (output.type === 'message') {
-                        const content = (output as any).content?.[0]?.text ?? (output as any).content ?? '';
-                        messages.push({ role: 'ai', text: typeof content === 'string' ? content : JSON.stringify(content), date: new Date(entry.createdAt), stats: statsStr });
-                      }
+              const tc = output as any;
+              let parsedOutput: string = tc.output ?? '';
+              try {
+                const arr = JSON.parse(parsedOutput);
+                if (Array.isArray(arr) && arr[0]?.text != null) parsedOutput = arr[0].text;
+              } catch {
+                /* leave as-is */
+              }
+              messages.push({
+                role: 'tool_call',
+                text: tc.name ?? tc.tool ?? '',
+                toolName: tc.name ?? tc.tool ?? '',
+                toolArguments: tc.arguments
+                  ? typeof tc.arguments === 'string'
+                    ? JSON.parse(tc.arguments)
+                    : tc.arguments
+                  : undefined,
+                toolOutput: parsedOutput || undefined,
+                providerLabel: tc.server_label ?? tc.provider_info?.server_label ?? undefined,
+                date: new Date(entry.createdAt),
+                collapsed: true,
+              });
+            } else if (output.type === 'message') {
+              const content = (output as any).content?.[0]?.text ?? (output as any).content ?? '';
+              messages.push({
+                role: 'ai',
+                text: typeof content === 'string' ? content : JSON.stringify(content),
+                date: new Date(entry.createdAt),
+                stats: statsStr,
+              });
+            }
           }
         }
       }
@@ -325,17 +455,11 @@ export class OpenAiApi implements OnDestroy, OnInit {
   // ── Messaging ─────────────────────────────────────────────────────────────
 
   submit(): void {
-    this.chatService.submit(
-      this.selectedModel()?.id ?? '',
-      () => this.loadChatList(),
-    );
+    this.chatService.submit(this.selectedModel()?.id ?? '', () => this.loadChatList());
   }
 
   resend(): void {
-    this.chatService.resend(
-      this.selectedModel()?.id ?? '',
-      () => this.loadChatList(),
-    );
+    this.chatService.resend(this.selectedModel()?.id ?? '', () => this.loadChatList());
   }
 
   // ── Chat rename / delete ──────────────────────────────────────────────────
@@ -345,7 +469,9 @@ export class OpenAiApi implements OnDestroy, OnInit {
     if (!trimmed) return;
     this.chatMetaService.updateChatMetadata(chatId, { name: trimmed }).subscribe({
       next: () => {
-        this.chatList.update((list) => list.map((c) => (c._id === chatId ? { ...c, name: trimmed } : c)));
+        this.chatList.update((list) =>
+          list.map((c) => (c._id === chatId ? { ...c, name: trimmed } : c)),
+        );
       },
     });
   }
