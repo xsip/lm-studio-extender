@@ -1,5 +1,6 @@
 import {
   Component,
+  computed,
   effect,
   ElementRef,
   inject,
@@ -12,11 +13,12 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
-  ChatMetadataService,
+  ChatMetadataService, ChatRequestDto,
   ChatsService,
   ContentDto,
   EasyInputMessageDtoContentInner,
   MessageDtoContentInner,
+  ReasoningDto,
   ResponseInputFileDto,
   ResponseInputImageDto,
   ResponseInputTextDto,
@@ -34,6 +36,7 @@ import { ChatSidebarComponent } from './lm-studio-api/chat-sidebar.component';
 import { ChatMessagesComponent } from './lm-studio-api/chat-messages.component';
 import { ChatInputComponent } from './lm-studio-api/chat-input.component';
 import { InfoComponent } from './lm-studio-api/info.component';
+import { ModelReasoningCapability } from './lm-studio-api/model-selector.component';
 
 @Component({
   selector: 'app-openai-api',
@@ -177,11 +180,11 @@ import { InfoComponent } from './lm-studio-api/info.component';
             <app-chat-input
               [form]="chatService.form"
               [streaming]="chatService.streaming()"
-              [reasoning]="undefined"
-              [modelReasoningCap]="null"
+              [reasoning]="reasoning()"
+              [modelReasoningCap]="modelReasoningCap()"
               (submitted)="submit()"
               (reset)="chatService.reset()"
-              (reasoningChanged)="($event)"
+              (reasoningChanged)="selectReasoning($event)"
             />
           </div>
         </div>
@@ -227,7 +230,13 @@ export class OpenAiApi implements OnDestroy, OnInit {
   private readonly chatsApi = inject(ChatsService);
   private readonly chatMetaService = inject(ChatMetadataService);
   private readonly openAiService = inject(OpenAIService);
-
+  readonly reasoning = signal<ReasoningDto.EffortEnum | undefined>(undefined);
+  readonly modelReasoningCap = computed<ModelReasoningCapability | null>(() => {
+    return {
+      allowed_options: Object.values(ReasoningDto.EffortEnum).map((v) => v),
+      default: Object.values(ReasoningDto.EffortEnum)[0][0],
+    };
+  });
   @ViewChild('messageContainer') private messageContainer?: ElementRef<HTMLElement>;
 
   readonly showChatsSidebar = signal(true);
@@ -246,6 +255,20 @@ export class OpenAiApi implements OnDestroy, OnInit {
       this.chatService.chatMessages();
       this.scrollToBottom(this.messageContainer);
     });
+
+    effect(() => {
+      const cap = this.modelReasoningCap();
+      if (!cap && this.reasoning()) this.reasoning.set(undefined);
+      if (!this.chatService.hasChatOpen()) this.reasoning.set((cap?.default as any) ?? undefined);
+    });
+  }
+
+  selectReasoning(value: ChatRequestDto.ReasoningEnum | ReasoningDto.EffortEnum): void {
+    this.reasoning.set(value as ReasoningDto.EffortEnum);
+    const chatId = this.chatService.currentChatId();
+    if (chatId) {
+      this.chatMetaService.updateChatMetadata(chatId, { reasoningMode: value }).subscribe();
+    }
   }
 
   ngOnInit(): void {
@@ -257,7 +280,19 @@ export class OpenAiApi implements OnDestroy, OnInit {
 
     if (chatId) {
       this.loadChatHistory(chatId);
+      this.loadChatMeta(chatId);
     }
+  }
+
+  private loadChatMeta(chatId: string): void {
+    this.chatMetaService.getChatMetadata(chatId).subscribe({
+      next: (meta) => {
+        const reasoningValue = meta.reasoningMode as ReasoningDto.EffortEnum | undefined;
+        if (reasoningValue) {
+          this.reasoning.set(reasoningValue);
+        }
+      },
+    });
   }
 
   ngOnDestroy(): void {
@@ -328,29 +363,31 @@ export class OpenAiApi implements OnDestroy, OnInit {
       | Array<ResponseOutputMessageDtoContentInner>
       | Array<ContentDto>,
   ) {
-    if(typeof content === 'string') {
+    if (typeof content === 'string') {
       return content;
     }
-    if(typeof content === 'object' && Array.isArray(content)) {
-      return content.map(c => {
-        if(typeof c === 'string') {
-          return c;
-        }
-        if (c.type === ResponseInputTextDto.TypeEnum.InputText) {
-          return c.text;
-        } else if (c.type === ResponseOutputRefusalDto.TypeEnum.Refusal) {
-          return c.refusal;
-        } else if (c.type === ContentDto.TypeEnum.ReasoningText) {
-          return c.text;
-        } else if (c.type === ResponseInputImageDto.TypeEnum.InputImage) {
-          return c.image_url;
-        } else if (c.type === ResponseOutputTextDto.TypeEnum.OutputText) {
-          return c.text;
-        } else if (c.type === ResponseInputFileDto.TypeEnum.InputFile) {
-          return c.file_data ?? c.file_url;
-        }
-        return JSON.stringify(c);
-      }).join(`  \n`);
+    if (typeof content === 'object' && Array.isArray(content)) {
+      return content
+        .map((c) => {
+          if (typeof c === 'string') {
+            return c;
+          }
+          if (c.type === ResponseInputTextDto.TypeEnum.InputText) {
+            return c.text;
+          } else if (c.type === ResponseOutputRefusalDto.TypeEnum.Refusal) {
+            return c.refusal;
+          } else if (c.type === ContentDto.TypeEnum.ReasoningText) {
+            return c.text;
+          } else if (c.type === ResponseInputImageDto.TypeEnum.InputImage) {
+            return c.image_url;
+          } else if (c.type === ResponseOutputTextDto.TypeEnum.OutputText) {
+            return c.text;
+          } else if (c.type === ResponseInputFileDto.TypeEnum.InputFile) {
+            return c.file_data ?? c.file_url;
+          }
+          return JSON.stringify(c);
+        })
+        .join(`  \n`);
     }
 
     return JSON.stringify(content);
@@ -443,6 +480,7 @@ export class OpenAiApi implements OnDestroy, OnInit {
     this.chatService.currentChatId.set(chatId);
     this.router.navigate(['/chat-openai', chatId]);
     this.loadChatHistory(chatId);
+    this.loadChatMeta(chatId);
   }
 
   newChat(): void {
@@ -455,11 +493,15 @@ export class OpenAiApi implements OnDestroy, OnInit {
   // ── Messaging ─────────────────────────────────────────────────────────────
 
   submit(): void {
-    this.chatService.submit(this.selectedModel()?.id ?? '', () => this.loadChatList());
+    this.chatService.submit(this.selectedModel()?.id ?? '', this.reasoning(), () =>
+      this.loadChatList(),
+    );
   }
 
   resend(): void {
-    this.chatService.resend(this.selectedModel()?.id ?? '', () => this.loadChatList());
+    this.chatService.resend(this.selectedModel()?.id ?? '', this.reasoning(), () =>
+      this.loadChatList(),
+    );
   }
 
   // ── Chat rename / delete ──────────────────────────────────────────────────

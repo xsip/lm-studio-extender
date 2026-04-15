@@ -114,10 +114,7 @@ export class OpenAiService {
       | ResponseCreateParamsStreamingDto = {
       model: dto.model,
       input: dto.input as string,
-      reasoning: {
-        summary: 'auto',
-        effort: 'medium',
-      },
+      reasoning: dto.reasoning,
       stream: true,
       tools: [
         {

@@ -19,6 +19,7 @@ import {
   McpCallDto,
   McpListToolsDto,
   MessageOutputDto,
+  ReasoningDto,
   ReasoningOutputDto,
   ResponseInputTextDto,
   ResponseOutputItemAddedEventDto,
@@ -107,7 +108,11 @@ export class ChatService {
     });
   }
 
-  submit(selectedModelId: string, onChatListRefresh: () => void): void {
+  submit(
+    selectedModelId: string,
+    reasoning: ReasoningDto.EffortEnum | undefined,
+    onChatListRefresh: () => void,
+  ): void {
     if (this.form.invalid || this.streaming()) return;
 
     const input = this.form.getRawValue().input!.trim();
@@ -349,17 +354,28 @@ export class ChatService {
             ],
           },
         ],
+        reasoning: reasoning
+          ? {
+              effort: reasoning,
+              summary: 'detailed',
+              generate_summary: 'detailed',
+            }
+          : undefined,
         store: true,
       },
       this.currentChatId() ?? undefined,
     );
   }
 
-  resend(selectedModelId: string, onChatListRefresh: () => void): void {
+  resend(
+    selectedModelId: string,
+    reasoning: ReasoningDto.EffortEnum | undefined,
+    onChatListRefresh: () => void,
+  ): void {
     const input = this.lastUserInput();
     if (!input || this.streaming()) return;
     this.form.setValue({ input });
-    this.submit(selectedModelId, onChatListRefresh);
+    this.submit(selectedModelId, reasoning, onChatListRefresh);
   }
 
   reset(): void {

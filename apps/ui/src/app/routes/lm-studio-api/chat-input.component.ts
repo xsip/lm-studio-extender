@@ -1,7 +1,7 @@
 import { Component, computed, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { ChatRequestDto } from '../../client';
+import { ChatRequestDto, ReasoningDto } from '../../client';
 import { ModelReasoningCapability } from './model-selector.component';
 
 export interface ReasoningOption {
@@ -118,7 +118,7 @@ export const ALL_REASONING_OPTIONS: ReasoningOption[] = [
 export class ChatInputComponent {
   readonly form = input.required<FormGroup>();
   readonly streaming = input.required<boolean>();
-  readonly reasoning = input.required<ChatRequestDto.ReasoningEnum | undefined>();
+  readonly reasoning = input.required<ChatRequestDto.ReasoningEnum | ReasoningDto.EffortEnum |  undefined>();
   readonly modelReasoningCap = input.required<ModelReasoningCapability | null>();
 
   readonly submitted = output<void>();
