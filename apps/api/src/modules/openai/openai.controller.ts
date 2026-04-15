@@ -4,7 +4,7 @@ import {
   ForbiddenException,
   Get,
   HttpCode,
-  HttpStatus,
+  HttpStatus, Param,
   Post,
   Query,
   Res,
@@ -15,6 +15,7 @@ import {
   ApiExtraModels,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiProduces,
   ApiQuery,
   ApiTags,
@@ -33,14 +34,12 @@ import { OpenAiService } from './openai.service';
 import { ModelOpenAiDto } from './dto/model-dtos';
 import { ResponseCreateParamsNonStreamingDto } from './dto/create-response-dtos';
 import { ResponseCreateParamsStreamingDto } from './dto/create-response-dtos/ResponseCreateParamsStreamingDto';
-import { ResponseCreateParamsDto } from './dto/create-response-dtos/ResponseCreateParamsDto';
 
 @ApiTags('OpenAI')
 @ApiBearerAuth()
 @ApiExtraModels(
   ResponseCreateParamsNonStreamingDto,
   ResponseCreateParamsStreamingDto,
-  ResponseCreateParamsDto,
 )
 @Controller('openai')
 export class OpenaiController {
@@ -95,9 +94,6 @@ export class OpenaiController {
         {
           $ref: getSchemaPath(ResponseCreateParamsStreamingDto),
         },
-        {
-          $ref: getSchemaPath(ResponseCreateParamsDto),
-        },
       ],
     },
   })
@@ -115,8 +111,7 @@ export class OpenaiController {
     @Body()
     dto:
       | ResponseCreateParamsNonStreamingDto
-      | ResponseCreateParamsStreamingDto
-      | ResponseCreateParamsDto,
+      | ResponseCreateParamsStreamingDto,
     @Res() res: Response,
     @Query('internalChatId') internalChatId?: string,
   ): Promise<void> {
@@ -156,8 +151,5 @@ export class OpenaiController {
       internalChatId,
     );
     // ───────────────────────────────────────────────────────────────────────
-
-
-
   }
 }

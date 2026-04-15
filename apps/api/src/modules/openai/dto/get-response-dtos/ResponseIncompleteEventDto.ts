@@ -6,18 +6,27 @@ import { ResponseDto } from './ResponseDto';
 
 export class ResponseIncompleteEventDto {
   /** The response that was incomplete. */
-  @ApiProperty({ description: `The response that was incomplete.`, type: () => ResponseDto })
+  @ApiProperty({
+    description: `The response that was incomplete.`,
+    type: () => ResponseDto,
+  })
   @ValidateNested()
   @Type(() => ResponseDto)
   response!: ResponseDto;
 
   /** The sequence number of this event. */
-  @ApiProperty({ description: `The sequence number of this event.`, type: 'number' })
+  @ApiProperty({
+    description: `The sequence number of this event.`,
+    type: 'number',
+  })
   @IsNumber()
   sequence_number!: number;
 
   /** The type of the event. Always `response.incomplete`. */
-  @ApiProperty({ description: `The type of the event. Always \`response.incomplete\`.`, example: 'response.incomplete' })
+  @ApiProperty({
+    description: `The type of the event. Always \`response.incomplete\`.`,
+    example: 'response.incomplete',
+  })
   @Equals('response.incomplete')
   type!: 'response.incomplete';
 }

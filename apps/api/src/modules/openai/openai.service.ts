@@ -18,12 +18,10 @@ import { TokenLimitService } from '../token-limit/token-limit.service';
 import OpenAI from 'openai';
 import { ModelOpenAiDto } from './dto/model-dtos';
 
-import { ResponseCreateParamsStreamingDto } from './dto/create-response-dtos/ResponseCreateParamsStreamingDto';
 import {
-  McpDto,
   ResponseCreateParamsNonStreamingDto,
+  ResponseCreateParamsStreamingDto,
 } from './dto/create-response-dtos';
-import { ResponseCreateParamsDto } from './dto/create-response-dtos/ResponseCreateParamsDto';
 import { ResponseStreamEvent } from 'openai/resources/responses/responses';
 import { Stream } from 'openai/streaming';
 import dayjs from 'dayjs';
@@ -104,10 +102,7 @@ export class OpenAiService {
 
   async chatStream(
     userId: Types.ObjectId,
-    dto:
-      | ResponseCreateParamsNonStreamingDto
-      | ResponseCreateParamsStreamingDto
-      | ResponseCreateParamsDto,
+    dto: ResponseCreateParamsNonStreamingDto | ResponseCreateParamsStreamingDto,
     res: Response,
     token: string,
     internalChatId?: string,
@@ -116,8 +111,7 @@ export class OpenAiService {
   ): Promise<void> {
     const mappedDto:
       | ResponseCreateParamsNonStreamingDto
-      | ResponseCreateParamsStreamingDto
-      | ResponseCreateParamsDto = {
+      | ResponseCreateParamsStreamingDto = {
       model: dto.model,
       input: dto.input as string,
       reasoning: {
@@ -189,7 +183,6 @@ export class OpenAiService {
         });
       }
 
-
       if (event.type === 'response.completed') {
         await this.chatsService.saveEntry(
           userId,
@@ -202,7 +195,7 @@ export class OpenAiService {
 
         // ── Token accounting via TokenLimitService ──────────────────────
         const tokensUsed =
-          (event.response.usage?.input_tokens  ?? 0)+
+          (event.response.usage?.input_tokens ?? 0) +
           (event.response.usage?.total_tokens ?? 0) +
           (event.response.usage?.output_tokens_details?.reasoning_tokens || 0);
 

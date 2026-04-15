@@ -3,12 +3,18 @@ import { Equals, IsString } from 'class-validator';
 
 export class ResponseOutputRefusalDto {
   /** The refusal explanation from the model. */
-  @ApiProperty({ description: `The refusal explanation from the model.`, type: 'string' })
+  @ApiProperty({
+    description: `The refusal explanation from the model.`,
+    type: 'string',
+  })
   @IsString()
   refusal!: string;
 
   /** The type of the refusal. Always `refusal`. */
-  @ApiProperty({ description: `The type of the refusal. Always \`refusal\`.`, example: 'refusal' })
+  @ApiProperty({
+    description: `The type of the refusal. Always \`refusal\`.`,
+    example: 'refusal',
+  })
   @Equals('refusal')
   type!: 'refusal';
 }

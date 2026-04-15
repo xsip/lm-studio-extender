@@ -3,12 +3,18 @@ import { Equals, IsString } from 'class-validator';
 
 export class SourceDto {
   /** The type of source. Always `url`. */
-  @ApiProperty({ description: `The type of source. Always \`url\`.`, example: 'url' })
+  @ApiProperty({
+    description: `The type of source. Always \`url\`.`,
+    example: 'url',
+  })
   @Equals('url')
   type!: 'url';
 
   /** The URL of the source. */
-  @ApiProperty({ description: `The URL of the source.`, type: 'string' })
+  @ApiProperty({
+    description: `The URL of the source.`,
+    type: 'string',
+  })
   @IsString()
   url!: string;
 }

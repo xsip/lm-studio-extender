@@ -6,23 +6,39 @@ import { SourceDto } from './SourceDto';
 
 export class SearchDto {
   /** [DEPRECATED] The search query. */
-  @ApiProperty({ description: `[DEPRECATED] The search query.`, type: 'string' })
+  @ApiProperty({
+    description: `[DEPRECATED] The search query.`,
+    type: 'string',
+  })
   @IsString()
   query!: string;
 
   /** The action type. */
-  @ApiProperty({ description: `The action type.`, example: 'search' })
+  @ApiProperty({
+    description: `The action type.`,
+    example: 'search',
+  })
   @Equals('search')
   type!: 'search';
 
   /** The search queries. */
-  @ApiProperty({ required: false, description: `The search queries.`, isArray: true })
+  @ApiProperty({
+    required: false,
+    description: `The search queries.`,
+    type: 'string',
+    isArray: true,
+  })
   @IsOptional()
   @IsArray()
   queries?: string[];
 
   /** The sources used in the search. */
-  @ApiProperty({ required: false, description: `The sources used in the search.`, type: () => [SourceDto], isArray: true })
+  @ApiProperty({
+    required: false,
+    description: `The sources used in the search.`,
+    type: SourceDto,
+    isArray: true,
+  })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })

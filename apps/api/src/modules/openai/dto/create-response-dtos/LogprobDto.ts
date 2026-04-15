@@ -9,7 +9,10 @@ export class LogprobDto {
   @IsString()
   token!: string;
 
-  @ApiProperty({ isArray: true })
+  @ApiProperty({
+    type: 'number',
+    isArray: true,
+  })
   @IsArray()
   bytes!: number[];
 
@@ -17,7 +20,10 @@ export class LogprobDto {
   @IsNumber()
   logprob!: number;
 
-  @ApiProperty({ type: () => [TopLogprobDto], isArray: true })
+  @ApiProperty({
+    type: TopLogprobDto,
+    isArray: true,
+  })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => TopLogprobDto)

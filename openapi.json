@@ -707,9 +707,6 @@
                   },
                   {
                     "$ref": "#/components/schemas/ResponseCreateParamsStreamingDto"
-                  },
-                  {
-                    "$ref": "#/components/schemas/ResponseCreateParamsDto"
                   }
                 ]
               }
@@ -1665,18 +1662,3705 @@
           }
         }
       },
-      "ResponsesModelDto": {
+      "ResponseConversationParamDto": {
         "type": "object",
         "properties": {
-          "length": {
+          "id": {
+            "type": "string",
+            "description": "The unique ID of the conversation."
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "ResponseInputTextDto": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "The text input to the model."
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the input item. Always `input_text`.",
+            "example": "input_text"
+          }
+        },
+        "required": [
+          "text",
+          "type"
+        ]
+      },
+      "ResponseInputImageDto": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "string",
+            "description": "The detail level of the image to be sent to the model. One of `high`, `low`,\n  `auto`, or `original`. Defaults to `auto`.",
+            "enum": [
+              "low",
+              "high",
+              "auto",
+              "original"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the input item. Always `input_image`.",
+            "example": "input_image"
+          },
+          "file_id": {
+            "type": "string",
+            "description": "The ID of the file to be sent to the model."
+          },
+          "image_url": {
+            "type": "string",
+            "description": "The URL of the image to be sent to the model. A fully qualified URL or base64\n  encoded image in a data URL."
+          }
+        },
+        "required": [
+          "detail",
+          "type"
+        ]
+      },
+      "ResponseInputFileDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The type of the input item. Always `input_file`.",
+            "example": "input_file"
+          },
+          "file_data": {
+            "type": "string",
+            "description": "The content of the file to be sent to the model."
+          },
+          "file_id": {
+            "type": "string",
+            "description": "The ID of the file to be sent to the model."
+          },
+          "file_url": {
+            "type": "string",
+            "description": "The URL of the file to be sent to the model."
+          },
+          "filename": {
+            "type": "string",
+            "description": "The name of the file to be sent to the model."
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "EasyInputMessageDto": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "object",
+            "description": "Text, image, or audio input to the model, used to generate a response. Can also\n  contain previous assistant responses."
+          },
+          "role": {
+            "type": "string",
+            "description": "The role of the message input. One of `user`, `assistant`, `system`, or\n  `developer`.",
+            "enum": [
+              "user",
+              "assistant",
+              "system",
+              "developer"
+            ]
+          },
+          "phase": {
+            "type": "string",
+            "description": "Labels an `assistant` message as intermediate commentary (`commentary`) or the\n  final answer (`final_answer`). For models like `gpt-5.3-codex` and beyond, when\n  sending follow-up requests, preserve and resend phase on all assistant messages\n  — dropping it can degrade performance. Not used for user messages.",
+            "enum": [
+              "commentary",
+              "final_answer"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the message input. Always `message`.",
+            "example": "message"
+          }
+        },
+        "required": [
+          "content",
+          "role"
+        ]
+      },
+      "MessageDto": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "description": "A list of one or many input items to the model, containing different content\n  types.",
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ResponseInputTextDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ResponseInputImageDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ResponseInputFileDto"
+                }
+              ]
+            }
+          },
+          "role": {
+            "type": "string",
+            "description": "The role of the message input. One of `user`, `system`, or `developer`.",
+            "enum": [
+              "user",
+              "system",
+              "developer"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of item. One of `in_progress`, `completed`, or `incomplete`.\n  Populated when items are returned via API.",
+            "enum": [
+              "in_progress",
+              "completed",
+              "incomplete"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the message input. Always set to `message`.",
+            "example": "message"
+          }
+        },
+        "required": [
+          "content",
+          "role"
+        ]
+      },
+      "FileCitationDto": {
+        "type": "object",
+        "properties": {
+          "file_id": {
+            "type": "string",
+            "description": "The ID of the file."
+          },
+          "filename": {
+            "type": "string",
+            "description": "The filename of the file cited."
+          },
+          "index": {
+            "type": "number",
+            "description": "The index of the file in the list of files."
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the file citation. Always `file_citation`.",
+            "example": "file_citation"
+          }
+        },
+        "required": [
+          "file_id",
+          "filename",
+          "index",
+          "type"
+        ]
+      },
+      "URLCitationDto": {
+        "type": "object",
+        "properties": {
+          "end_index": {
+            "type": "number",
+            "description": "The index of the last character of the URL citation in the message."
+          },
+          "start_index": {
+            "type": "number",
+            "description": "The index of the first character of the URL citation in the message."
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of the web resource."
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the URL citation. Always `url_citation`.",
+            "example": "url_citation"
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL of the web resource."
+          }
+        },
+        "required": [
+          "end_index",
+          "start_index",
+          "title",
+          "type",
+          "url"
+        ]
+      },
+      "ContainerFileCitationDto": {
+        "type": "object",
+        "properties": {
+          "container_id": {
+            "type": "string",
+            "description": "The ID of the container file."
+          },
+          "end_index": {
+            "type": "number",
+            "description": "The index of the last character of the container file citation in the message."
+          },
+          "file_id": {
+            "type": "string",
+            "description": "The ID of the file."
+          },
+          "filename": {
+            "type": "string",
+            "description": "The filename of the container file cited."
+          },
+          "start_index": {
+            "type": "number",
+            "description": "The index of the first character of the container file citation in the message."
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the container file citation. Always `container_file_citation`.",
+            "example": "container_file_citation"
+          }
+        },
+        "required": [
+          "container_id",
+          "end_index",
+          "file_id",
+          "filename",
+          "start_index",
+          "type"
+        ]
+      },
+      "FilePathDto": {
+        "type": "object",
+        "properties": {
+          "file_id": {
+            "type": "string",
+            "description": "The ID of the file."
+          },
+          "index": {
+            "type": "number",
+            "description": "The index of the file in the list of files."
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the file path. Always `file_path`.",
+            "example": "file_path"
+          }
+        },
+        "required": [
+          "file_id",
+          "index",
+          "type"
+        ]
+      },
+      "TopLogprobDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "bytes": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "logprob": {
             "type": "number"
           }
         },
         "required": [
-          "length"
+          "token",
+          "bytes",
+          "logprob"
         ]
       },
-      "ResponseFormatTextConfigDto": {
+      "LogprobDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "bytes": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "logprob": {
+            "type": "number"
+          },
+          "top_logprobs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TopLogprobDto"
+            }
+          }
+        },
+        "required": [
+          "token",
+          "bytes",
+          "logprob",
+          "top_logprobs"
+        ]
+      },
+      "ResponseOutputTextDto": {
+        "type": "object",
+        "properties": {
+          "annotations": {
+            "description": "The annotations of the text output.",
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/FileCitationDto"
+                },
+                {
+                  "$ref": "#/components/schemas/URLCitationDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ContainerFileCitationDto"
+                },
+                {
+                  "$ref": "#/components/schemas/FilePathDto"
+                }
+              ]
+            }
+          },
+          "text": {
+            "type": "string",
+            "description": "The text output from the model."
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the output text. Always `output_text`.",
+            "example": "output_text"
+          },
+          "logprobs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LogprobDto"
+            }
+          }
+        },
+        "required": [
+          "annotations",
+          "text",
+          "type"
+        ]
+      },
+      "ResponseOutputRefusalDto": {
+        "type": "object",
+        "properties": {
+          "refusal": {
+            "type": "string",
+            "description": "The refusal explanation from the model."
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the refusal. Always `refusal`.",
+            "example": "refusal"
+          }
+        },
+        "required": [
+          "refusal",
+          "type"
+        ]
+      },
+      "ResponseOutputMessageDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique ID of the output message."
+          },
+          "content": {
+            "description": "The content of the output message.",
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ResponseOutputTextDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ResponseOutputRefusalDto"
+                }
+              ]
+            }
+          },
+          "role": {
+            "type": "string",
+            "description": "The role of the output message. Always `assistant`.",
+            "example": "assistant"
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of the message input. One of `in_progress`, `completed`, or\n  `incomplete`. Populated when input items are returned via API.",
+            "enum": [
+              "in_progress",
+              "completed",
+              "incomplete"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the output message. Always `message`.",
+            "example": "message"
+          },
+          "phase": {
+            "type": "string",
+            "description": "Labels an `assistant` message as intermediate commentary (`commentary`) or the\n  final answer (`final_answer`). For models like `gpt-5.3-codex` and beyond, when\n  sending follow-up requests, preserve and resend phase on all assistant messages\n  — dropping it can degrade performance. Not used for user messages.",
+            "enum": [
+              "commentary",
+              "final_answer"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "content",
+          "role",
+          "status",
+          "type"
+        ]
+      },
+      "ResultDto": {
+        "type": "object",
+        "properties": {
+          "attributes": {
+            "type": "object",
+            "description": "Set of 16 key-value pairs that can be attached to an object. This can be useful\n  for storing additional information about the object in a structured format, and\n  querying for objects via API or the dashboard. Keys are strings with a maximum\n  length of 64 characters. Values are strings with a maximum length of 512\n  characters, booleans, or numbers."
+          },
+          "file_id": {
+            "type": "string",
+            "description": "The unique ID of the file."
+          },
+          "filename": {
+            "type": "string",
+            "description": "The name of the file."
+          },
+          "score": {
+            "type": "number",
+            "description": "The relevance score of the file - a value between 0 and 1."
+          },
+          "text": {
+            "type": "string",
+            "description": "The text that was retrieved from the file."
+          }
+        }
+      },
+      "ResponseFileSearchToolCallDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique ID of the file search tool call."
+          },
+          "queries": {
+            "description": "The queries used to search for files.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of the file search tool call. One of `in_progress`, `searching`,\n  `incomplete` or `failed`,",
+            "enum": [
+              "in_progress",
+              "completed",
+              "incomplete",
+              "searching",
+              "failed"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the file search tool call. Always `file_search_call`.",
+            "example": "file_search_call"
+          },
+          "results": {
+            "description": "The results of the file search tool call.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResultDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "queries",
+          "status",
+          "type"
+        ]
+      },
+      "ClickDto": {
+        "type": "object",
+        "properties": {
+          "button": {
+            "type": "string",
+            "description": "Indicates which mouse button was pressed during the click. One of `left`,\n  `right`, `wheel`, `back`, or `forward`.",
+            "enum": [
+              "left",
+              "right",
+              "wheel",
+              "back",
+              "forward"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "Specifies the event type. For a click action, this property is always `click`.",
+            "example": "click"
+          },
+          "x": {
+            "type": "number",
+            "description": "The x-coordinate where the click occurred."
+          },
+          "y": {
+            "type": "number",
+            "description": "The y-coordinate where the click occurred."
+          },
+          "keys": {
+            "description": "The keys being held while clicking.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "button",
+          "type",
+          "x",
+          "y"
+        ]
+      },
+      "DoubleClickDto": {
+        "type": "object",
+        "properties": {
+          "keys": {
+            "description": "The keys being held while double-clicking.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "type": {
+            "type": "string",
+            "description": "Specifies the event type. For a double click action, this property is always set\n  to `double_click`.",
+            "example": "double_click"
+          },
+          "x": {
+            "type": "number",
+            "description": "The x-coordinate where the double click occurred."
+          },
+          "y": {
+            "type": "number",
+            "description": "The y-coordinate where the double click occurred."
+          }
+        },
+        "required": [
+          "keys",
+          "type",
+          "x",
+          "y"
+        ]
+      },
+      "PathDto": {
+        "type": "object",
+        "properties": {
+          "x": {
+            "type": "number",
+            "description": "The x-coordinate."
+          },
+          "y": {
+            "type": "number",
+            "description": "The y-coordinate."
+          }
+        },
+        "required": [
+          "x",
+          "y"
+        ]
+      },
+      "DragDto": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "description": "An array of coordinates representing the path of the drag action. Coordinates\n  will appear as an array of objects, eg\n  \n  ```\n  [\n    { x: 100, y: 200 },\n    { x: 200, y: 300 }\n  ]\n  ```",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PathDto"
+            }
+          },
+          "type": {
+            "type": "string",
+            "description": "Specifies the event type. For a drag action, this property is always set to\n  `drag`.",
+            "example": "drag"
+          },
+          "keys": {
+            "description": "The keys being held while dragging the mouse.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "path",
+          "type"
+        ]
+      },
+      "KeypressDto": {
+        "type": "object",
+        "properties": {
+          "keys": {
+            "description": "The combination of keys the model is requesting to be pressed. This is an array\n  of strings, each representing a key.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "type": {
+            "type": "string",
+            "description": "Specifies the event type. For a keypress action, this property is always set to\n  `keypress`.",
+            "example": "keypress"
+          }
+        },
+        "required": [
+          "keys",
+          "type"
+        ]
+      },
+      "MoveDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Specifies the event type. For a move action, this property is always set to\n  `move`.",
+            "example": "move"
+          },
+          "x": {
+            "type": "number",
+            "description": "The x-coordinate to move to."
+          },
+          "y": {
+            "type": "number",
+            "description": "The y-coordinate to move to."
+          },
+          "keys": {
+            "description": "The keys being held while moving the mouse.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "type",
+          "x",
+          "y"
+        ]
+      },
+      "ScreenshotDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Specifies the event type. For a screenshot action, this property is always set\n  to `screenshot`.",
+            "example": "screenshot"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "ScrollDto": {
+        "type": "object",
+        "properties": {
+          "scroll_x": {
+            "type": "number",
+            "description": "The horizontal scroll distance."
+          },
+          "scroll_y": {
+            "type": "number",
+            "description": "The vertical scroll distance."
+          },
+          "type": {
+            "type": "string",
+            "description": "Specifies the event type. For a scroll action, this property is always set to\n  `scroll`.",
+            "example": "scroll"
+          },
+          "x": {
+            "type": "number",
+            "description": "The x-coordinate where the scroll occurred."
+          },
+          "y": {
+            "type": "number",
+            "description": "The y-coordinate where the scroll occurred."
+          },
+          "keys": {
+            "description": "The keys being held while scrolling.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "scroll_x",
+          "scroll_y",
+          "type",
+          "x",
+          "y"
+        ]
+      },
+      "TypeDto": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "The text to type."
+          },
+          "type": {
+            "type": "string",
+            "description": "Specifies the event type. For a type action, this property is always set to\n  `type`.",
+            "example": "type"
+          }
+        },
+        "required": [
+          "text",
+          "type"
+        ]
+      },
+      "WaitDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Specifies the event type. For a wait action, this property is always set to\n  `wait`.",
+            "example": "wait"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "PendingSafetyCheckDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the pending safety check."
+          },
+          "code": {
+            "type": "string",
+            "description": "The type of the pending safety check."
+          },
+          "message": {
+            "type": "string",
+            "description": "Details about the pending safety check."
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "ResponseComputerToolCallDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique ID of the computer call."
+          },
+          "call_id": {
+            "type": "string",
+            "description": "An identifier used when responding to the tool call with output."
+          },
+          "pending_safety_checks": {
+            "description": "The pending safety checks for the computer call.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PendingSafetyCheckDto"
+            }
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of the item. One of `in_progress`, `completed`, or `incomplete`.\n  Populated when items are returned via API.",
+            "enum": [
+              "in_progress",
+              "completed",
+              "incomplete"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the computer call. Always `computer_call`.",
+            "example": "computer_call"
+          },
+          "action": {
+            "description": "A click action.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ClickDto"
+              },
+              {
+                "$ref": "#/components/schemas/DoubleClickDto"
+              },
+              {
+                "$ref": "#/components/schemas/DragDto"
+              },
+              {
+                "$ref": "#/components/schemas/KeypressDto"
+              },
+              {
+                "$ref": "#/components/schemas/MoveDto"
+              },
+              {
+                "$ref": "#/components/schemas/ScreenshotDto"
+              },
+              {
+                "$ref": "#/components/schemas/ScrollDto"
+              },
+              {
+                "$ref": "#/components/schemas/TypeDto"
+              },
+              {
+                "$ref": "#/components/schemas/WaitDto"
+              }
+            ]
+          },
+          "actions": {
+            "description": "Flattened batched actions for `computer_use`. Each action includes an `type`\n  discriminator and action-specific fields.",
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ClickDto"
+                },
+                {
+                  "$ref": "#/components/schemas/DoubleClickDto"
+                },
+                {
+                  "$ref": "#/components/schemas/DragDto"
+                },
+                {
+                  "$ref": "#/components/schemas/KeypressDto"
+                },
+                {
+                  "$ref": "#/components/schemas/MoveDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ScreenshotDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ScrollDto"
+                },
+                {
+                  "$ref": "#/components/schemas/TypeDto"
+                },
+                {
+                  "$ref": "#/components/schemas/WaitDto"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "call_id",
+          "pending_safety_checks",
+          "status",
+          "type"
+        ]
+      },
+      "ResponseComputerToolCallOutputScreenshotDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Specifies the event type. For a computer screenshot, this property is always set\n  to `computer_screenshot`.",
+            "example": "computer_screenshot"
+          },
+          "file_id": {
+            "type": "string",
+            "description": "The identifier of an uploaded file that contains the screenshot."
+          },
+          "image_url": {
+            "type": "string",
+            "description": "The URL of the screenshot image."
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "AcknowledgedSafetyCheckDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the pending safety check."
+          },
+          "code": {
+            "type": "string",
+            "description": "The type of the pending safety check."
+          },
+          "message": {
+            "type": "string",
+            "description": "Details about the pending safety check."
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "ComputerCallOutputDto": {
+        "type": "object",
+        "properties": {
+          "call_id": {
+            "type": "string",
+            "description": "The ID of the computer tool call that produced the output."
+          },
+          "output": {
+            "description": "A computer screenshot image used with the computer use tool.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ResponseComputerToolCallOutputScreenshotDto"
+              }
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the computer tool call output. Always `computer_call_output`.",
+            "example": "computer_call_output"
+          },
+          "id": {
+            "type": "string",
+            "description": "The ID of the computer tool call output."
+          },
+          "acknowledged_safety_checks": {
+            "description": "The safety checks reported by the API that have been acknowledged by the\n  developer.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AcknowledgedSafetyCheckDto"
+            }
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of the message input. One of `in_progress`, `completed`, or\n  `incomplete`. Populated when input items are returned via API.",
+            "enum": [
+              "in_progress",
+              "completed",
+              "incomplete"
+            ]
+          }
+        },
+        "required": [
+          "call_id",
+          "output",
+          "type"
+        ]
+      },
+      "SourceDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The type of source. Always `url`.",
+            "example": "url"
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL of the source."
+          }
+        },
+        "required": [
+          "type",
+          "url"
+        ]
+      },
+      "SearchDto": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "[DEPRECATED] The search query."
+          },
+          "type": {
+            "type": "string",
+            "description": "The action type.",
+            "example": "search"
+          },
+          "queries": {
+            "description": "The search queries.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sources": {
+            "description": "The sources used in the search.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SourceDto"
+            }
+          }
+        },
+        "required": [
+          "query",
+          "type"
+        ]
+      },
+      "OpenPageDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The action type.",
+            "example": "open_page"
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL opened by the model."
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "FindDto": {
+        "type": "object",
+        "properties": {
+          "pattern": {
+            "type": "string",
+            "description": "The pattern or text to search for within the page."
+          },
+          "type": {
+            "type": "string",
+            "description": "The action type.",
+            "example": "find_in_page"
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL of the page searched for the pattern."
+          }
+        },
+        "required": [
+          "pattern",
+          "type",
+          "url"
+        ]
+      },
+      "ResponseFunctionWebSearchDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique ID of the web search tool call."
+          },
+          "action": {
+            "description": "An object describing the specific action taken in this web search call. Includes\n  details on how the model used the web (search, open_page, find_in_page).",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SearchDto"
+              },
+              {
+                "$ref": "#/components/schemas/OpenPageDto"
+              },
+              {
+                "$ref": "#/components/schemas/FindDto"
+              }
+            ]
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of the web search tool call.",
+            "enum": [
+              "in_progress",
+              "completed",
+              "searching",
+              "failed"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the web search tool call. Always `web_search_call`.",
+            "example": "web_search_call"
+          }
+        },
+        "required": [
+          "id",
+          "action",
+          "status",
+          "type"
+        ]
+      },
+      "ResponseFunctionToolCallDto": {
+        "type": "object",
+        "properties": {
+          "arguments": {
+            "type": "string",
+            "description": "A JSON string of the arguments to pass to the function."
+          },
+          "call_id": {
+            "type": "string",
+            "description": "The unique ID of the function tool call generated by the model."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the function to run."
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the function tool call. Always `function_call`.",
+            "example": "function_call"
+          },
+          "id": {
+            "type": "string",
+            "description": "The unique ID of the function tool call."
+          },
+          "namespace": {
+            "type": "string",
+            "description": "The namespace of the function to run."
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of the item. One of `in_progress`, `completed`, or `incomplete`.\n  Populated when items are returned via API.",
+            "enum": [
+              "in_progress",
+              "completed",
+              "incomplete"
+            ]
+          }
+        },
+        "required": [
+          "arguments",
+          "call_id",
+          "name",
+          "type"
+        ]
+      },
+      "ResponseInputTextContentDto": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "The text input to the model."
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the input item. Always `input_text`.",
+            "example": "input_text"
+          }
+        },
+        "required": [
+          "text",
+          "type"
+        ]
+      },
+      "ResponseInputImageContentDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The type of the input item. Always `input_image`.",
+            "example": "input_image"
+          },
+          "detail": {
+            "type": "string",
+            "description": "The detail level of the image to be sent to the model. One of `high`, `low`,\n  `auto`, or `original`. Defaults to `auto`.",
+            "enum": [
+              "low",
+              "high",
+              "auto",
+              "original"
+            ]
+          },
+          "file_id": {
+            "type": "string",
+            "description": "The ID of the file to be sent to the model."
+          },
+          "image_url": {
+            "type": "string",
+            "description": "The URL of the image to be sent to the model. A fully qualified URL or base64\n  encoded image in a data URL."
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "ResponseInputFileContentDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The type of the input item. Always `input_file`.",
+            "example": "input_file"
+          },
+          "file_data": {
+            "type": "string",
+            "description": "The base64-encoded data of the file to be sent to the model."
+          },
+          "file_id": {
+            "type": "string",
+            "description": "The ID of the file to be sent to the model."
+          },
+          "file_url": {
+            "type": "string",
+            "description": "The URL of the file to be sent to the model."
+          },
+          "filename": {
+            "type": "string",
+            "description": "The name of the file to be sent to the model."
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "FunctionCallOutputDto": {
+        "type": "object",
+        "properties": {
+          "call_id": {
+            "type": "string",
+            "description": "The unique ID of the function tool call generated by the model."
+          },
+          "output": {
+            "type": "object",
+            "description": "Text, image, or file output of the function tool call."
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the function tool call output. Always `function_call_output`.",
+            "example": "function_call_output"
+          },
+          "id": {
+            "type": "string",
+            "description": "The unique ID of the function tool call output. Populated when this item is\n  returned via API."
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of the item. One of `in_progress`, `completed`, or `incomplete`.\n  Populated when items are returned via API.",
+            "enum": [
+              "in_progress",
+              "completed",
+              "incomplete"
+            ]
+          }
+        },
+        "required": [
+          "call_id",
+          "output",
+          "type"
+        ]
+      },
+      "ToolSearchCallDto": {
+        "type": "object",
+        "properties": {
+          "arguments": {
+            "type": "object",
+            "description": "The arguments supplied to the tool search call."
+          },
+          "type": {
+            "type": "string",
+            "description": "The item type. Always `tool_search_call`.",
+            "example": "tool_search_call"
+          },
+          "id": {
+            "type": "string",
+            "description": "The unique ID of this tool search call."
+          },
+          "call_id": {
+            "type": "string",
+            "description": "The unique ID of the tool search call generated by the model."
+          },
+          "execution": {
+            "type": "string",
+            "description": "Whether tool search was executed by the server or by the client.",
+            "enum": [
+              "server",
+              "client"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of the tool search call.",
+            "enum": [
+              "in_progress",
+              "completed",
+              "incomplete"
+            ]
+          }
+        },
+        "required": [
+          "arguments",
+          "type"
+        ]
+      },
+      "FunctionToolDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the function to call."
+          },
+          "parameters": {
+            "type": "object",
+            "description": "A JSON schema object describing the parameters of the function."
+          },
+          "strict": {
+            "type": "object",
+            "description": "Whether to enforce strict parameter validation. Default `true`."
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the function tool. Always `function`.",
+            "example": "function"
+          },
+          "defer_loading": {
+            "type": "boolean",
+            "description": "Whether this function is deferred and loaded via tool search."
+          },
+          "description": {
+            "type": "string",
+            "description": "A description of the function. Used by the model to determine whether or not to\n  call the function."
+          }
+        },
+        "required": [
+          "name",
+          "parameters",
+          "strict",
+          "type"
+        ]
+      },
+      "ComparisonFilterDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "The key to compare against the value."
+          },
+          "type": {
+            "type": "string",
+            "description": "Specifies the comparison operator: `eq`, `ne`, `gt`, `gte`, `lt`, `lte`, `in`,\n  `nin`.\n  \n  - `eq`: equals\n  - `ne`: not equal\n  - `gt`: greater than\n  - `gte`: greater than or equal\n  - `lt`: less than\n  - `lte`: less than or equal\n  - `in`: in\n  - `nin`: not in",
+            "enum": [
+              "eq",
+              "ne",
+              "gt",
+              "gte",
+              "lt",
+              "lte",
+              "in",
+              "nin"
+            ]
+          },
+          "value": {
+            "type": "object",
+            "description": "The value to compare against the attribute key; supports string, number, or\n  boolean types."
+          }
+        },
+        "required": [
+          "key",
+          "type",
+          "value"
+        ]
+      },
+      "CompoundFilterDto": {
+        "type": "object",
+        "properties": {
+          "filters": {
+            "description": "Array of filters to combine. Items can be `ComparisonFilter` or\n  `CompoundFilter`.",
+            "type": "array",
+            "items": {
+              "type": "array"
+            }
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of operation: `and` or `or`.",
+            "enum": [
+              "and",
+              "or"
+            ]
+          }
+        },
+        "required": [
+          "filters",
+          "type"
+        ]
+      },
+      "HybridSearchDto": {
+        "type": "object",
+        "properties": {
+          "embedding_weight": {
+            "type": "number",
+            "description": "The weight of the embedding in the reciprocal ranking fusion."
+          },
+          "text_weight": {
+            "type": "number",
+            "description": "The weight of the text in the reciprocal ranking fusion."
+          }
+        },
+        "required": [
+          "embedding_weight",
+          "text_weight"
+        ]
+      },
+      "RankingOptionsDto": {
+        "type": "object",
+        "properties": {
+          "hybrid_search": {
+            "description": "Weights that control how reciprocal rank fusion balances semantic embedding\n  matches versus sparse keyword matches when hybrid search is enabled.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/HybridSearchDto"
+              }
+            ]
+          },
+          "ranker": {
+            "type": "string",
+            "description": "The ranker to use for the file search.",
+            "enum": [
+              "auto",
+              "default-2024-11-15"
+            ]
+          },
+          "score_threshold": {
+            "type": "number",
+            "description": "The score threshold for the file search, a number between 0 and 1. Numbers\n  closer to 1 will attempt to return only the most relevant results, but may\n  return fewer results."
+          }
+        }
+      },
+      "FileSearchToolDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The type of the file search tool. Always `file_search`.",
+            "example": "file_search"
+          },
+          "vector_store_ids": {
+            "description": "The IDs of the vector stores to search.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "filters": {
+            "description": "A filter to apply.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ComparisonFilterDto"
+              },
+              {
+                "$ref": "#/components/schemas/CompoundFilterDto"
+              }
+            ]
+          },
+          "max_num_results": {
+            "type": "number",
+            "description": "The maximum number of results to return. This number should be between 1 and 50\n  inclusive."
+          },
+          "ranking_options": {
+            "description": "Ranking options for search.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RankingOptionsDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "vector_store_ids"
+        ]
+      },
+      "ComputerToolDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The type of the computer tool. Always `computer`.",
+            "example": "computer"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "ComputerUsePreviewToolDto": {
+        "type": "object",
+        "properties": {
+          "display_height": {
+            "type": "number",
+            "description": "The height of the computer display."
+          },
+          "display_width": {
+            "type": "number",
+            "description": "The width of the computer display."
+          },
+          "environment": {
+            "type": "string",
+            "description": "The type of computer environment to control.",
+            "enum": [
+              "windows",
+              "mac",
+              "linux",
+              "ubuntu",
+              "browser"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the computer use tool. Always `computer_use_preview`.",
+            "example": "computer_use_preview"
+          }
+        },
+        "required": [
+          "display_height",
+          "display_width",
+          "environment",
+          "type"
+        ]
+      },
+      "FiltersDto": {
+        "type": "object",
+        "properties": {
+          "allowed_domains": {
+            "description": "Allowed domains for the search. If not provided, all domains are allowed.\n  Subdomains of the provided domains are allowed as well.\n  \n  Example: `[\"pubmed.ncbi.nlm.nih.gov\"]`",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "UserLocationDto": {
+        "type": "object",
+        "properties": {
+          "city": {
+            "type": "string",
+            "description": "Free text input for the city of the user, e.g. `San Francisco`."
+          },
+          "country": {
+            "type": "string",
+            "description": "The two-letter [ISO country code](https://en.wikipedia.org/wiki/ISO_3166-1) of\n  the user, e.g. `US`."
+          },
+          "region": {
+            "type": "string",
+            "description": "Free text input for the region of the user, e.g. `California`."
+          },
+          "timezone": {
+            "type": "string",
+            "description": "The [IANA timezone](https://timeapi.io/documentation/iana-timezones) of the\n  user, e.g. `America/Los_Angeles`."
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of location approximation. Always `approximate`.",
+            "example": "approximate"
+          }
+        }
+      },
+      "WebSearchToolDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The type of the web search tool. One of `web_search` or `web_search_2025_08_26`.",
+            "enum": [
+              "web_search",
+              "web_search_2025_08_26"
+            ]
+          },
+          "filters": {
+            "description": "Filters for the search.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FiltersDto"
+              }
+            ]
+          },
+          "search_context_size": {
+            "type": "string",
+            "description": "High level guidance for the amount of context window space to use for the\n  search. One of `low`, `medium`, or `high`. `medium` is the default.",
+            "enum": [
+              "low",
+              "high",
+              "medium"
+            ]
+          },
+          "user_location": {
+            "description": "The approximate location of the user.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserLocationDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "McpToolFilterDto": {
+        "type": "object",
+        "properties": {
+          "read_only": {
+            "type": "boolean",
+            "description": "Indicates whether or not a tool modifies data or is read-only. If an MCP server\n  is\n  [annotated with `readOnlyHint`](https://modelcontextprotocol.io/specification/2025-06-18/schema#toolannotations-readonlyhint),\n  it will match this filter."
+          },
+          "tool_names": {
+            "description": "List of allowed tool names.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "AlwaysDto": {
+        "type": "object",
+        "properties": {
+          "read_only": {
+            "type": "boolean",
+            "description": "Indicates whether or not a tool modifies data or is read-only. If an MCP server\n  is\n  [annotated with `readOnlyHint`](https://modelcontextprotocol.io/specification/2025-06-18/schema#toolannotations-readonlyhint),\n  it will match this filter."
+          },
+          "tool_names": {
+            "description": "List of allowed tool names.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "NeverDto": {
+        "type": "object",
+        "properties": {
+          "read_only": {
+            "type": "boolean",
+            "description": "Indicates whether or not a tool modifies data or is read-only. If an MCP server\n  is\n  [annotated with `readOnlyHint`](https://modelcontextprotocol.io/specification/2025-06-18/schema#toolannotations-readonlyhint),\n  it will match this filter."
+          },
+          "tool_names": {
+            "description": "List of allowed tool names.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "McpToolApprovalFilterDto": {
+        "type": "object",
+        "properties": {
+          "always": {
+            "description": "A filter object to specify which tools are allowed.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AlwaysDto"
+              }
+            ]
+          },
+          "never": {
+            "description": "A filter object to specify which tools are allowed.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NeverDto"
+              }
+            ]
+          }
+        }
+      },
+      "McpDto": {
+        "type": "object",
+        "properties": {
+          "server_label": {
+            "type": "string",
+            "description": "A label for this MCP server, used to identify it in tool calls."
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the MCP tool. Always `mcp`.",
+            "example": "mcp"
+          },
+          "allowed_tools": {
+            "description": "List of allowed tool names or a filter object.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/McpToolFilterDto"
+              }
+            ]
+          },
+          "authorization": {
+            "type": "string",
+            "description": "An OAuth access token that can be used with a remote MCP server, either with a\n  custom MCP server URL or a service connector. Your application must handle the\n  OAuth authorization flow and provide the token here."
+          },
+          "connector_id": {
+            "type": "string",
+            "description": "Identifier for service connectors, like those available in ChatGPT. One of\n  `server_url` or `connector_id` must be provided. Learn more about service\n  connectors\n  [here](https://platform.openai.com/docs/guides/tools-remote-mcp#connectors).\n  \n  Currently supported `connector_id` values are:\n  \n  - Dropbox: `connector_dropbox`\n  - Gmail: `connector_gmail`\n  - Google Calendar: `connector_googlecalendar`\n  - Google Drive: `connector_googledrive`\n  - Microsoft Teams: `connector_microsoftteams`\n  - Outlook Calendar: `connector_outlookcalendar`\n  - Outlook Email: `connector_outlookemail`\n  - SharePoint: `connector_sharepoint`",
+            "enum": [
+              "connector_dropbox",
+              "connector_gmail",
+              "connector_googlecalendar",
+              "connector_googledrive",
+              "connector_microsoftteams",
+              "connector_outlookcalendar",
+              "connector_outlookemail",
+              "connector_sharepoint"
+            ]
+          },
+          "defer_loading": {
+            "type": "boolean",
+            "description": "Whether this MCP tool is deferred and discovered via tool search."
+          },
+          "headers": {
+            "type": "object",
+            "description": "Optional HTTP headers to send to the MCP server. Use for authentication or other\n  purposes."
+          },
+          "require_approval": {
+            "description": "Specify which of the MCP server's tools require approval.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/McpToolApprovalFilterDto"
+              }
+            ]
+          },
+          "server_description": {
+            "type": "string",
+            "description": "Optional description of the MCP server, used to provide more context."
+          },
+          "server_url": {
+            "type": "string",
+            "description": "The URL for the MCP server. One of `server_url` or `connector_id` must be\n  provided."
+          }
+        },
+        "required": [
+          "server_label",
+          "type"
+        ]
+      },
+      "ContainerNetworkPolicyDisabledDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Disable outbound network access. Always `disabled`.",
+            "example": "disabled"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "ContainerNetworkPolicyDomainSecretDto": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string",
+            "description": "The domain associated with the secret."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the secret to inject for the domain."
+          },
+          "value": {
+            "type": "string",
+            "description": "The secret value to inject for the domain."
+          }
+        },
+        "required": [
+          "domain",
+          "name",
+          "value"
+        ]
+      },
+      "ContainerNetworkPolicyAllowlistDto": {
+        "type": "object",
+        "properties": {
+          "allowed_domains": {
+            "description": "A list of allowed domains when type is `allowlist`.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "type": {
+            "type": "string",
+            "description": "Allow outbound network access only to specified domains. Always `allowlist`.",
+            "example": "allowlist"
+          },
+          "domain_secrets": {
+            "description": "Optional domain-scoped secrets for allowlisted domains.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContainerNetworkPolicyDomainSecretDto"
+            }
+          }
+        },
+        "required": [
+          "allowed_domains",
+          "type"
+        ]
+      },
+      "CodeInterpreterToolAutoDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Always `auto`.",
+            "example": "auto"
+          },
+          "file_ids": {
+            "description": "An optional list of uploaded files to make available to your code.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "memory_limit": {
+            "type": "string",
+            "description": "The memory limit for the code interpreter container.",
+            "enum": [
+              "1g",
+              "4g",
+              "16g",
+              "64g"
+            ]
+          },
+          "network_policy": {
+            "description": "Network access policy for the container.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ContainerNetworkPolicyDisabledDto"
+              },
+              {
+                "$ref": "#/components/schemas/ContainerNetworkPolicyAllowlistDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "CodeInterpreterDto": {
+        "type": "object",
+        "properties": {
+          "container": {
+            "description": "The code interpreter container. Can be a container ID or an object that\n  specifies uploaded file IDs to make available to your code, along with an\n  optional `memory_limit` setting.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CodeInterpreterToolAutoDto"
+              }
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the code interpreter tool. Always `code_interpreter`.",
+            "example": "code_interpreter"
+          }
+        },
+        "required": [
+          "container",
+          "type"
+        ]
+      },
+      "_Inline_0Dto": {
+        "type": "object",
+        "properties": {}
+      },
+      "InputImageMaskDto": {
+        "type": "object",
+        "properties": {
+          "file_id": {
+            "type": "string",
+            "description": "File ID for the mask image."
+          },
+          "image_url": {
+            "type": "string",
+            "description": "Base64-encoded mask image."
+          }
+        }
+      },
+      "ImageGenerationDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The type of the image generation tool. Always `image_generation`.",
+            "example": "image_generation"
+          },
+          "action": {
+            "type": "string",
+            "description": "Whether to generate a new image or edit an existing image. Default: `auto`.",
+            "enum": [
+              "auto",
+              "generate",
+              "edit"
+            ]
+          },
+          "background": {
+            "type": "string",
+            "description": "Background type for the generated image. One of `transparent`, `opaque`, or\n  `auto`. Default: `auto`.",
+            "enum": [
+              "auto",
+              "transparent",
+              "opaque"
+            ]
+          },
+          "input_fidelity": {
+            "type": "string",
+            "description": "Control how much effort the model will exert to match the style and features,\n  especially facial features, of input images. This parameter is only supported\n  for `gpt-image-1` and `gpt-image-1.5` and later models, unsupported for\n  `gpt-image-1-mini`. Supports `high` and `low`. Defaults to `low`.",
+            "enum": [
+              "low",
+              "high"
+            ]
+          },
+          "input_image_mask": {
+            "description": "Optional mask for inpainting. Contains `image_url` (string, optional) and\n  `file_id` (string, optional).",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InputImageMaskDto"
+              }
+            ]
+          },
+          "model": {
+            "description": "The image generation model to use. Default: `gpt-image-1`.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/_Inline_0Dto"
+              }
+            ]
+          },
+          "moderation": {
+            "type": "string",
+            "description": "Moderation level for the generated image. Default: `auto`.",
+            "enum": [
+              "low",
+              "auto"
+            ]
+          },
+          "output_compression": {
+            "type": "number",
+            "description": "Compression level for the output image. Default: 100."
+          },
+          "output_format": {
+            "type": "string",
+            "description": "The output format of the generated image. One of `png`, `webp`, or `jpeg`.\n  Default: `png`.",
+            "enum": [
+              "png",
+              "webp",
+              "jpeg"
+            ]
+          },
+          "partial_images": {
+            "type": "number",
+            "description": "Number of partial images to generate in streaming mode, from 0 (default value)\n  to 3."
+          },
+          "quality": {
+            "type": "string",
+            "description": "The quality of the generated image. One of `low`, `medium`, `high`, or `auto`.\n  Default: `auto`.",
+            "enum": [
+              "low",
+              "high",
+              "auto",
+              "medium"
+            ]
+          },
+          "size": {
+            "type": "string",
+            "description": "The size of the generated image. One of `1024x1024`, `1024x1536`, `1536x1024`,\n  or `auto`. Default: `auto`.",
+            "enum": [
+              "auto",
+              "1024x1024",
+              "1024x1536",
+              "1536x1024"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "LocalShellDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The type of the local shell tool. Always `local_shell`.",
+            "example": "local_shell"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "SkillReferenceDto": {
+        "type": "object",
+        "properties": {
+          "skill_id": {
+            "type": "string",
+            "description": "The ID of the referenced skill."
+          },
+          "type": {
+            "type": "string",
+            "description": "References a skill created with the /v1/skills endpoint.",
+            "example": "skill_reference"
+          },
+          "version": {
+            "type": "string",
+            "description": "Optional skill version. Use a positive integer or 'latest'. Omit for default."
+          }
+        },
+        "required": [
+          "skill_id",
+          "type"
+        ]
+      },
+      "InlineSkillSourceDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "string",
+            "description": "Base64-encoded skill zip bundle."
+          },
+          "media_type": {
+            "type": "string",
+            "description": "The media type of the inline skill payload. Must be `application/zip`.",
+            "example": "application/zip"
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the inline skill source. Must be `base64`.",
+            "example": "base64"
+          }
+        },
+        "required": [
+          "data",
+          "media_type",
+          "type"
+        ]
+      },
+      "InlineSkillDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "The description of the skill."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the skill."
+          },
+          "source": {
+            "description": "Inline skill payload",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InlineSkillSourceDto"
+              }
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "Defines an inline skill for this request.",
+            "example": "inline"
+          }
+        },
+        "required": [
+          "description",
+          "name",
+          "source",
+          "type"
+        ]
+      },
+      "ContainerAutoDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Automatically creates a container for this request",
+            "example": "container_auto"
+          },
+          "file_ids": {
+            "description": "An optional list of uploaded files to make available to your code.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "memory_limit": {
+            "type": "string",
+            "description": "The memory limit for the container.",
+            "enum": [
+              "1g",
+              "4g",
+              "16g",
+              "64g"
+            ]
+          },
+          "network_policy": {
+            "description": "Network access policy for the container.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ContainerNetworkPolicyDisabledDto"
+              },
+              {
+                "$ref": "#/components/schemas/ContainerNetworkPolicyAllowlistDto"
+              }
+            ]
+          },
+          "skills": {
+            "description": "An optional list of skills referenced by id or inline data.",
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/SkillReferenceDto"
+                },
+                {
+                  "$ref": "#/components/schemas/InlineSkillDto"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "LocalSkillDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "The description of the skill."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the skill."
+          },
+          "path": {
+            "type": "string",
+            "description": "The path to the directory containing the skill."
+          }
+        },
+        "required": [
+          "description",
+          "name",
+          "path"
+        ]
+      },
+      "LocalEnvironmentDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Use a local computer environment.",
+            "example": "local"
+          },
+          "skills": {
+            "description": "An optional list of skills.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocalSkillDto"
+            }
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "ContainerReferenceDto": {
+        "type": "object",
+        "properties": {
+          "container_id": {
+            "type": "string",
+            "description": "The ID of the referenced container."
+          },
+          "type": {
+            "type": "string",
+            "description": "References a container created with the /v1/containers endpoint",
+            "example": "container_reference"
+          }
+        },
+        "required": [
+          "container_id",
+          "type"
+        ]
+      },
+      "FunctionShellToolDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The type of the shell tool. Always `shell`.",
+            "example": "shell"
+          },
+          "environment": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ContainerAutoDto"
+              },
+              {
+                "$ref": "#/components/schemas/LocalEnvironmentDto"
+              },
+              {
+                "$ref": "#/components/schemas/ContainerReferenceDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "TextDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Unconstrained text format. Always `text`.",
+            "example": "text"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "GrammarDto": {
+        "type": "object",
+        "properties": {
+          "definition": {
+            "type": "string",
+            "description": "The grammar definition."
+          },
+          "syntax": {
+            "type": "string",
+            "description": "The syntax of the grammar definition. One of `lark` or `regex`.",
+            "enum": [
+              "lark",
+              "regex"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "Grammar format. Always `grammar`.",
+            "example": "grammar"
+          }
+        },
+        "required": [
+          "definition",
+          "syntax",
+          "type"
+        ]
+      },
+      "CustomToolDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the custom tool, used to identify it in tool calls."
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the custom tool. Always `custom`.",
+            "example": "custom"
+          },
+          "defer_loading": {
+            "type": "boolean",
+            "description": "Whether this tool should be deferred and discovered via tool search."
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description of the custom tool, used to provide more context."
+          },
+          "format": {
+            "description": "The input format for the custom tool. Default is unconstrained text.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TextDto"
+              },
+              {
+                "$ref": "#/components/schemas/GrammarDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ]
+      },
+      "_Inline_6nksgqDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "example": "function"
+          },
+          "defer_loading": {
+            "type": "boolean",
+            "description": "Whether this function should be deferred and discovered via tool search."
+          },
+          "description": {
+            "type": "string"
+          },
+          "parameters": {
+            "type": "object"
+          },
+          "strict": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ]
+      },
+      "NamespaceToolDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "A description of the namespace shown to the model."
+          },
+          "name": {
+            "type": "string",
+            "description": "The namespace name used in tool calls (for example, `crm`)."
+          },
+          "tools": {
+            "description": "The function/custom tools available inside this namespace.",
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/CustomToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/_Inline_6nksgqDto"
+                }
+              ]
+            }
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the tool. Always `namespace`.",
+            "example": "namespace"
+          }
+        },
+        "required": [
+          "description",
+          "name",
+          "tools",
+          "type"
+        ]
+      },
+      "ToolSearchToolDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The type of the tool. Always `tool_search`.",
+            "example": "tool_search"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description shown to the model for a client-executed tool search tool."
+          },
+          "execution": {
+            "type": "string",
+            "description": "Whether tool search is executed by the server or by the client.",
+            "enum": [
+              "server",
+              "client"
+            ]
+          },
+          "parameters": {
+            "type": "object",
+            "description": "Parameter schema for a client-executed tool search tool."
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "WebSearchPreviewToolDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The type of the web search tool. One of `web_search_preview` or\n  `web_search_preview_2025_03_11`.",
+            "enum": [
+              "web_search_preview",
+              "web_search_preview_2025_03_11"
+            ]
+          },
+          "search_content_types": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "text",
+                "image"
+              ]
+            }
+          },
+          "search_context_size": {
+            "type": "string",
+            "description": "High level guidance for the amount of context window space to use for the\n  search. One of `low`, `medium`, or `high`. `medium` is the default.",
+            "enum": [
+              "low",
+              "high",
+              "medium"
+            ]
+          },
+          "user_location": {
+            "description": "The user's location.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserLocationDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "ApplyPatchToolDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The type of the tool. Always `apply_patch`.",
+            "example": "apply_patch"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "ResponseToolSearchOutputItemParamDto": {
+        "type": "object",
+        "properties": {
+          "tools": {
+            "description": "The loaded tool definitions returned by the tool search output.",
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/FunctionToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/FileSearchToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ComputerToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ComputerUsePreviewToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/WebSearchToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/McpDto"
+                },
+                {
+                  "$ref": "#/components/schemas/CodeInterpreterDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ImageGenerationDto"
+                },
+                {
+                  "$ref": "#/components/schemas/LocalShellDto"
+                },
+                {
+                  "$ref": "#/components/schemas/FunctionShellToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/CustomToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/NamespaceToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ToolSearchToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/WebSearchPreviewToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ApplyPatchToolDto"
+                }
+              ]
+            }
+          },
+          "type": {
+            "type": "string",
+            "description": "The item type. Always `tool_search_output`.",
+            "example": "tool_search_output"
+          },
+          "id": {
+            "type": "string",
+            "description": "The unique ID of this tool search output."
+          },
+          "call_id": {
+            "type": "string",
+            "description": "The unique ID of the tool search call generated by the model."
+          },
+          "execution": {
+            "type": "string",
+            "description": "Whether tool search was executed by the server or by the client.",
+            "enum": [
+              "server",
+              "client"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of the tool search output.",
+            "enum": [
+              "in_progress",
+              "completed",
+              "incomplete"
+            ]
+          }
+        },
+        "required": [
+          "tools",
+          "type"
+        ]
+      },
+      "SummaryDto": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "A summary of the reasoning output from the model so far."
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the object. Always `summary_text`.",
+            "example": "summary_text"
+          }
+        },
+        "required": [
+          "text",
+          "type"
+        ]
+      },
+      "ContentDto": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "The reasoning text from the model."
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the reasoning text. Always `reasoning_text`.",
+            "example": "reasoning_text"
+          }
+        },
+        "required": [
+          "text",
+          "type"
+        ]
+      },
+      "ResponseReasoningItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier of the reasoning content."
+          },
+          "summary": {
+            "description": "Reasoning summary content.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SummaryDto"
+            }
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the object. Always `reasoning`.",
+            "example": "reasoning"
+          },
+          "content": {
+            "description": "Reasoning text content.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentDto"
+            }
+          },
+          "encrypted_content": {
+            "type": "string",
+            "description": "The encrypted content of the reasoning item - populated when a response is\n  generated with `reasoning.encrypted_content` in the `include` parameter."
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of the item. One of `in_progress`, `completed`, or `incomplete`.\n  Populated when items are returned via API.",
+            "enum": [
+              "in_progress",
+              "completed",
+              "incomplete"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "summary",
+          "type"
+        ]
+      },
+      "ResponseCompactionItemParamDto": {
+        "type": "object",
+        "properties": {
+          "encrypted_content": {
+            "type": "string",
+            "description": "The encrypted content of the compaction summary."
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the item. Always `compaction`.",
+            "example": "compaction"
+          },
+          "id": {
+            "type": "string",
+            "description": "The ID of the compaction item."
+          }
+        },
+        "required": [
+          "encrypted_content",
+          "type"
+        ]
+      },
+      "ImageGenerationCallDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique ID of the image generation call."
+          },
+          "result": {
+            "type": "string",
+            "description": "The generated image encoded in base64."
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of the image generation call.",
+            "enum": [
+              "in_progress",
+              "completed",
+              "failed",
+              "generating"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the image generation call. Always `image_generation_call`.",
+            "example": "image_generation_call"
+          }
+        },
+        "required": [
+          "id",
+          "result",
+          "status",
+          "type"
+        ]
+      },
+      "LogsDto": {
+        "type": "object",
+        "properties": {
+          "logs": {
+            "type": "string",
+            "description": "The logs output from the code interpreter."
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the output. Always `logs`.",
+            "example": "logs"
+          }
+        },
+        "required": [
+          "logs",
+          "type"
+        ]
+      },
+      "ImageDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The type of the output. Always `image`.",
+            "example": "image"
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL of the image output from the code interpreter."
+          }
+        },
+        "required": [
+          "type",
+          "url"
+        ]
+      },
+      "ResponseCodeInterpreterToolCallDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique ID of the code interpreter tool call."
+          },
+          "code": {
+            "type": "string",
+            "description": "The code to run, or null if not available."
+          },
+          "container_id": {
+            "type": "string",
+            "description": "The ID of the container used to run the code."
+          },
+          "outputs": {
+            "description": "The outputs generated by the code interpreter, such as logs or images. Can be\n  null if no outputs are available.",
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/LogsDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ImageDto"
+                }
+              ]
+            }
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of the code interpreter tool call. Valid values are `in_progress`,\n  `completed`, `incomplete`, `interpreting`, and `failed`.",
+            "enum": [
+              "in_progress",
+              "completed",
+              "incomplete",
+              "failed",
+              "interpreting"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the code interpreter tool call. Always `code_interpreter_call`.",
+            "example": "code_interpreter_call"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "container_id",
+          "outputs",
+          "status",
+          "type"
+        ]
+      },
+      "ActionDto": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "description": "The command to run.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "env": {
+            "type": "object",
+            "description": "Environment variables to set for the command."
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the local shell action. Always `exec`.",
+            "example": "exec"
+          },
+          "timeout_ms": {
+            "type": "number",
+            "description": "Optional timeout in milliseconds for the command."
+          },
+          "user": {
+            "type": "string",
+            "description": "Optional user to run the command as."
+          },
+          "working_directory": {
+            "type": "string",
+            "description": "Optional working directory to run the command in."
+          }
+        },
+        "required": [
+          "command",
+          "env",
+          "type"
+        ]
+      },
+      "LocalShellCallDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique ID of the local shell call."
+          },
+          "action": {
+            "description": "Execute a shell command on the server.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ActionDto"
+              }
+            ]
+          },
+          "call_id": {
+            "type": "string",
+            "description": "The unique ID of the local shell tool call generated by the model."
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of the local shell call.",
+            "enum": [
+              "in_progress",
+              "completed",
+              "incomplete"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the local shell call. Always `local_shell_call`.",
+            "example": "local_shell_call"
+          }
+        },
+        "required": [
+          "id",
+          "action",
+          "call_id",
+          "status",
+          "type"
+        ]
+      },
+      "LocalShellCallOutputDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique ID of the local shell tool call generated by the model."
+          },
+          "output": {
+            "type": "string",
+            "description": "A JSON string of the output of the local shell tool call."
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the local shell tool call output. Always `local_shell_call_output`.",
+            "example": "local_shell_call_output"
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of the item. One of `in_progress`, `completed`, or `incomplete`.",
+            "enum": [
+              "in_progress",
+              "completed",
+              "incomplete"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "output",
+          "type"
+        ]
+      },
+      "ShellCallDto": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "description": "The shell commands and limits that describe how to run the tool call.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ActionDto"
+              }
+            ]
+          },
+          "call_id": {
+            "type": "string",
+            "description": "The unique ID of the shell tool call generated by the model."
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the item. Always `shell_call`.",
+            "example": "shell_call"
+          },
+          "id": {
+            "type": "string",
+            "description": "The unique ID of the shell tool call. Populated when this item is returned via\n  API."
+          },
+          "environment": {
+            "description": "The environment to execute the shell commands in.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/LocalEnvironmentDto"
+              },
+              {
+                "$ref": "#/components/schemas/ContainerReferenceDto"
+              }
+            ]
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of the shell call. One of `in_progress`, `completed`, or\n  `incomplete`.",
+            "enum": [
+              "in_progress",
+              "completed",
+              "incomplete"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "call_id",
+          "type"
+        ]
+      },
+      "TimeoutDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The outcome type. Always `timeout`.",
+            "example": "timeout"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "ExitDto": {
+        "type": "object",
+        "properties": {
+          "exit_code": {
+            "type": "number",
+            "description": "The exit code returned by the shell process."
+          },
+          "type": {
+            "type": "string",
+            "description": "The outcome type. Always `exit`.",
+            "example": "exit"
+          }
+        },
+        "required": [
+          "exit_code",
+          "type"
+        ]
+      },
+      "ResponseFunctionShellCallOutputContentDto": {
+        "type": "object",
+        "properties": {
+          "outcome": {
+            "description": "The exit or timeout outcome associated with this shell call.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TimeoutDto"
+              },
+              {
+                "$ref": "#/components/schemas/ExitDto"
+              }
+            ]
+          },
+          "stderr": {
+            "type": "string",
+            "description": "Captured stderr output for the shell call."
+          },
+          "stdout": {
+            "type": "string",
+            "description": "Captured stdout output for the shell call."
+          }
+        },
+        "required": [
+          "outcome",
+          "stderr",
+          "stdout"
+        ]
+      },
+      "ShellCallOutputDto": {
+        "type": "object",
+        "properties": {
+          "call_id": {
+            "type": "string",
+            "description": "The unique ID of the shell tool call generated by the model."
+          },
+          "output": {
+            "description": "Captured chunks of stdout and stderr output, along with their associated\n  outcomes.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResponseFunctionShellCallOutputContentDto"
+            }
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the item. Always `shell_call_output`.",
+            "example": "shell_call_output"
+          },
+          "id": {
+            "type": "string",
+            "description": "The unique ID of the shell tool call output. Populated when this item is\n  returned via API."
+          },
+          "max_output_length": {
+            "type": "number",
+            "description": "The maximum number of UTF-8 characters captured for this shell call's combined\n  output."
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of the shell call output.",
+            "enum": [
+              "in_progress",
+              "completed",
+              "incomplete"
+            ]
+          }
+        },
+        "required": [
+          "call_id",
+          "output",
+          "type"
+        ]
+      },
+      "CreateFileDto": {
+        "type": "object",
+        "properties": {
+          "diff": {
+            "type": "string",
+            "description": "Unified diff content to apply when creating the file."
+          },
+          "path": {
+            "type": "string",
+            "description": "Path of the file to create relative to the workspace root."
+          },
+          "type": {
+            "type": "string",
+            "description": "The operation type. Always `create_file`.",
+            "example": "create_file"
+          }
+        },
+        "required": [
+          "diff",
+          "path",
+          "type"
+        ]
+      },
+      "DeleteFileDto": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Path of the file to delete relative to the workspace root."
+          },
+          "type": {
+            "type": "string",
+            "description": "The operation type. Always `delete_file`.",
+            "example": "delete_file"
+          }
+        },
+        "required": [
+          "path",
+          "type"
+        ]
+      },
+      "UpdateFileDto": {
+        "type": "object",
+        "properties": {
+          "diff": {
+            "type": "string",
+            "description": "Unified diff content to apply to the existing file."
+          },
+          "path": {
+            "type": "string",
+            "description": "Path of the file to update relative to the workspace root."
+          },
+          "type": {
+            "type": "string",
+            "description": "The operation type. Always `update_file`.",
+            "example": "update_file"
+          }
+        },
+        "required": [
+          "diff",
+          "path",
+          "type"
+        ]
+      },
+      "ApplyPatchCallDto": {
+        "type": "object",
+        "properties": {
+          "call_id": {
+            "type": "string",
+            "description": "The unique ID of the apply patch tool call generated by the model."
+          },
+          "operation": {
+            "description": "The specific create, delete, or update instruction for the apply_patch tool\n  call.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CreateFileDto"
+              },
+              {
+                "$ref": "#/components/schemas/DeleteFileDto"
+              },
+              {
+                "$ref": "#/components/schemas/UpdateFileDto"
+              }
+            ]
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of the apply patch tool call. One of `in_progress` or `completed`.",
+            "enum": [
+              "in_progress",
+              "completed"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the item. Always `apply_patch_call`.",
+            "example": "apply_patch_call"
+          },
+          "id": {
+            "type": "string",
+            "description": "The unique ID of the apply patch tool call. Populated when this item is returned\n  via API."
+          }
+        },
+        "required": [
+          "call_id",
+          "operation",
+          "status",
+          "type"
+        ]
+      },
+      "ApplyPatchCallOutputDto": {
+        "type": "object",
+        "properties": {
+          "call_id": {
+            "type": "string",
+            "description": "The unique ID of the apply patch tool call generated by the model."
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of the apply patch tool call output. One of `completed` or `failed`.",
+            "enum": [
+              "completed",
+              "failed"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the item. Always `apply_patch_call_output`.",
+            "example": "apply_patch_call_output"
+          },
+          "id": {
+            "type": "string",
+            "description": "The unique ID of the apply patch tool call output. Populated when this item is\n  returned via API."
+          },
+          "output": {
+            "type": "string",
+            "description": "Optional human-readable log text from the apply patch tool (e.g., patch results\n  or errors)."
+          }
+        },
+        "required": [
+          "call_id",
+          "status",
+          "type"
+        ]
+      },
+      "ToolDto": {
+        "type": "object",
+        "properties": {
+          "input_schema": {
+            "type": "object",
+            "description": "The JSON schema describing the tool's input."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the tool."
+          },
+          "annotations": {
+            "type": "object",
+            "description": "Additional annotations about the tool."
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the tool."
+          }
+        },
+        "required": [
+          "input_schema",
+          "name"
+        ]
+      },
+      "McpListToolsDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique ID of the list."
+          },
+          "server_label": {
+            "type": "string",
+            "description": "The label of the MCP server."
+          },
+          "tools": {
+            "description": "The tools available on the server.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ToolDto"
+            }
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the item. Always `mcp_list_tools`.",
+            "example": "mcp_list_tools"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message if the server could not list tools."
+          }
+        },
+        "required": [
+          "id",
+          "server_label",
+          "tools",
+          "type"
+        ]
+      },
+      "McpApprovalRequestDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique ID of the approval request."
+          },
+          "arguments": {
+            "type": "string",
+            "description": "A JSON string of arguments for the tool."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the tool to run."
+          },
+          "server_label": {
+            "type": "string",
+            "description": "The label of the MCP server making the request."
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the item. Always `mcp_approval_request`.",
+            "example": "mcp_approval_request"
+          }
+        },
+        "required": [
+          "id",
+          "arguments",
+          "name",
+          "server_label",
+          "type"
+        ]
+      },
+      "McpApprovalResponseDto": {
+        "type": "object",
+        "properties": {
+          "approval_request_id": {
+            "type": "string",
+            "description": "The ID of the approval request being answered."
+          },
+          "approve": {
+            "type": "boolean",
+            "description": "Whether the request was approved."
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the item. Always `mcp_approval_response`.",
+            "example": "mcp_approval_response"
+          },
+          "id": {
+            "type": "string",
+            "description": "The unique ID of the approval response"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Optional reason for the decision."
+          }
+        },
+        "required": [
+          "approval_request_id",
+          "approve",
+          "type"
+        ]
+      },
+      "McpCallDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique ID of the tool call."
+          },
+          "arguments": {
+            "type": "string",
+            "description": "A JSON string of the arguments passed to the tool."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the tool that was run."
+          },
+          "server_label": {
+            "type": "string",
+            "description": "The label of the MCP server running the tool."
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the item. Always `mcp_call`.",
+            "example": "mcp_call"
+          },
+          "approval_request_id": {
+            "type": "string",
+            "description": "Unique identifier for the MCP tool call approval request. Include this value in\n  a subsequent `mcp_approval_response` input to approve or reject the\n  corresponding tool call."
+          },
+          "error": {
+            "type": "string",
+            "description": "The error from the tool call, if any."
+          },
+          "output": {
+            "type": "string",
+            "description": "The output from the tool call."
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of the tool call. One of `in_progress`, `completed`, `incomplete`,\n  `calling`, or `failed`.",
+            "enum": [
+              "in_progress",
+              "completed",
+              "incomplete",
+              "failed",
+              "calling"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "arguments",
+          "name",
+          "server_label",
+          "type"
+        ]
+      },
+      "ResponseCustomToolCallOutputDto": {
+        "type": "object",
+        "properties": {
+          "call_id": {
+            "type": "string",
+            "description": "The call ID, used to map this custom tool call output to a custom tool call."
+          },
+          "output": {
+            "type": "object",
+            "description": "The output from the custom tool call generated by your code. Can be a string or\n  an list of output content."
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the custom tool call output. Always `custom_tool_call_output`.",
+            "example": "custom_tool_call_output"
+          },
+          "id": {
+            "type": "string",
+            "description": "The unique ID of the custom tool call output in the OpenAI platform."
+          }
+        },
+        "required": [
+          "call_id",
+          "output",
+          "type"
+        ]
+      },
+      "ResponseCustomToolCallDto": {
+        "type": "object",
+        "properties": {
+          "call_id": {
+            "type": "string",
+            "description": "An identifier used to map this custom tool call to a tool call output."
+          },
+          "input": {
+            "type": "string",
+            "description": "The input for the custom tool call generated by the model."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the custom tool being called."
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the custom tool call. Always `custom_tool_call`.",
+            "example": "custom_tool_call"
+          },
+          "id": {
+            "type": "string",
+            "description": "The unique ID of the custom tool call in the OpenAI platform."
+          },
+          "namespace": {
+            "type": "string",
+            "description": "The namespace of the custom tool being called."
+          }
+        },
+        "required": [
+          "call_id",
+          "input",
+          "name",
+          "type"
+        ]
+      },
+      "ItemReferenceDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the item to reference."
+          },
+          "type": {
+            "type": "object",
+            "description": "The type of item to reference. Always `item_reference`.",
+            "example": "item_reference"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "ResponsePromptDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier of the prompt template to use."
+          },
+          "variables": {
+            "type": "object",
+            "description": "Optional map of values to substitute in for variables in your prompt. The\n  substitution values can either be strings, or other Response input types like\n  images or files."
+          },
+          "version": {
+            "type": "string",
+            "description": "Optional version of the prompt template."
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "ReasoningDto": {
+        "type": "object",
+        "properties": {
+          "effort": {
+            "type": "string",
+            "description": "Constrains effort on reasoning for\n  [reasoning models](https://platform.openai.com/docs/guides/reasoning). Currently\n  supported values are `none`, `minimal`, `low`, `medium`, `high`, and `xhigh`.\n  Reducing reasoning effort can result in faster responses and fewer tokens used\n  on reasoning in a response.\n  \n  - `gpt-5.1` defaults to `none`, which does not perform reasoning. The supported\n    reasoning values for `gpt-5.1` are `none`, `low`, `medium`, and `high`. Tool\n    calls are supported for all reasoning values in gpt-5.1.\n  - All models before `gpt-5.1` default to `medium` reasoning effort, and do not\n    support `none`.\n  - The `gpt-5-pro` model defaults to (and only supports) `high` reasoning effort.\n  - `xhigh` is supported for all models after `gpt-5.1-codex-max`.",
+            "enum": [
+              "low",
+              "high",
+              "medium",
+              "none",
+              "minimal",
+              "xhigh"
+            ]
+          },
+          "generate_summary": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "concise",
+              "detailed"
+            ]
+          },
+          "summary": {
+            "type": "string",
+            "description": "A summary of the reasoning performed by the model. This can be useful for\n  debugging and understanding the model's reasoning process. One of `auto`,\n  `concise`, or `detailed`.\n  \n  `concise` is supported for `computer-use-preview` models and all reasoning\n  models after `gpt-5`.",
+            "enum": [
+              "auto",
+              "concise",
+              "detailed"
+            ]
+          }
+        }
+      },
+      "StreamOptionsDto": {
+        "type": "object",
+        "properties": {
+          "include_obfuscation": {
+            "type": "boolean",
+            "description": "When true, stream obfuscation will be enabled. Stream obfuscation adds random\n  characters to an `obfuscation` field on streaming delta events to normalize\n  payload sizes as a mitigation to certain side-channel attacks. These obfuscation\n  fields are included by default, but add a small amount of overhead to the data\n  stream. You can set `include_obfuscation` to false to optimize for bandwidth if\n  you trust the network links between your application and the OpenAI API."
+          }
+        }
+      },
+      "ToolChoiceAllowedDto": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "description": "Constrains the tools available to the model to a pre-defined set.\n  \n  `auto` allows the model to pick from among the allowed tools and generate a\n  message.\n  \n  `required` requires the model to call one or more of the allowed tools.",
+            "enum": [
+              "auto",
+              "required"
+            ]
+          },
+          "tools": {
+            "description": "A list of tool definitions that the model should be allowed to call.\n  \n  For the Responses API, the list of tool definitions might look like:\n  \n  ```json\n  [\n    { \"type\": \"function\", \"name\": \"get_weather\" },\n    { \"type\": \"mcp\", \"server_label\": \"deepwiki\" },\n    { \"type\": \"image_generation\" }\n  ]\n  ```",
+            "type": "array",
+            "items": {
+              "type": "array"
+            }
+          },
+          "type": {
+            "type": "string",
+            "description": "Allowed tool configuration type. Always `allowed_tools`.",
+            "example": "allowed_tools"
+          }
+        },
+        "required": [
+          "mode",
+          "tools",
+          "type"
+        ]
+      },
+      "ToolChoiceTypesDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The type of hosted tool the model should to use. Learn more about\n  [built-in tools](https://platform.openai.com/docs/guides/tools).\n  \n  Allowed values are:\n  \n  - `file_search`\n  - `web_search_preview`\n  - `computer`\n  - `computer_use_preview`\n  - `computer_use`\n  - `code_interpreter`\n  - `mcp`\n  - `image_generation`",
+            "enum": [
+              "file_search",
+              "computer",
+              "computer_use_preview",
+              "mcp",
+              "code_interpreter",
+              "image_generation",
+              "web_search_preview",
+              "web_search_preview_2025_03_11",
+              "computer_use"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "ToolChoiceFunctionDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the function to call."
+          },
+          "type": {
+            "type": "string",
+            "description": "For function calling, the type is always `function`.",
+            "example": "function"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ]
+      },
+      "ToolChoiceMcpDto": {
+        "type": "object",
+        "properties": {
+          "server_label": {
+            "type": "string",
+            "description": "The label of the MCP server to use."
+          },
+          "type": {
+            "type": "string",
+            "description": "For MCP tools, the type is always `mcp`.",
+            "example": "mcp"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the tool to call on the server."
+          }
+        },
+        "required": [
+          "server_label",
+          "type"
+        ]
+      },
+      "ToolChoiceCustomDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the custom tool to call."
+          },
+          "type": {
+            "type": "string",
+            "description": "For custom tool calling, the type is always `custom`.",
+            "example": "custom"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ]
+      },
+      "ToolChoiceApplyPatchDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The tool to call. Always `apply_patch`.",
+            "example": "apply_patch"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "ToolChoiceShellDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The tool to call. Always `shell`.",
+            "example": "shell"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "ContextManagementDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The context management entry type. Currently only 'compaction' is supported."
+          },
+          "compact_threshold": {
+            "type": "number",
+            "description": "Token threshold at which compaction should be triggered for this entry."
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "ResponseFormatTextDto": {
         "type": "object",
         "properties": {
           "type": {
@@ -1689,20 +5373,75 @@
           "type"
         ]
       },
+      "ResponseFormatTextJSONSchemaConfigDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the response format. Must be a-z, A-Z, 0-9, or contain underscores\n  and dashes, with a maximum length of 64."
+          },
+          "schema": {
+            "type": "object",
+            "description": "The schema for the response format, described as a JSON Schema object. Learn how\n  to build JSON schemas [here](https://json-schema.org/)."
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of response format being defined. Always `json_schema`.",
+            "example": "json_schema"
+          },
+          "description": {
+            "type": "string",
+            "description": "A description of what the response format is for, used by the model to determine\n  how to respond in the format."
+          },
+          "strict": {
+            "type": "object",
+            "description": "Whether to enable strict schema adherence when generating the output. If set to\n  true, the model will always follow the exact schema defined in the `schema`\n  field. Only a subset of JSON Schema is supported when `strict` is `true`. To\n  learn more, read the\n  [Structured Outputs guide](https://platform.openai.com/docs/guides/structured-outputs)."
+          }
+        },
+        "required": [
+          "name",
+          "schema",
+          "type"
+        ]
+      },
+      "ResponseFormatJSONObjectDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The type of response format being defined. Always `json_object`.",
+            "example": "json_object"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
       "ResponseTextConfigDto": {
         "type": "object",
         "properties": {
           "format": {
-            "description": "An object specifying the format that the model must output.\n\nConfiguring `{ \"type\": \"json_schema\" }` enables Structured Outputs, which\nensures the model will match your supplied JSON schema. Learn more in the\n[Structured Outputs guide](https://platform.openai.com/docs/guides/structured-outputs).\n\nThe default format is `{ \"type\": \"text\" }` with no additional options.\n\n**Not recommended for gpt-4o and newer models:**\n\nSetting to `{ \"type\": \"json_object\" }` enables the older JSON mode, which\nensures the message the model generates is valid JSON. Using `json_schema` is\npreferred for models that support it.",
-            "allOf": [
+            "description": "An object specifying the format that the model must output.\n  \n  Configuring `{ \"type\": \"json_schema\" }` enables Structured Outputs, which\n  ensures the model will match your supplied JSON schema. Learn more in the\n  [Structured Outputs guide](https://platform.openai.com/docs/guides/structured-outputs).\n  \n  The default format is `{ \"type\": \"text\" }` with no additional options.\n  \n  **Not recommended for gpt-4o and newer models:**\n  \n  Setting to `{ \"type\": \"json_object\" }` enables the older JSON mode, which\n  ensures the message the model generates is valid JSON. Using `json_schema` is\n  preferred for models that support it.",
+            "oneOf": [
               {
-                "$ref": "#/components/schemas/ResponseFormatTextConfigDto"
+                "$ref": "#/components/schemas/ResponseFormatTextDto"
+              },
+              {
+                "$ref": "#/components/schemas/ResponseFormatTextJSONSchemaConfigDto"
+              },
+              {
+                "$ref": "#/components/schemas/ResponseFormatJSONObjectDto"
               }
             ]
           },
           "verbosity": {
-            "type": "object",
-            "description": "Constrains the verbosity of the model's response. Lower values will result in\nmore concise responses, while higher values will result in more verbose\nresponses. Currently supported values are `low`, `medium`, and `high`."
+            "type": "string",
+            "description": "Constrains the verbosity of the model's response. Lower values will result in\n  more concise responses, while higher values will result in more verbose\n  responses. Currently supported values are `low`, `medium`, and `high`.",
+            "enum": [
+              "low",
+              "high",
+              "medium"
+            ]
           }
         }
       },
@@ -1711,75 +5450,110 @@
         "properties": {
           "background": {
             "type": "object",
-            "description": "Whether to run the model response in the background.\n[Learn more](https://platform.openai.com/docs/guides/background)."
+            "description": "Whether to run the model response in the background.\n  [Learn more](https://platform.openai.com/docs/guides/background)."
           },
           "context_management": {
-            "type": "object",
-            "description": "Context management configuration for this request."
+            "description": "Context management configuration for this request.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContextManagementDto"
+            }
           },
           "conversation": {
-            "type": "object",
-            "description": "The conversation that this response belongs to. Items from this conversation are\nprepended to `input_items` for this response request. Input items and output\nitems from this response are automatically added to this conversation after this\nresponse completes."
+            "description": "The conversation that this response belongs to. Items from this conversation are\n  prepended to `input_items` for this response request. Input items and output\n  items from this response are automatically added to this conversation after this\n  response completes.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ResponseConversationParamDto"
+              }
+            ]
           },
           "include": {
-            "type": "object",
-            "description": "Specify additional output data to include in the model response. Currently\nsupported values are:\n\n- `web_search_call.action.sources`: Include the sources of the web search tool\n  call.\n- `code_interpreter_call.outputs`: Includes the outputs of python code execution\n  in code interpreter tool call items.\n- `computer_call_output.output.image_url`: Include image urls from the computer\n  call output.\n- `file_search_call.results`: Include the search results of the file search tool\n  call.\n- `message.input_image.image_url`: Include image urls from the input message.\n- `computer_call_output.output.image_url`: Include image urls from the computer\n  call output.\n- `reasoning.encrypted_content`: Includes an encrypted version of reasoning\n  tokens in reasoning item outputs. This enables reasoning items to be used in\n  multi-turn conversations when using the Responses API statelessly (like when\n  the `store` parameter is set to `false`, or when an organization is enrolled\n  in the zero data retention program).\n- `code_interpreter_call.outputs`: Includes the outputs of python code execution\n  in code interpreter tool call items."
+            "type": "array",
+            "description": "Specify additional output data to include in the model response. Currently\n  supported values are:\n  \n  - `web_search_call.action.sources`: Include the sources of the web search tool\n    call.\n  - `code_interpreter_call.outputs`: Includes the outputs of python code execution\n    in code interpreter tool call items.\n  - `computer_call_output.output.image_url`: Include image urls from the computer\n    call output.\n  - `file_search_call.results`: Include the search results of the file search tool\n    call.\n  - `message.input_image.image_url`: Include image urls from the input message.\n  - `computer_call_output.output.image_url`: Include image urls from the computer\n    call output.\n  - `reasoning.encrypted_content`: Includes an encrypted version of reasoning\n    tokens in reasoning item outputs. This enables reasoning items to be used in\n    multi-turn conversations when using the Responses API statelessly (like when\n    the `store` parameter is set to `false`, or when an organization is enrolled\n    in the zero data retention program).\n  - `code_interpreter_call.outputs`: Includes the outputs of python code execution\n    in code interpreter tool call items.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "file_search_call.results",
+                "web_search_call.results",
+                "web_search_call.action.sources",
+                "message.input_image.image_url",
+                "computer_call_output.output.image_url",
+                "code_interpreter_call.outputs",
+                "reasoning.encrypted_content",
+                "message.output_text.logprobs"
+              ]
+            }
           },
           "input": {
             "type": "object",
-            "description": "Text, image, or file inputs to the model, used to generate a response.\n\nLearn more:\n\n- [Text inputs and outputs](https://platform.openai.com/docs/guides/text)\n- [Image inputs](https://platform.openai.com/docs/guides/images)\n- [File inputs](https://platform.openai.com/docs/guides/pdf-files)\n- [Conversation state](https://platform.openai.com/docs/guides/conversation-state)\n- [Function calling](https://platform.openai.com/docs/guides/function-calling)"
+            "description": "Text, image, or file inputs to the model, used to generate a response.\n  \n  Learn more:\n  \n  - [Text inputs and outputs](https://platform.openai.com/docs/guides/text)\n  - [Image inputs](https://platform.openai.com/docs/guides/images)\n  - [File inputs](https://platform.openai.com/docs/guides/pdf-files)\n  - [Conversation state](https://platform.openai.com/docs/guides/conversation-state)\n  - [Function calling](https://platform.openai.com/docs/guides/function-calling)"
           },
           "instructions": {
-            "type": "object",
-            "description": "A system (or developer) message inserted into the model's context.\n\nWhen using along with `previous_response_id`, the instructions from a previous\nresponse will not be carried over to the next response. This makes it simple to\nswap out system (or developer) messages in new responses."
+            "type": "string",
+            "description": "A system (or developer) message inserted into the model's context.\n  \n  When using along with `previous_response_id`, the instructions from a previous\n  response will not be carried over to the next response. This makes it simple to\n  swap out system (or developer) messages in new responses."
           },
           "max_output_tokens": {
-            "type": "object",
-            "description": "An upper bound for the number of tokens that can be generated for a response,\nincluding visible output tokens and\n[reasoning tokens](https://platform.openai.com/docs/guides/reasoning)."
+            "type": "number",
+            "description": "An upper bound for the number of tokens that can be generated for a response,\n  including visible output tokens and\n  [reasoning tokens](https://platform.openai.com/docs/guides/reasoning)."
           },
           "metadata": {
             "type": "object",
-            "description": "Set of 16 key-value pairs that can be attached to an object. This can be useful\nfor storing additional information about the object in a structured format, and\nquerying for objects via API or the dashboard.\n\nKeys are strings with a maximum length of 64 characters. Values are strings with\na maximum length of 512 characters."
+            "description": "Set of 16 key-value pairs that can be attached to an object. This can be useful\n  for storing additional information about the object in a structured format, and\n  querying for objects via API or the dashboard.\n  \n  Keys are strings with a maximum length of 64 characters. Values are strings with\n  a maximum length of 512 characters."
           },
           "model": {
-            "description": "Model ID used to generate the response, like `gpt-4o` or `o3`. OpenAI offers a\nwide range of models with different capabilities, performance characteristics,\nand price points. Refer to the\n[model guide](https://platform.openai.com/docs/models) to browse and compare\navailable models.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ResponsesModelDto"
-              }
-            ]
+            "type": "string",
+            "description": "Model ID used to generate the response, like `gpt-4o` or `o3`. OpenAI offers a\n  wide range of models with different capabilities, performance characteristics,\n  and price points. Refer to the\n  [model guide](https://platform.openai.com/docs/models) to browse and compare\n  available models."
           },
           "parallel_tool_calls": {
             "type": "object",
             "description": "Whether to allow the model to run tool calls in parallel."
           },
           "previous_response_id": {
-            "type": "object",
-            "description": "The unique ID of the previous response to the model. Use this to create\nmulti-turn conversations. Learn more about\n[conversation state](https://platform.openai.com/docs/guides/conversation-state).\nCannot be used in conjunction with `conversation`."
+            "type": "string",
+            "description": "The unique ID of the previous response to the model. Use this to create\n  multi-turn conversations. Learn more about\n  [conversation state](https://platform.openai.com/docs/guides/conversation-state).\n  Cannot be used in conjunction with `conversation`."
           },
           "prompt": {
-            "type": "object",
-            "description": "Reference to a prompt template and its variables.\n[Learn more](https://platform.openai.com/docs/guides/text?api-mode=responses#reusable-prompts)."
+            "description": "Reference to a prompt template and its variables.\n  [Learn more](https://platform.openai.com/docs/guides/text?api-mode=responses#reusable-prompts).",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ResponsePromptDto"
+              }
+            ]
           },
           "prompt_cache_key": {
             "type": "string",
-            "description": "Used by OpenAI to cache responses for similar requests to optimize your cache\nhit rates. Replaces the `user` field.\n[Learn more](https://platform.openai.com/docs/guides/prompt-caching)."
+            "description": "Used by OpenAI to cache responses for similar requests to optimize your cache\n  hit rates. Replaces the `user` field.\n  [Learn more](https://platform.openai.com/docs/guides/prompt-caching)."
           },
           "prompt_cache_retention": {
-            "type": "object",
-            "description": "The retention policy for the prompt cache. Set to `24h` to enable extended\nprompt caching, which keeps cached prefixes active for longer, up to a maximum\nof 24 hours.\n[Learn more](https://platform.openai.com/docs/guides/prompt-caching#prompt-cache-retention)."
+            "type": "string",
+            "description": "The retention policy for the prompt cache. Set to `24h` to enable extended\n  prompt caching, which keeps cached prefixes active for longer, up to a maximum\n  of 24 hours.\n  [Learn more](https://platform.openai.com/docs/guides/prompt-caching#prompt-cache-retention).",
+            "enum": [
+              "in-memory",
+              "24h"
+            ]
           },
           "reasoning": {
-            "type": "object",
-            "description": "**gpt-5 and o-series models only**\n\nConfiguration options for\n[reasoning models](https://platform.openai.com/docs/guides/reasoning)."
+            "description": "**gpt-5 and o-series models only**\n  \n  Configuration options for\n  [reasoning models](https://platform.openai.com/docs/guides/reasoning).",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ReasoningDto"
+              }
+            ]
           },
           "safety_identifier": {
             "type": "string",
-            "description": "A stable identifier used to help detect users of your application that may be\nviolating OpenAI's usage policies. The IDs should be a string that uniquely\nidentifies each user, with a maximum length of 64 characters. We recommend\nhashing their username or email address, in order to avoid sending us any\nidentifying information.\n[Learn more](https://platform.openai.com/docs/guides/safety-best-practices#safety-identifiers)."
+            "description": "A stable identifier used to help detect users of your application that may be\n  violating OpenAI's usage policies. The IDs should be a string that uniquely\n  identifies each user, with a maximum length of 64 characters. We recommend\n  hashing their username or email address, in order to avoid sending us any\n  identifying information.\n  [Learn more](https://platform.openai.com/docs/guides/safety-best-practices#safety-identifiers)."
           },
           "service_tier": {
-            "type": "object",
-            "description": "Specifies the latency tier to use for processing the request. This parameter is\nrelevant for customers subscribed to the scale tier service:\n\n- If set to 'auto', then the request will be processed with the service tier\n  configured in the Project settings. Unless otherwise configured, the Project\n  will use 'default'.\n- If set to 'default', then the request will be processed with the standard\n  pricing and performance for the selected model.\n- If set to '[flex](https://platform.openai.com/docs/guides/flex-processing)' or\n  '[priority](https://openai.com/api-priority-processing/)', then the request\n  will be processed with the corresponding service tier.\n- When not set, the default behavior is 'auto'.\n\nWhen this parameter is set, the response body will include the `service_tier`\nutilized."
+            "type": "string",
+            "description": "Specifies the latency tier to use for processing the request. This parameter is\n  relevant for customers subscribed to the scale tier service:\n  \n  - If set to 'auto', then the request will be processed with the service tier\n    configured in the Project settings. Unless otherwise configured, the Project\n    will use 'default'.\n  - If set to 'default', then the request will be processed with the standard\n    pricing and performance for the selected model.\n  - If set to '[flex](https://platform.openai.com/docs/guides/flex-processing)' or\n    '[priority](https://openai.com/api-priority-processing/)', then the request\n    will be processed with the corresponding service tier.\n  - When not set, the default behavior is 'auto'.\n  \n  When this parameter is set, the response body will include the `service_tier`\n  utilized.",
+            "enum": [
+              "auto",
+              "default",
+              "flex",
+              "scale",
+              "priority"
+            ]
           },
           "store": {
             "type": "object",
@@ -1787,18 +5561,22 @@
           },
           "stream": {
             "type": "object",
-            "description": "If set to true, the model response data will be streamed to the client as it is\ngenerated using\n[server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#Event_stream_format).\nSee the\n[Streaming section below](https://platform.openai.com/docs/api-reference/responses-streaming)\nfor more information."
+            "description": "If set to true, the model response data will be streamed to the client as it is\n  generated using\n  [server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#Event_stream_format).\n  See the\n  [Streaming section below](https://platform.openai.com/docs/api-reference/responses-streaming)\n  for more information."
           },
           "stream_options": {
-            "type": "object",
-            "description": "Options for streaming responses. Only set this when you set `stream: true`."
+            "description": "Options for streaming responses. Only set this when you set `stream: true`.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/StreamOptionsDto"
+              }
+            ]
           },
           "temperature": {
-            "type": "object",
-            "description": "What sampling temperature to use, between 0 and 2. Higher values like 0.8 will\nmake the output more random, while lower values like 0.2 will make it more\nfocused and deterministic. We generally recommend altering this or `top_p` but\nnot both."
+            "type": "number",
+            "description": "What sampling temperature to use, between 0 and 2. Higher values like 0.8 will\n  make the output more random, while lower values like 0.2 will make it more\n  focused and deterministic. We generally recommend altering this or `top_p` but\n  not both."
           },
           "text": {
-            "description": "Configuration options for a text response from the model. Can be plain text or\nstructured JSON data. Learn more:\n\n- [Text inputs and outputs](https://platform.openai.com/docs/guides/text)\n- [Structured Outputs](https://platform.openai.com/docs/guides/structured-outputs)",
+            "description": "Configuration options for a text response from the model. Can be plain text or\n  structured JSON data. Learn more:\n  \n  - [Text inputs and outputs](https://platform.openai.com/docs/guides/text)\n  - [Structured Outputs](https://platform.openai.com/docs/guides/structured-outputs)",
             "allOf": [
               {
                 "$ref": "#/components/schemas/ResponseTextConfigDto"
@@ -1806,23 +5584,95 @@
             ]
           },
           "tool_choice": {
-            "type": "object",
-            "description": "How the model should select which tool (or tools) to use when generating a\nresponse. See the `tools` parameter to see how to specify which tools the model\ncan call."
+            "description": "How the model should select which tool (or tools) to use when generating a\n  response. See the `tools` parameter to see how to specify which tools the model\n  can call.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ToolChoiceAllowedDto"
+              },
+              {
+                "$ref": "#/components/schemas/ToolChoiceTypesDto"
+              },
+              {
+                "$ref": "#/components/schemas/ToolChoiceFunctionDto"
+              },
+              {
+                "$ref": "#/components/schemas/ToolChoiceMcpDto"
+              },
+              {
+                "$ref": "#/components/schemas/ToolChoiceCustomDto"
+              },
+              {
+                "$ref": "#/components/schemas/ToolChoiceApplyPatchDto"
+              },
+              {
+                "$ref": "#/components/schemas/ToolChoiceShellDto"
+              }
+            ]
           },
           "tools": {
-            "description": "An array of tools the model may call while generating a response. You can\nspecify which tool to use by setting the `tool_choice` parameter.\n\nWe support the following categories of tools:\n\n- **Built-in tools**: Tools that are provided by OpenAI that extend the model's\n  capabilities, like\n  [web search](https://platform.openai.com/docs/guides/tools-web-search) or\n  [file search](https://platform.openai.com/docs/guides/tools-file-search).\n  Learn more about\n  [built-in tools](https://platform.openai.com/docs/guides/tools).\n- **MCP Tools**: Integrations with third-party systems via custom MCP servers or\n  predefined connectors such as Google Drive and SharePoint. Learn more about\n  [MCP Tools](https://platform.openai.com/docs/guides/tools-connectors-mcp).\n- **Function calls (custom tools)**: Functions that are defined by you, enabling\n  the model to call your own code with strongly typed arguments and outputs.\n  Learn more about\n  [function calling](https://platform.openai.com/docs/guides/function-calling).\n  You can also use custom tools to call your own code.",
+            "description": "An array of tools the model may call while generating a response. You can\n  specify which tool to use by setting the `tool_choice` parameter.\n  \n  We support the following categories of tools:\n  \n  - **Built-in tools**: Tools that are provided by OpenAI that extend the model's\n    capabilities, like\n    [web search](https://platform.openai.com/docs/guides/tools-web-search) or\n    [file search](https://platform.openai.com/docs/guides/tools-file-search).\n    Learn more about\n    [built-in tools](https://platform.openai.com/docs/guides/tools).\n  - **MCP Tools**: Integrations with third-party systems via custom MCP servers or\n    predefined connectors such as Google Drive and SharePoint. Learn more about\n    [MCP Tools](https://platform.openai.com/docs/guides/tools-connectors-mcp).\n  - **Function calls (custom tools)**: Functions that are defined by you, enabling\n    the model to call your own code with strongly typed arguments and outputs.\n    Learn more about\n    [function calling](https://platform.openai.com/docs/guides/function-calling).\n    You can also use custom tools to call your own code.",
             "type": "array",
             "items": {
-              "type": "array"
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/FunctionToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/FileSearchToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ComputerToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ComputerUsePreviewToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/WebSearchToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/McpDto"
+                },
+                {
+                  "$ref": "#/components/schemas/CodeInterpreterDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ImageGenerationDto"
+                },
+                {
+                  "$ref": "#/components/schemas/LocalShellDto"
+                },
+                {
+                  "$ref": "#/components/schemas/FunctionShellToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/CustomToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/NamespaceToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ToolSearchToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/WebSearchPreviewToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ApplyPatchToolDto"
+                }
+              ]
             }
           },
           "top_p": {
-            "type": "object",
-            "description": "An alternative to sampling with temperature, called nucleus sampling, where the\nmodel considers the results of the tokens with top_p probability mass. So 0.1\nmeans only the tokens comprising the top 10% probability mass are considered.\n\nWe generally recommend altering this or `temperature` but not both."
+            "type": "number",
+            "description": "An alternative to sampling with temperature, called nucleus sampling, where the\n  model considers the results of the tokens with top_p probability mass. So 0.1\n  means only the tokens comprising the top 10% probability mass are considered.\n  \n  We generally recommend altering this or `temperature` but not both."
           },
           "truncation": {
-            "type": "object",
-            "description": "The truncation strategy to use for the model response.\n\n- `auto`: If the input to this Response exceeds the model's context window size,\n  the model will truncate the response to fit the context window by dropping\n  items from the beginning of the conversation.\n- `disabled` (default): If the input size will exceed the context window size\n  for a model, the request will fail with a 400 error."
+            "type": "string",
+            "description": "The truncation strategy to use for the model response.\n  \n  - `auto`: If the input to this Response exceeds the model's context window size,\n    the model will truncate the response to fit the context window by dropping\n    items from the beginning of the conversation.\n  - `disabled` (default): If the input size will exceed the context window size\n    for a model, the request will fail with a 400 error.",
+            "enum": [
+              "auto",
+              "disabled"
+            ]
           },
           "user": {
             "type": "string"
@@ -1834,94 +5684,134 @@
         "properties": {
           "background": {
             "type": "object",
-            "description": "Whether to run the model response in the background.\n[Learn more](https://platform.openai.com/docs/guides/background)."
+            "description": "Whether to run the model response in the background.\n  [Learn more](https://platform.openai.com/docs/guides/background)."
           },
           "context_management": {
-            "type": "object",
-            "description": "Context management configuration for this request."
+            "description": "Context management configuration for this request.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContextManagementDto"
+            }
           },
           "conversation": {
-            "type": "object",
-            "description": "The conversation that this response belongs to. Items from this conversation are\nprepended to `input_items` for this response request. Input items and output\nitems from this response are automatically added to this conversation after this\nresponse completes."
+            "description": "The conversation that this response belongs to. Items from this conversation are\n  prepended to `input_items` for this response request. Input items and output\n  items from this response are automatically added to this conversation after this\n  response completes.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ResponseConversationParamDto"
+              }
+            ]
           },
           "include": {
-            "type": "object",
-            "description": "Specify additional output data to include in the model response. Currently\nsupported values are:\n\n- `web_search_call.action.sources`: Include the sources of the web search tool\n  call.\n- `code_interpreter_call.outputs`: Includes the outputs of python code execution\n  in code interpreter tool call items.\n- `computer_call_output.output.image_url`: Include image urls from the computer\n  call output.\n- `file_search_call.results`: Include the search results of the file search tool\n  call.\n- `message.input_image.image_url`: Include image urls from the input message.\n- `computer_call_output.output.image_url`: Include image urls from the computer\n  call output.\n- `reasoning.encrypted_content`: Includes an encrypted version of reasoning\n  tokens in reasoning item outputs. This enables reasoning items to be used in\n  multi-turn conversations when using the Responses API statelessly (like when\n  the `store` parameter is set to `false`, or when an organization is enrolled\n  in the zero data retention program).\n- `code_interpreter_call.outputs`: Includes the outputs of python code execution\n  in code interpreter tool call items."
+            "type": "array",
+            "description": "Specify additional output data to include in the model response. Currently\n  supported values are:\n  \n  - `web_search_call.action.sources`: Include the sources of the web search tool\n    call.\n  - `code_interpreter_call.outputs`: Includes the outputs of python code execution\n    in code interpreter tool call items.\n  - `computer_call_output.output.image_url`: Include image urls from the computer\n    call output.\n  - `file_search_call.results`: Include the search results of the file search tool\n    call.\n  - `message.input_image.image_url`: Include image urls from the input message.\n  - `computer_call_output.output.image_url`: Include image urls from the computer\n    call output.\n  - `reasoning.encrypted_content`: Includes an encrypted version of reasoning\n    tokens in reasoning item outputs. This enables reasoning items to be used in\n    multi-turn conversations when using the Responses API statelessly (like when\n    the `store` parameter is set to `false`, or when an organization is enrolled\n    in the zero data retention program).\n  - `code_interpreter_call.outputs`: Includes the outputs of python code execution\n    in code interpreter tool call items.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "file_search_call.results",
+                "web_search_call.results",
+                "web_search_call.action.sources",
+                "message.input_image.image_url",
+                "computer_call_output.output.image_url",
+                "code_interpreter_call.outputs",
+                "reasoning.encrypted_content",
+                "message.output_text.logprobs"
+              ]
+            }
           },
           "input": {
             "type": "object",
-            "description": "Text, image, or file inputs to the model, used to generate a response.\n\nLearn more:\n\n- [Text inputs and outputs](https://platform.openai.com/docs/guides/text)\n- [Image inputs](https://platform.openai.com/docs/guides/images)\n- [File inputs](https://platform.openai.com/docs/guides/pdf-files)\n- [Conversation state](https://platform.openai.com/docs/guides/conversation-state)\n- [Function calling](https://platform.openai.com/docs/guides/function-calling)"
+            "description": "Text, image, or file inputs to the model, used to generate a response.\n  \n  Learn more:\n  \n  - [Text inputs and outputs](https://platform.openai.com/docs/guides/text)\n  - [Image inputs](https://platform.openai.com/docs/guides/images)\n  - [File inputs](https://platform.openai.com/docs/guides/pdf-files)\n  - [Conversation state](https://platform.openai.com/docs/guides/conversation-state)\n  - [Function calling](https://platform.openai.com/docs/guides/function-calling)"
           },
           "instructions": {
-            "type": "object",
-            "description": "A system (or developer) message inserted into the model's context.\n\nWhen using along with `previous_response_id`, the instructions from a previous\nresponse will not be carried over to the next response. This makes it simple to\nswap out system (or developer) messages in new responses."
+            "type": "string",
+            "description": "A system (or developer) message inserted into the model's context.\n  \n  When using along with `previous_response_id`, the instructions from a previous\n  response will not be carried over to the next response. This makes it simple to\n  swap out system (or developer) messages in new responses."
           },
           "max_output_tokens": {
-            "type": "object",
-            "description": "An upper bound for the number of tokens that can be generated for a response,\nincluding visible output tokens and\n[reasoning tokens](https://platform.openai.com/docs/guides/reasoning)."
+            "type": "number",
+            "description": "An upper bound for the number of tokens that can be generated for a response,\n  including visible output tokens and\n  [reasoning tokens](https://platform.openai.com/docs/guides/reasoning)."
           },
           "metadata": {
             "type": "object",
-            "description": "Set of 16 key-value pairs that can be attached to an object. This can be useful\nfor storing additional information about the object in a structured format, and\nquerying for objects via API or the dashboard.\n\nKeys are strings with a maximum length of 64 characters. Values are strings with\na maximum length of 512 characters."
+            "description": "Set of 16 key-value pairs that can be attached to an object. This can be useful\n  for storing additional information about the object in a structured format, and\n  querying for objects via API or the dashboard.\n  \n  Keys are strings with a maximum length of 64 characters. Values are strings with\n  a maximum length of 512 characters."
           },
           "model": {
-            "description": "Model ID used to generate the response, like `gpt-4o` or `o3`. OpenAI offers a\nwide range of models with different capabilities, performance characteristics,\nand price points. Refer to the\n[model guide](https://platform.openai.com/docs/models) to browse and compare\navailable models.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ResponsesModelDto"
-              }
-            ]
+            "type": "string",
+            "description": "Model ID used to generate the response, like `gpt-4o` or `o3`. OpenAI offers a\n  wide range of models with different capabilities, performance characteristics,\n  and price points. Refer to the\n  [model guide](https://platform.openai.com/docs/models) to browse and compare\n  available models."
           },
           "parallel_tool_calls": {
             "type": "object",
             "description": "Whether to allow the model to run tool calls in parallel."
           },
           "previous_response_id": {
-            "type": "object",
-            "description": "The unique ID of the previous response to the model. Use this to create\nmulti-turn conversations. Learn more about\n[conversation state](https://platform.openai.com/docs/guides/conversation-state).\nCannot be used in conjunction with `conversation`."
+            "type": "string",
+            "description": "The unique ID of the previous response to the model. Use this to create\n  multi-turn conversations. Learn more about\n  [conversation state](https://platform.openai.com/docs/guides/conversation-state).\n  Cannot be used in conjunction with `conversation`."
           },
           "prompt": {
-            "type": "object",
-            "description": "Reference to a prompt template and its variables.\n[Learn more](https://platform.openai.com/docs/guides/text?api-mode=responses#reusable-prompts)."
+            "description": "Reference to a prompt template and its variables.\n  [Learn more](https://platform.openai.com/docs/guides/text?api-mode=responses#reusable-prompts).",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ResponsePromptDto"
+              }
+            ]
           },
           "prompt_cache_key": {
             "type": "string",
-            "description": "Used by OpenAI to cache responses for similar requests to optimize your cache\nhit rates. Replaces the `user` field.\n[Learn more](https://platform.openai.com/docs/guides/prompt-caching)."
+            "description": "Used by OpenAI to cache responses for similar requests to optimize your cache\n  hit rates. Replaces the `user` field.\n  [Learn more](https://platform.openai.com/docs/guides/prompt-caching)."
           },
           "prompt_cache_retention": {
-            "type": "object",
-            "description": "The retention policy for the prompt cache. Set to `24h` to enable extended\nprompt caching, which keeps cached prefixes active for longer, up to a maximum\nof 24 hours.\n[Learn more](https://platform.openai.com/docs/guides/prompt-caching#prompt-cache-retention)."
+            "type": "string",
+            "description": "The retention policy for the prompt cache. Set to `24h` to enable extended\n  prompt caching, which keeps cached prefixes active for longer, up to a maximum\n  of 24 hours.\n  [Learn more](https://platform.openai.com/docs/guides/prompt-caching#prompt-cache-retention).",
+            "enum": [
+              "in-memory",
+              "24h"
+            ]
           },
           "reasoning": {
-            "type": "object",
-            "description": "**gpt-5 and o-series models only**\n\nConfiguration options for\n[reasoning models](https://platform.openai.com/docs/guides/reasoning)."
+            "description": "**gpt-5 and o-series models only**\n  \n  Configuration options for\n  [reasoning models](https://platform.openai.com/docs/guides/reasoning).",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ReasoningDto"
+              }
+            ]
           },
           "safety_identifier": {
             "type": "string",
-            "description": "A stable identifier used to help detect users of your application that may be\nviolating OpenAI's usage policies. The IDs should be a string that uniquely\nidentifies each user, with a maximum length of 64 characters. We recommend\nhashing their username or email address, in order to avoid sending us any\nidentifying information.\n[Learn more](https://platform.openai.com/docs/guides/safety-best-practices#safety-identifiers)."
+            "description": "A stable identifier used to help detect users of your application that may be\n  violating OpenAI's usage policies. The IDs should be a string that uniquely\n  identifies each user, with a maximum length of 64 characters. We recommend\n  hashing their username or email address, in order to avoid sending us any\n  identifying information.\n  [Learn more](https://platform.openai.com/docs/guides/safety-best-practices#safety-identifiers)."
           },
           "service_tier": {
-            "type": "object",
-            "description": "Specifies the latency tier to use for processing the request. This parameter is\nrelevant for customers subscribed to the scale tier service:\n\n- If set to 'auto', then the request will be processed with the service tier\n  configured in the Project settings. Unless otherwise configured, the Project\n  will use 'default'.\n- If set to 'default', then the request will be processed with the standard\n  pricing and performance for the selected model.\n- If set to '[flex](https://platform.openai.com/docs/guides/flex-processing)' or\n  '[priority](https://openai.com/api-priority-processing/)', then the request\n  will be processed with the corresponding service tier.\n- When not set, the default behavior is 'auto'.\n\nWhen this parameter is set, the response body will include the `service_tier`\nutilized."
+            "type": "string",
+            "description": "Specifies the latency tier to use for processing the request. This parameter is\n  relevant for customers subscribed to the scale tier service:\n  \n  - If set to 'auto', then the request will be processed with the service tier\n    configured in the Project settings. Unless otherwise configured, the Project\n    will use 'default'.\n  - If set to 'default', then the request will be processed with the standard\n    pricing and performance for the selected model.\n  - If set to '[flex](https://platform.openai.com/docs/guides/flex-processing)' or\n    '[priority](https://openai.com/api-priority-processing/)', then the request\n    will be processed with the corresponding service tier.\n  - When not set, the default behavior is 'auto'.\n  \n  When this parameter is set, the response body will include the `service_tier`\n  utilized.",
+            "enum": [
+              "auto",
+              "default",
+              "flex",
+              "scale",
+              "priority"
+            ]
           },
           "store": {
             "type": "object",
             "description": "Whether to store the generated model response for later retrieval via API."
           },
           "stream": {
-            "type": "object",
-            "description": "If set to true, the model response data will be streamed to the client as it is\ngenerated using\n[server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#Event_stream_format).\nSee the\n[Streaming section below](https://platform.openai.com/docs/api-reference/responses-streaming)\nfor more information."
+            "type": "boolean",
+            "description": "If set to true, the model response data will be streamed to the client as it is\n  generated using\n  [server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#Event_stream_format).\n  See the\n  [Streaming section below](https://platform.openai.com/docs/api-reference/responses-streaming)\n  for more information.",
+            "example": true
           },
           "stream_options": {
-            "type": "object",
-            "description": "Options for streaming responses. Only set this when you set `stream: true`."
+            "description": "Options for streaming responses. Only set this when you set `stream: true`.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/StreamOptionsDto"
+              }
+            ]
           },
           "temperature": {
-            "type": "object",
-            "description": "What sampling temperature to use, between 0 and 2. Higher values like 0.8 will\nmake the output more random, while lower values like 0.2 will make it more\nfocused and deterministic. We generally recommend altering this or `top_p` but\nnot both."
+            "type": "number",
+            "description": "What sampling temperature to use, between 0 and 2. Higher values like 0.8 will\n  make the output more random, while lower values like 0.2 will make it more\n  focused and deterministic. We generally recommend altering this or `top_p` but\n  not both."
           },
           "text": {
-            "description": "Configuration options for a text response from the model. Can be plain text or\nstructured JSON data. Learn more:\n\n- [Text inputs and outputs](https://platform.openai.com/docs/guides/text)\n- [Structured Outputs](https://platform.openai.com/docs/guides/structured-outputs)",
+            "description": "Configuration options for a text response from the model. Can be plain text or\n  structured JSON data. Learn more:\n  \n  - [Text inputs and outputs](https://platform.openai.com/docs/guides/text)\n  - [Structured Outputs](https://platform.openai.com/docs/guides/structured-outputs)",
             "allOf": [
               {
                 "$ref": "#/components/schemas/ResponseTextConfigDto"
@@ -1929,151 +5819,103 @@
             ]
           },
           "tool_choice": {
-            "type": "object",
-            "description": "How the model should select which tool (or tools) to use when generating a\nresponse. See the `tools` parameter to see how to specify which tools the model\ncan call."
+            "description": "How the model should select which tool (or tools) to use when generating a\n  response. See the `tools` parameter to see how to specify which tools the model\n  can call.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ToolChoiceAllowedDto"
+              },
+              {
+                "$ref": "#/components/schemas/ToolChoiceTypesDto"
+              },
+              {
+                "$ref": "#/components/schemas/ToolChoiceFunctionDto"
+              },
+              {
+                "$ref": "#/components/schemas/ToolChoiceMcpDto"
+              },
+              {
+                "$ref": "#/components/schemas/ToolChoiceCustomDto"
+              },
+              {
+                "$ref": "#/components/schemas/ToolChoiceApplyPatchDto"
+              },
+              {
+                "$ref": "#/components/schemas/ToolChoiceShellDto"
+              }
+            ]
           },
           "tools": {
-            "description": "An array of tools the model may call while generating a response. You can\nspecify which tool to use by setting the `tool_choice` parameter.\n\nWe support the following categories of tools:\n\n- **Built-in tools**: Tools that are provided by OpenAI that extend the model's\n  capabilities, like\n  [web search](https://platform.openai.com/docs/guides/tools-web-search) or\n  [file search](https://platform.openai.com/docs/guides/tools-file-search).\n  Learn more about\n  [built-in tools](https://platform.openai.com/docs/guides/tools).\n- **MCP Tools**: Integrations with third-party systems via custom MCP servers or\n  predefined connectors such as Google Drive and SharePoint. Learn more about\n  [MCP Tools](https://platform.openai.com/docs/guides/tools-connectors-mcp).\n- **Function calls (custom tools)**: Functions that are defined by you, enabling\n  the model to call your own code with strongly typed arguments and outputs.\n  Learn more about\n  [function calling](https://platform.openai.com/docs/guides/function-calling).\n  You can also use custom tools to call your own code.",
+            "description": "An array of tools the model may call while generating a response. You can\n  specify which tool to use by setting the `tool_choice` parameter.\n  \n  We support the following categories of tools:\n  \n  - **Built-in tools**: Tools that are provided by OpenAI that extend the model's\n    capabilities, like\n    [web search](https://platform.openai.com/docs/guides/tools-web-search) or\n    [file search](https://platform.openai.com/docs/guides/tools-file-search).\n    Learn more about\n    [built-in tools](https://platform.openai.com/docs/guides/tools).\n  - **MCP Tools**: Integrations with third-party systems via custom MCP servers or\n    predefined connectors such as Google Drive and SharePoint. Learn more about\n    [MCP Tools](https://platform.openai.com/docs/guides/tools-connectors-mcp).\n  - **Function calls (custom tools)**: Functions that are defined by you, enabling\n    the model to call your own code with strongly typed arguments and outputs.\n    Learn more about\n    [function calling](https://platform.openai.com/docs/guides/function-calling).\n    You can also use custom tools to call your own code.",
             "type": "array",
             "items": {
-              "type": "array"
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/FunctionToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/FileSearchToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ComputerToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ComputerUsePreviewToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/WebSearchToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/McpDto"
+                },
+                {
+                  "$ref": "#/components/schemas/CodeInterpreterDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ImageGenerationDto"
+                },
+                {
+                  "$ref": "#/components/schemas/LocalShellDto"
+                },
+                {
+                  "$ref": "#/components/schemas/FunctionShellToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/CustomToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/NamespaceToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ToolSearchToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/WebSearchPreviewToolDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ApplyPatchToolDto"
+                }
+              ]
             }
           },
           "top_p": {
-            "type": "object",
-            "description": "An alternative to sampling with temperature, called nucleus sampling, where the\nmodel considers the results of the tokens with top_p probability mass. So 0.1\nmeans only the tokens comprising the top 10% probability mass are considered.\n\nWe generally recommend altering this or `temperature` but not both."
+            "type": "number",
+            "description": "An alternative to sampling with temperature, called nucleus sampling, where the\n  model considers the results of the tokens with top_p probability mass. So 0.1\n  means only the tokens comprising the top 10% probability mass are considered.\n  \n  We generally recommend altering this or `temperature` but not both."
           },
           "truncation": {
-            "type": "object",
-            "description": "The truncation strategy to use for the model response.\n\n- `auto`: If the input to this Response exceeds the model's context window size,\n  the model will truncate the response to fit the context window by dropping\n  items from the beginning of the conversation.\n- `disabled` (default): If the input size will exceed the context window size\n  for a model, the request will fail with a 400 error."
+            "type": "string",
+            "description": "The truncation strategy to use for the model response.\n  \n  - `auto`: If the input to this Response exceeds the model's context window size,\n    the model will truncate the response to fit the context window by dropping\n    items from the beginning of the conversation.\n  - `disabled` (default): If the input size will exceed the context window size\n    for a model, the request will fail with a 400 error.",
+            "enum": [
+              "auto",
+              "disabled"
+            ]
           },
           "user": {
             "type": "string"
           }
-        }
-      },
-      "ResponseCreateParamsDto": {
-        "type": "object",
-        "properties": {
-          "stream": {
-            "type": "object",
-            "description": "If set to true, the model response data will be streamed to the client as it is\ngenerated using\n[server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#Event_stream_format).\nSee the\n[Streaming section below](https://platform.openai.com/docs/api-reference/responses-streaming)\nfor more information."
-          },
-          "background": {
-            "type": "object",
-            "description": "Whether to run the model response in the background.\n[Learn more](https://platform.openai.com/docs/guides/background)."
-          },
-          "context_management": {
-            "type": "object",
-            "description": "Context management configuration for this request."
-          },
-          "conversation": {
-            "type": "object",
-            "description": "The conversation that this response belongs to. Items from this conversation are\nprepended to `input_items` for this response request. Input items and output\nitems from this response are automatically added to this conversation after this\nresponse completes."
-          },
-          "include": {
-            "type": "object",
-            "description": "Specify additional output data to include in the model response. Currently\nsupported values are:\n\n- `web_search_call.action.sources`: Include the sources of the web search tool\n  call.\n- `code_interpreter_call.outputs`: Includes the outputs of python code execution\n  in code interpreter tool call items.\n- `computer_call_output.output.image_url`: Include image urls from the computer\n  call output.\n- `file_search_call.results`: Include the search results of the file search tool\n  call.\n- `message.input_image.image_url`: Include image urls from the input message.\n- `computer_call_output.output.image_url`: Include image urls from the computer\n  call output.\n- `reasoning.encrypted_content`: Includes an encrypted version of reasoning\n  tokens in reasoning item outputs. This enables reasoning items to be used in\n  multi-turn conversations when using the Responses API statelessly (like when\n  the `store` parameter is set to `false`, or when an organization is enrolled\n  in the zero data retention program).\n- `code_interpreter_call.outputs`: Includes the outputs of python code execution\n  in code interpreter tool call items."
-          },
-          "input": {
-            "type": "object",
-            "description": "Text, image, or file inputs to the model, used to generate a response.\n\nLearn more:\n\n- [Text inputs and outputs](https://platform.openai.com/docs/guides/text)\n- [Image inputs](https://platform.openai.com/docs/guides/images)\n- [File inputs](https://platform.openai.com/docs/guides/pdf-files)\n- [Conversation state](https://platform.openai.com/docs/guides/conversation-state)\n- [Function calling](https://platform.openai.com/docs/guides/function-calling)"
-          },
-          "instructions": {
-            "type": "object",
-            "description": "A system (or developer) message inserted into the model's context.\n\nWhen using along with `previous_response_id`, the instructions from a previous\nresponse will not be carried over to the next response. This makes it simple to\nswap out system (or developer) messages in new responses."
-          },
-          "max_output_tokens": {
-            "type": "object",
-            "description": "An upper bound for the number of tokens that can be generated for a response,\nincluding visible output tokens and\n[reasoning tokens](https://platform.openai.com/docs/guides/reasoning)."
-          },
-          "metadata": {
-            "type": "object",
-            "description": "Set of 16 key-value pairs that can be attached to an object. This can be useful\nfor storing additional information about the object in a structured format, and\nquerying for objects via API or the dashboard.\n\nKeys are strings with a maximum length of 64 characters. Values are strings with\na maximum length of 512 characters."
-          },
-          "model": {
-            "description": "Model ID used to generate the response, like `gpt-4o` or `o3`. OpenAI offers a\nwide range of models with different capabilities, performance characteristics,\nand price points. Refer to the\n[model guide](https://platform.openai.com/docs/models) to browse and compare\navailable models.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ResponsesModelDto"
-              }
-            ]
-          },
-          "parallel_tool_calls": {
-            "type": "object",
-            "description": "Whether to allow the model to run tool calls in parallel."
-          },
-          "previous_response_id": {
-            "type": "object",
-            "description": "The unique ID of the previous response to the model. Use this to create\nmulti-turn conversations. Learn more about\n[conversation state](https://platform.openai.com/docs/guides/conversation-state).\nCannot be used in conjunction with `conversation`."
-          },
-          "prompt": {
-            "type": "object",
-            "description": "Reference to a prompt template and its variables.\n[Learn more](https://platform.openai.com/docs/guides/text?api-mode=responses#reusable-prompts)."
-          },
-          "prompt_cache_key": {
-            "type": "string",
-            "description": "Used by OpenAI to cache responses for similar requests to optimize your cache\nhit rates. Replaces the `user` field.\n[Learn more](https://platform.openai.com/docs/guides/prompt-caching)."
-          },
-          "prompt_cache_retention": {
-            "type": "object",
-            "description": "The retention policy for the prompt cache. Set to `24h` to enable extended\nprompt caching, which keeps cached prefixes active for longer, up to a maximum\nof 24 hours.\n[Learn more](https://platform.openai.com/docs/guides/prompt-caching#prompt-cache-retention)."
-          },
-          "reasoning": {
-            "type": "object",
-            "description": "**gpt-5 and o-series models only**\n\nConfiguration options for\n[reasoning models](https://platform.openai.com/docs/guides/reasoning)."
-          },
-          "safety_identifier": {
-            "type": "string",
-            "description": "A stable identifier used to help detect users of your application that may be\nviolating OpenAI's usage policies. The IDs should be a string that uniquely\nidentifies each user, with a maximum length of 64 characters. We recommend\nhashing their username or email address, in order to avoid sending us any\nidentifying information.\n[Learn more](https://platform.openai.com/docs/guides/safety-best-practices#safety-identifiers)."
-          },
-          "service_tier": {
-            "type": "object",
-            "description": "Specifies the latency tier to use for processing the request. This parameter is\nrelevant for customers subscribed to the scale tier service:\n\n- If set to 'auto', then the request will be processed with the service tier\n  configured in the Project settings. Unless otherwise configured, the Project\n  will use 'default'.\n- If set to 'default', then the request will be processed with the standard\n  pricing and performance for the selected model.\n- If set to '[flex](https://platform.openai.com/docs/guides/flex-processing)' or\n  '[priority](https://openai.com/api-priority-processing/)', then the request\n  will be processed with the corresponding service tier.\n- When not set, the default behavior is 'auto'.\n\nWhen this parameter is set, the response body will include the `service_tier`\nutilized."
-          },
-          "store": {
-            "type": "object",
-            "description": "Whether to store the generated model response for later retrieval via API."
-          },
-          "stream_options": {
-            "type": "object",
-            "description": "Options for streaming responses. Only set this when you set `stream: true`."
-          },
-          "temperature": {
-            "type": "object",
-            "description": "What sampling temperature to use, between 0 and 2. Higher values like 0.8 will\nmake the output more random, while lower values like 0.2 will make it more\nfocused and deterministic. We generally recommend altering this or `top_p` but\nnot both."
-          },
-          "text": {
-            "description": "Configuration options for a text response from the model. Can be plain text or\nstructured JSON data. Learn more:\n\n- [Text inputs and outputs](https://platform.openai.com/docs/guides/text)\n- [Structured Outputs](https://platform.openai.com/docs/guides/structured-outputs)",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ResponseTextConfigDto"
-              }
-            ]
-          },
-          "tool_choice": {
-            "type": "object",
-            "description": "How the model should select which tool (or tools) to use when generating a\nresponse. See the `tools` parameter to see how to specify which tools the model\ncan call."
-          },
-          "tools": {
-            "description": "An array of tools the model may call while generating a response. You can\nspecify which tool to use by setting the `tool_choice` parameter.\n\nWe support the following categories of tools:\n\n- **Built-in tools**: Tools that are provided by OpenAI that extend the model's\n  capabilities, like\n  [web search](https://platform.openai.com/docs/guides/tools-web-search) or\n  [file search](https://platform.openai.com/docs/guides/tools-file-search).\n  Learn more about\n  [built-in tools](https://platform.openai.com/docs/guides/tools).\n- **MCP Tools**: Integrations with third-party systems via custom MCP servers or\n  predefined connectors such as Google Drive and SharePoint. Learn more about\n  [MCP Tools](https://platform.openai.com/docs/guides/tools-connectors-mcp).\n- **Function calls (custom tools)**: Functions that are defined by you, enabling\n  the model to call your own code with strongly typed arguments and outputs.\n  Learn more about\n  [function calling](https://platform.openai.com/docs/guides/function-calling).\n  You can also use custom tools to call your own code.",
-            "type": "array",
-            "items": {
-              "type": "array"
-            }
-          },
-          "top_p": {
-            "type": "object",
-            "description": "An alternative to sampling with temperature, called nucleus sampling, where the\nmodel considers the results of the tokens with top_p probability mass. So 0.1\nmeans only the tokens comprising the top 10% probability mass are considered.\n\nWe generally recommend altering this or `temperature` but not both."
-          },
-          "truncation": {
-            "type": "object",
-            "description": "The truncation strategy to use for the model response.\n\n- `auto`: If the input to this Response exceeds the model's context window size,\n  the model will truncate the response to fit the context window by dropping\n  items from the beginning of the conversation.\n- `disabled` (default): If the input size will exceed the context window size\n  for a model, the request will fail with a 400 error."
-          },
-          "user": {
-            "type": "string"
-          }
-        }
+        },
+        "required": [
+          "stream"
+        ]
       },
       "ModelOpenAiDto": {
         "type": "object",

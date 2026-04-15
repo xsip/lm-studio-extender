@@ -11,7 +11,6 @@ import { ChatRequestDto } from '../lm-studio/dto/chat.dto';
 import { ChatResponseDto } from '../lm-studio/dto/chat-response.dto';
 import { ResponseCreateParamsNonStreamingDto } from '../openai/dto/create-response-dtos';
 import { ResponseCreateParamsStreamingDto } from '../openai/dto/create-response-dtos/ResponseCreateParamsStreamingDto';
-import { ResponseCreateParamsDto } from '../openai/dto/create-response-dtos/ResponseCreateParamsDto';
 import { ResponseDto } from '../openai/dto/get-response-dtos';
 
 @Injectable()
@@ -32,8 +31,8 @@ export class ChatsService {
     request:
       | ChatRequestDto
       | ResponseCreateParamsNonStreamingDto
-      | ResponseCreateParamsStreamingDto
-      | ResponseCreateParamsDto,
+      | ResponseCreateParamsStreamingDto,
+
     response: ChatResponseDto | ResponseDto,
     name?: string,
     chatInternalId?: string,

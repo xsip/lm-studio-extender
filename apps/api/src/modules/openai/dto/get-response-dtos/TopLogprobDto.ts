@@ -6,7 +6,10 @@ export class TopLogprobDto {
   @IsString()
   token!: string;
 
-  @ApiProperty({ isArray: true })
+  @ApiProperty({
+    type: 'number',
+    isArray: true,
+  })
   @IsArray()
   bytes!: number[];
 
