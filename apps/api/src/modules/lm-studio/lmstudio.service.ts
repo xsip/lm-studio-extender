@@ -200,7 +200,7 @@ export class LmStudioService {
           if (isNewChat) {
             this.writeSseEvent(res, 'created_chat', {
               type: 'created_chat',
-              result: chatId,
+              result: resolvedChatMetaId,
             });
           }
 
