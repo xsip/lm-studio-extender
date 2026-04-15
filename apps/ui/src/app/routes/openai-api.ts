@@ -13,11 +13,14 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
-  ChatMetadataService, ChatRequestDto,
+  ChatMetadataService,
+  ChatRequestDto,
   ChatsService,
   ContentDto,
   EasyInputMessageDtoContentInner,
   MessageDtoContentInner,
+  ModelOpenAiDto,
+  OpenAIService,
   ReasoningDto,
   ResponseInputFileDto,
   ResponseInputImageDto,
@@ -26,17 +29,15 @@ import {
   ResponseOutputRefusalDto,
   ResponseOutputTextDto,
 } from '../client';
-import { OpenAIService } from '../client/api/openAI.service';
-import { ModelOpenAiDto } from '../client/model/modelOpenAiDto';
 import { ChatService } from './openai-api/chat.service';
 import { OpenAiModelSelectorComponent } from './openai-api/model-selector.component';
 
 // Re-use the shared sub-components from lm-studio-api — they are generic enough
 import { ChatSidebarComponent } from './lm-studio-api/chat-sidebar.component';
 import { ChatMessagesComponent } from './lm-studio-api/chat-messages.component';
-import { ChatInputComponent } from './lm-studio-api/chat-input.component';
 import { InfoComponent } from './lm-studio-api/info.component';
 import { ModelReasoningCapability } from './lm-studio-api/model-selector.component';
+import { AppendedFile, OpenAiChatInputComponent } from './openai-api/chat-input.component';
 
 @Component({
   selector: 'app-openai-api',
@@ -46,7 +47,7 @@ import { ModelReasoningCapability } from './lm-studio-api/model-selector.compone
     RouterLink,
     ChatSidebarComponent,
     ChatMessagesComponent,
-    ChatInputComponent,
+    OpenAiChatInputComponent,
     OpenAiModelSelectorComponent,
     InfoComponent,
   ],
@@ -177,7 +178,8 @@ import { ModelReasoningCapability } from './lm-studio-api/model-selector.compone
               />
             </div>
 
-            <app-chat-input
+            <app-openai-chat-input
+              #chatInput
               [form]="chatService.form"
               [streaming]="chatService.streaming()"
               [reasoning]="reasoning()"
@@ -185,6 +187,7 @@ import { ModelReasoningCapability } from './lm-studio-api/model-selector.compone
               (submitted)="submit()"
               (reset)="chatService.reset()"
               (reasoningChanged)="selectReasoning($event)"
+              (appendedFilesChanged)="appendedFiles.set($event)"
             />
           </div>
         </div>
@@ -238,11 +241,13 @@ export class OpenAiApi implements OnDestroy, OnInit {
     };
   });
   @ViewChild('messageContainer') private messageContainer?: ElementRef<HTMLElement>;
+  @ViewChild('chatInput') private chatInputRef?: OpenAiChatInputComponent;
 
   readonly showChatsSidebar = signal(true);
   readonly showInfoPanel = signal(false);
   readonly chatList = signal<any[]>([]);
   readonly chatsLoading = signal(false);
+  readonly appendedFiles = signal<AppendedFile[]>([]);
 
   readonly models = signal<ModelOpenAiDto[]>([]);
   readonly modelsLoading = signal(false);
@@ -493,15 +498,20 @@ export class OpenAiApi implements OnDestroy, OnInit {
   // ── Messaging ─────────────────────────────────────────────────────────────
 
   submit(): void {
-    this.chatService.submit(this.selectedModel()?.id ?? '', this.reasoning(), () =>
+    this.chatService.submit(this.selectedModel()?.id ?? '', this.reasoning(),this.appendedFiles(), () =>
       this.loadChatList(),
     );
+    this.chatInputRef?.clearFiles();
   }
 
   resend(): void {
-    this.chatService.resend(this.selectedModel()?.id ?? '', this.reasoning(), () =>
-      this.loadChatList(),
+    this.chatService.resend(
+      this.selectedModel()?.id ?? '',
+      this.reasoning(),
+      this.appendedFiles(),
+      () => this.loadChatList(),
     );
+    this.chatInputRef?.clearFiles();
   }
 
   // ── Chat rename / delete ──────────────────────────────────────────────────

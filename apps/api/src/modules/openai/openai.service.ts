@@ -169,50 +169,58 @@ export class OpenAiService {
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders();
 
-    const stream: Stream<ResponseStreamEvent> =
-      (await this.openAi.responses.create(mappedDto as any)) as any;
-    for await (const event of stream) {
-      res.write(`data: ${JSON.stringify(event)}\n\n`);
-      if (isNewChat) {
-        this.writeSseEvent(res, 'created_chat', {
-          type: 'created_chat',
-          result: resolvedChatMetaId,
-        });
-      }
-
-      if (event.type === 'response.completed') {
-        await this.chatsService.saveEntry(
-          userId,
-          chatId,
-          dto,
-          event.response as any,
-          name,
-          resolvedChatMetaId,
-        );
-
-        // ── Token accounting via TokenLimitService ──────────────────────
-        const tokensUsed =
-          (event.response.usage?.input_tokens ?? 0) +
-          (event.response.usage?.total_tokens ?? 0) +
-          (event.response.usage?.output_tokens_details?.reasoning_tokens || 0);
-
-        const updatedUser = await this.tokenLimitService.updateUsedTokens(
-          userId,
-          tokensUsed,
-        );
-
-        const limit = await this.tokenLimitService.getTokensPerIntervall(
-          updatedUser.subscription,
-        );
-
-        if (updatedUser.usedTokens >= limit) {
-          this.writeSseEvent(res, 'api.info', {
-            type: 'api.info',
-            message: `Rate limit reached. Resets at ${dayjs(updatedUser.tokenCountResetDate).toString()}`,
+    try {
+      const stream: Stream<ResponseStreamEvent> =
+        (await this.openAi.responses.create(mappedDto as any)) as any;
+      for await (const event of stream) {
+        res.write(`data: ${JSON.stringify(event)}\n\n`);
+        if (isNewChat) {
+          this.writeSseEvent(res, 'created_chat', {
+            type: 'created_chat',
+            result: resolvedChatMetaId,
           });
         }
-        // ───────────────────────────────────────────────────────────────
+
+        if (event.type === 'response.completed') {
+          await this.chatsService.saveEntry(
+            userId,
+            chatId,
+            dto,
+            event.response as any,
+            name,
+            resolvedChatMetaId,
+          );
+
+          // ── Token accounting via TokenLimitService ──────────────────────
+          const tokensUsed =
+            (event.response.usage?.input_tokens ?? 0) +
+            (event.response.usage?.total_tokens ?? 0) +
+            (event.response.usage?.output_tokens_details?.reasoning_tokens ||
+              0);
+
+          const updatedUser = await this.tokenLimitService.updateUsedTokens(
+            userId,
+            tokensUsed,
+          );
+
+          const limit = await this.tokenLimitService.getTokensPerIntervall(
+            updatedUser.subscription,
+          );
+
+          if (updatedUser.usedTokens >= limit) {
+            this.writeSseEvent(res, 'api.info', {
+              type: 'api.info',
+              message: `Rate limit reached. Resets at ${dayjs(updatedUser.tokenCountResetDate).toString()}`,
+            });
+          }
+          // ───────────────────────────────────────────────────────────────
+        }
       }
+    } catch (error: any) {
+      this.writeSseEvent(res, 'error', {
+        type: 'error',
+        error: error.error,
+      });
     }
 
     res.write('data: [DONE]\n\n');

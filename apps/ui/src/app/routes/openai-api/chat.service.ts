@@ -26,6 +26,7 @@ import {
   ResponseOutputItemDoneEventDto,
   ResponseReasoningItemDto,
 } from '../../client';
+import { AppendedFile } from './chat-input.component';
 
 export interface ChatMessage {
   role: 'user' | 'ai' | 'error' | 'info' | 'tool_call' | 'reasoning' | 'mcp_list_tools';
@@ -111,6 +112,7 @@ export class ChatService {
   submit(
     selectedModelId: string,
     reasoning: ReasoningDto.EffortEnum | undefined,
+    appendedFiles: AppendedFile[] | undefined,
     onChatListRefresh: () => void,
   ): void {
     if (this.form.invalid || this.streaming()) return;
@@ -341,6 +343,7 @@ export class ChatService {
           {
             role: 'user',
             content: [
+              ...(appendedFiles ?? []),
               /*{
                 type: 'input_file',
                 filename: 'base64emoji.png',
@@ -370,12 +373,13 @@ export class ChatService {
   resend(
     selectedModelId: string,
     reasoning: ReasoningDto.EffortEnum | undefined,
+    appendedFiles: AppendedFile[] | undefined,
     onChatListRefresh: () => void,
   ): void {
     const input = this.lastUserInput();
     if (!input || this.streaming()) return;
     this.form.setValue({ input });
-    this.submit(selectedModelId, reasoning, onChatListRefresh);
+    this.submit(selectedModelId, reasoning, appendedFiles,onChatListRefresh);
   }
 
   reset(): void {

@@ -4,9 +4,13 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import path from 'node:path';
 import * as fs from 'node:fs';
 import dayjs from 'dayjs';
-
+import * as bodyParser from 'body-parser';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.use(bodyParser.json({ limit: '10mb' }));
+  app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
+
   app.enableCors({
     origin: [
       'http://localhost:4200',
@@ -38,6 +42,5 @@ async function bootstrap() {
       `📖 Swagger UI at   http://localhost:${process.env.PORT ?? 8888}/api`,
     );
   await app.listen(process.env.PORT ?? 8888);
-
 }
 bootstrap();
