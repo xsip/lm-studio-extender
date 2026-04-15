@@ -13,7 +13,8 @@ export class ReasoningTextDto {
   /** The type of the reasoning text. Always `reasoning_text`. */
   @ApiProperty({
     description: `The type of the reasoning text. Always \`reasoning_text\`.`,
-    example: 'reasoning_text',
+    type: 'string',
+    enum: ['reasoning_text'],
   })
   @Equals('reasoning_text')
   type!: 'reasoning_text';

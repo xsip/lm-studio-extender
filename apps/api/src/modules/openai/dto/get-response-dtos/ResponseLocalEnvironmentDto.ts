@@ -5,7 +5,8 @@ export class ResponseLocalEnvironmentDto {
   /** The environment type. Always `local`. */
   @ApiProperty({
     description: `The environment type. Always \`local\`.`,
-    example: 'local',
+    type: 'string',
+    enum: ['local'],
   })
   @Equals('local')
   type!: 'local';

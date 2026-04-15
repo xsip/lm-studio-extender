@@ -37,7 +37,8 @@ export class McpApprovalRequestDto {
   /** The type of the item. Always `mcp_approval_request`. */
   @ApiProperty({
     description: `The type of the item. Always \`mcp_approval_request\`.`,
-    example: 'mcp_approval_request',
+    type: 'string',
+    enum: ['mcp_approval_request'],
   })
   @Equals('mcp_approval_request')
   type!: 'mcp_approval_request';

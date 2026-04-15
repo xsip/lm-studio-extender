@@ -13,7 +13,8 @@ export class ContainerReferenceDto {
   /** References a container created with the /v1/containers endpoint */
   @ApiProperty({
     description: `References a container created with the /v1/containers endpoint`,
-    example: 'container_reference',
+    type: 'string',
+    enum: ['container_reference'],
   })
   @Equals('container_reference')
   type!: 'container_reference';

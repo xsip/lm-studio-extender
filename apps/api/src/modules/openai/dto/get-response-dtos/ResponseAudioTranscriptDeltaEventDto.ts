@@ -21,7 +21,8 @@ export class ResponseAudioTranscriptDeltaEventDto {
   /** The type of the event. Always `response.audio.transcript.delta`. */
   @ApiProperty({
     description: `The type of the event. Always \`response.audio.transcript.delta\`.`,
-    example: 'response.audio.transcript.delta',
+    type: 'string',
+    enum: ['response.audio.transcript.delta'],
   })
   @Equals('response.audio.transcript.delta')
   type!: 'response.audio.transcript.delta';

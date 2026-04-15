@@ -27,7 +27,7 @@ export class ResponseOutputTextDto {
     ],
   })
   @IsArray()
-  annotations!: FileCitationDto | URLCitationDto | ContainerFileCitationDto | FilePathDto[];
+  annotations!: (FileCitationDto | URLCitationDto | ContainerFileCitationDto | FilePathDto)[];
 
   /** The text output from the model. */
   @ApiProperty({
@@ -40,7 +40,8 @@ export class ResponseOutputTextDto {
   /** The type of the output text. Always `output_text`. */
   @ApiProperty({
     description: `The type of the output text. Always \`output_text\`.`,
-    example: 'output_text',
+    type: 'string',
+    enum: ['output_text'],
   })
   @Equals('output_text')
   type!: 'output_text';

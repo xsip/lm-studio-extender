@@ -26,7 +26,7 @@ export class WebSearchPreviewToolDto {
   })
   @IsOptional()
   @IsArray()
-  search_content_types?: 'text' | 'image'[];
+  search_content_types?: ('text' | 'image')[];
 
   /**
    * High level guidance for the amount of context window space to use for the

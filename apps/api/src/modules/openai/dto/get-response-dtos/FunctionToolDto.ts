@@ -21,7 +21,8 @@ export class FunctionToolDto {
   /** The type of the function tool. Always `function`. */
   @ApiProperty({
     description: `The type of the function tool. Always \`function\`.`,
-    example: 'function',
+    type: 'string',
+    enum: ['function'],
   })
   @Equals('function')
   type!: 'function';

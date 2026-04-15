@@ -29,7 +29,8 @@ export class FileCitationDto {
   /** The type of the file citation. Always `file_citation`. */
   @ApiProperty({
     description: `The type of the file citation. Always \`file_citation\`.`,
-    example: 'file_citation',
+    type: 'string',
+    enum: ['file_citation'],
   })
   @Equals('file_citation')
   type!: 'file_citation';

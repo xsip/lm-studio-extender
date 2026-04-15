@@ -42,7 +42,10 @@ export class ResponseFunctionCallArgumentsDoneEventDto {
   @IsNumber()
   sequence_number!: number;
 
-  @ApiProperty({ example: 'response.function_call_arguments.done' })
+  @ApiProperty({
+    type: 'string',
+    enum: ['response.function_call_arguments.done'],
+  })
   @Equals('response.function_call_arguments.done')
   type!: 'response.function_call_arguments.done';
 }

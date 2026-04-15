@@ -36,7 +36,8 @@ export class ResponseFileSearchToolCallDto {
   /** The type of the file search tool call. Always `file_search_call`. */
   @ApiProperty({
     description: `The type of the file search tool call. Always \`file_search_call\`.`,
-    example: 'file_search_call',
+    type: 'string',
+    enum: ['file_search_call'],
   })
   @Equals('file_search_call')
   type!: 'file_search_call';

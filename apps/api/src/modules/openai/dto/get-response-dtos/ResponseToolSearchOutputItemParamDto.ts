@@ -58,12 +58,13 @@ export class ResponseToolSearchOutputItemParamDto {
     ],
   })
   @IsArray()
-  tools!: FunctionToolDto | FileSearchToolDto | ComputerToolDto | ComputerUsePreviewToolDto | WebSearchToolDto | McpDto | CodeInterpreterDto | ImageGenerationDto | LocalShellDto | FunctionShellToolDto | CustomToolDto | NamespaceToolDto | ToolSearchToolDto | WebSearchPreviewToolDto | ApplyPatchToolDto[];
+  tools!: (FunctionToolDto | FileSearchToolDto | ComputerToolDto | ComputerUsePreviewToolDto | WebSearchToolDto | McpDto | CodeInterpreterDto | ImageGenerationDto | LocalShellDto | FunctionShellToolDto | CustomToolDto | NamespaceToolDto | ToolSearchToolDto | WebSearchPreviewToolDto | ApplyPatchToolDto)[];
 
   /** The item type. Always `tool_search_output`. */
   @ApiProperty({
     description: `The item type. Always \`tool_search_output\`.`,
-    example: 'tool_search_output',
+    type: 'string',
+    enum: ['tool_search_output'],
   })
   @Equals('tool_search_output')
   type!: 'tool_search_output';

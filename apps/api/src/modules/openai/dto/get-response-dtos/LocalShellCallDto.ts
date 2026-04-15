@@ -41,7 +41,8 @@ export class LocalShellCallDto {
   /** The type of the local shell call. Always `local_shell_call`. */
   @ApiProperty({
     description: `The type of the local shell call. Always \`local_shell_call\`.`,
-    example: 'local_shell_call',
+    type: 'string',
+    enum: ['local_shell_call'],
   })
   @Equals('local_shell_call')
   type!: 'local_shell_call';

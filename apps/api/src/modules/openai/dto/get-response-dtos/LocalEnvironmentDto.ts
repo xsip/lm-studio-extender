@@ -8,7 +8,8 @@ export class LocalEnvironmentDto {
   /** Use a local computer environment. */
   @ApiProperty({
     description: `Use a local computer environment.`,
-    example: 'local',
+    type: 'string',
+    enum: ['local'],
   })
   @Equals('local')
   type!: 'local';

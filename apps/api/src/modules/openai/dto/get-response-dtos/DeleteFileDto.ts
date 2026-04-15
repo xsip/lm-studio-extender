@@ -13,7 +13,8 @@ export class DeleteFileDto {
   /** The operation type. Always `delete_file`. */
   @ApiProperty({
     description: `The operation type. Always \`delete_file\`.`,
-    example: 'delete_file',
+    type: 'string',
+    enum: ['delete_file'],
   })
   @Equals('delete_file')
   type!: 'delete_file';

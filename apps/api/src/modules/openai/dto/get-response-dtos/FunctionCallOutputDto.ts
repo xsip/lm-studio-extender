@@ -20,13 +20,23 @@ export class FunctionCallOutputDto {
   call_id!: string;
 
   /** Text, image, or file output of the function tool call. */
-  @ApiProperty({ description: `Text, image, or file output of the function tool call.` })
-  output!: string | ResponseInputTextContentDto | ResponseInputImageContentDto | ResponseInputFileContentDto[];
+  @ApiProperty({
+    description: `Text, image, or file output of the function tool call.`,
+    isArray: true,
+    oneOf: [
+      { type: 'string' },
+      { $ref: getSchemaPath(ResponseInputTextContentDto) },
+      { $ref: getSchemaPath(ResponseInputImageContentDto) },
+      { $ref: getSchemaPath(ResponseInputFileContentDto) },
+    ],
+  })
+  output!: string | (ResponseInputTextContentDto | ResponseInputImageContentDto | ResponseInputFileContentDto)[];
 
   /** The type of the function tool call output. Always `function_call_output`. */
   @ApiProperty({
     description: `The type of the function tool call output. Always \`function_call_output\`.`,
-    example: 'function_call_output',
+    type: 'string',
+    enum: ['function_call_output'],
   })
   @Equals('function_call_output')
   type!: 'function_call_output';

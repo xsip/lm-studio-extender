@@ -13,7 +13,8 @@ export class ToolChoiceMcpDto {
   /** For MCP tools, the type is always `mcp`. */
   @ApiProperty({
     description: `For MCP tools, the type is always \`mcp\`.`,
-    example: 'mcp',
+    type: 'string',
+    enum: ['mcp'],
   })
   @Equals('mcp')
   type!: 'mcp';

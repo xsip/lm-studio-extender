@@ -28,7 +28,8 @@ export class ResponseReasoningItemDto {
   /** The type of the object. Always `reasoning`. */
   @ApiProperty({
     description: `The type of the object. Always \`reasoning\`.`,
-    example: 'reasoning',
+    type: 'string',
+    enum: ['reasoning'],
   })
   @Equals('reasoning')
   type!: 'reasoning';

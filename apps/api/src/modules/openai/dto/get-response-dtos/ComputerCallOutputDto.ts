@@ -26,7 +26,8 @@ export class ComputerCallOutputDto {
   /** The type of the computer tool call output. Always `computer_call_output`. */
   @ApiProperty({
     description: `The type of the computer tool call output. Always \`computer_call_output\`.`,
-    example: 'computer_call_output',
+    type: 'string',
+    enum: ['computer_call_output'],
   })
   @Equals('computer_call_output')
   type!: 'computer_call_output';

@@ -17,7 +17,8 @@ export class ClickDto {
   /** Specifies the event type. For a click action, this property is always `click`. */
   @ApiProperty({
     description: `Specifies the event type. For a click action, this property is always \`click\`.`,
-    example: 'click',
+    type: 'string',
+    enum: ['click'],
   })
   @Equals('click')
   type!: 'click';

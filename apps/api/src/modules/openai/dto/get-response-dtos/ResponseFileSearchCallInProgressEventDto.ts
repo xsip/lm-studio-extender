@@ -29,7 +29,8 @@ export class ResponseFileSearchCallInProgressEventDto {
   /** The type of the event. Always `response.file_search_call.in_progress`. */
   @ApiProperty({
     description: `The type of the event. Always \`response.file_search_call.in_progress\`.`,
-    example: 'response.file_search_call.in_progress',
+    type: 'string',
+    enum: ['response.file_search_call.in_progress'],
   })
   @Equals('response.file_search_call.in_progress')
   type!: 'response.file_search_call.in_progress';

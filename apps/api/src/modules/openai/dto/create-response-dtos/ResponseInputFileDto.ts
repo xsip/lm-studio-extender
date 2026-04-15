@@ -5,7 +5,8 @@ export class ResponseInputFileDto {
   /** The type of the input item. Always `input_file`. */
   @ApiProperty({
     description: `The type of the input item. Always \`input_file\`.`,
-    example: 'input_file',
+    type: 'string',
+    enum: ['input_file'],
   })
   @Equals('input_file')
   type!: 'input_file';

@@ -41,7 +41,8 @@ export class ResponseCodeInterpreterCallCodeDeltaEventDto {
   /** The type of the event. Always `response.code_interpreter_call_code.delta`. */
   @ApiProperty({
     description: `The type of the event. Always \`response.code_interpreter_call_code.delta\`.`,
-    example: 'response.code_interpreter_call_code.delta',
+    type: 'string',
+    enum: ['response.code_interpreter_call_code.delta'],
   })
   @Equals('response.code_interpreter_call_code.delta')
   type!: 'response.code_interpreter_call_code.delta';

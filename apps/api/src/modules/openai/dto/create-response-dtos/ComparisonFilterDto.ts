@@ -44,7 +44,14 @@ export class ComparisonFilterDto {
    * The value to compare against the attribute key; supports string, number, or
    * boolean types.
    */
-  @ApiProperty({ description: `The value to compare against the attribute key; supports string, number, or
-  boolean types.` })
-  value!: string | number | false | true | string | number[];
+  @ApiProperty({
+    description: `The value to compare against the attribute key; supports string, number, or
+  boolean types.`,
+    isArray: true,
+    oneOf: [
+      { type: 'string' },
+      { type: 'number' },
+    ],
+  })
+  value!: string | number | false | true | (string | number)[];
 }

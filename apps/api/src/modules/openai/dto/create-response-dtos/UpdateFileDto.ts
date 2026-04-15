@@ -21,7 +21,8 @@ export class UpdateFileDto {
   /** The operation type. Always `update_file`. */
   @ApiProperty({
     description: `The operation type. Always \`update_file\`.`,
-    example: 'update_file',
+    type: 'string',
+    enum: ['update_file'],
   })
   @Equals('update_file')
   type!: 'update_file';

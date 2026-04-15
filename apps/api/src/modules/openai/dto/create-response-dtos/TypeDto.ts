@@ -17,7 +17,8 @@ export class TypeDto {
   @ApiProperty({
     description: `Specifies the event type. For a type action, this property is always set to
   \`type\`.`,
-    example: 'type',
+    type: 'string',
+    enum: ['type'],
   })
   @Equals('type')
   type!: 'type';

@@ -22,7 +22,8 @@ export class KeypressDto {
   @ApiProperty({
     description: `Specifies the event type. For a keypress action, this property is always set to
   \`keypress\`.`,
-    example: 'keypress',
+    type: 'string',
+    enum: ['keypress'],
   })
   @Equals('keypress')
   type!: 'keypress';

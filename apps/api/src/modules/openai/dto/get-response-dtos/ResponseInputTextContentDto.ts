@@ -13,7 +13,8 @@ export class ResponseInputTextContentDto {
   /** The type of the input item. Always `input_text`. */
   @ApiProperty({
     description: `The type of the input item. Always \`input_text\`.`,
-    example: 'input_text',
+    type: 'string',
+    enum: ['input_text'],
   })
   @Equals('input_text')
   type!: 'input_text';

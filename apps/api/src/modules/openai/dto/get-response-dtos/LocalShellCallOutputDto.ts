@@ -21,7 +21,8 @@ export class LocalShellCallOutputDto {
   /** The type of the local shell tool call output. Always `local_shell_call_output`. */
   @ApiProperty({
     description: `The type of the local shell tool call output. Always \`local_shell_call_output\`.`,
-    example: 'local_shell_call_output',
+    type: 'string',
+    enum: ['local_shell_call_output'],
   })
   @Equals('local_shell_call_output')
   type!: 'local_shell_call_output';

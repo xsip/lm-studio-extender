@@ -29,7 +29,8 @@ export class URLCitationDto {
   /** The type of the URL citation. Always `url_citation`. */
   @ApiProperty({
     description: `The type of the URL citation. Always \`url_citation\`.`,
-    example: 'url_citation',
+    type: 'string',
+    enum: ['url_citation'],
   })
   @Equals('url_citation')
   type!: 'url_citation';

@@ -13,7 +13,8 @@ export class ResponseAudioDoneEventDto {
   /** The type of the event. Always `response.audio.done`. */
   @ApiProperty({
     description: `The type of the event. Always \`response.audio.done\`.`,
-    example: 'response.audio.done',
+    type: 'string',
+    enum: ['response.audio.done'],
   })
   @Equals('response.audio.done')
   type!: 'response.audio.done';

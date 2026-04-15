@@ -17,7 +17,8 @@ export class ResponseInputImageDto {
   /** The type of the input item. Always `input_image`. */
   @ApiProperty({
     description: `The type of the input item. Always \`input_image\`.`,
-    example: 'input_image',
+    type: 'string',
+    enum: ['input_image'],
   })
   @Equals('input_image')
   type!: 'input_image';

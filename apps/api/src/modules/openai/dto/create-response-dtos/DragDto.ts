@@ -41,7 +41,8 @@ export class DragDto {
   @ApiProperty({
     description: `Specifies the event type. For a drag action, this property is always set to
   \`drag\`.`,
-    example: 'drag',
+    type: 'string',
+    enum: ['drag'],
   })
   @Equals('drag')
   type!: 'drag';

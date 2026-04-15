@@ -29,7 +29,8 @@ export class ComputerUsePreviewToolDto {
   /** The type of the computer use tool. Always `computer_use_preview`. */
   @ApiProperty({
     description: `The type of the computer use tool. Always \`computer_use_preview\`.`,
-    example: 'computer_use_preview',
+    type: 'string',
+    enum: ['computer_use_preview'],
   })
   @Equals('computer_use_preview')
   type!: 'computer_use_preview';

@@ -5,7 +5,8 @@ export class ImageDto {
   /** The type of the output. Always `image`. */
   @ApiProperty({
     description: `The type of the output. Always \`image\`.`,
-    example: 'image',
+    type: 'string',
+    enum: ['image'],
   })
   @Equals('image')
   type!: 'image';

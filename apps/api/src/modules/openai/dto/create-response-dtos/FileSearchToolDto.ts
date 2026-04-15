@@ -14,7 +14,8 @@ export class FileSearchToolDto {
   /** The type of the file search tool. Always `file_search`. */
   @ApiProperty({
     description: `The type of the file search tool. Always \`file_search\`.`,
-    example: 'file_search',
+    type: 'string',
+    enum: ['file_search'],
   })
   @Equals('file_search')
   type!: 'file_search';

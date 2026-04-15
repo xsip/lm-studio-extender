@@ -5,7 +5,8 @@ export class ComputerToolDto {
   /** The type of the computer tool. Always `computer`. */
   @ApiProperty({
     description: `The type of the computer tool. Always \`computer\`.`,
-    example: 'computer',
+    type: 'string',
+    enum: ['computer'],
   })
   @Equals('computer')
   type!: 'computer';

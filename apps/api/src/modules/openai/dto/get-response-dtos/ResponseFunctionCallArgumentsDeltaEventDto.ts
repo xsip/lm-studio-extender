@@ -37,7 +37,8 @@ export class ResponseFunctionCallArgumentsDeltaEventDto {
   /** The type of the event. Always `response.function_call_arguments.delta`. */
   @ApiProperty({
     description: `The type of the event. Always \`response.function_call_arguments.delta\`.`,
-    example: 'response.function_call_arguments.delta',
+    type: 'string',
+    enum: ['response.function_call_arguments.delta'],
   })
   @Equals('response.function_call_arguments.delta')
   type!: 'response.function_call_arguments.delta';

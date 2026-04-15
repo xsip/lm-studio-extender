@@ -29,7 +29,8 @@ export class ResponseImageGenCallCompletedEventDto {
   /** The type of the event. Always 'response.image_generation_call.completed'. */
   @ApiProperty({
     description: `The type of the event. Always 'response.image_generation_call.completed'.`,
-    example: 'response.image_generation_call.completed',
+    type: 'string',
+    enum: ['response.image_generation_call.completed'],
   })
   @Equals('response.image_generation_call.completed')
   type!: 'response.image_generation_call.completed';

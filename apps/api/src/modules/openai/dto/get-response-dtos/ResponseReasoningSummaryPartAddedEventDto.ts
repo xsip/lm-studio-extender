@@ -49,7 +49,8 @@ export class ResponseReasoningSummaryPartAddedEventDto {
   /** The type of the event. Always `response.reasoning_summary_part.added`. */
   @ApiProperty({
     description: `The type of the event. Always \`response.reasoning_summary_part.added\`.`,
-    example: 'response.reasoning_summary_part.added',
+    type: 'string',
+    enum: ['response.reasoning_summary_part.added'],
   })
   @Equals('response.reasoning_summary_part.added')
   type!: 'response.reasoning_summary_part.added';

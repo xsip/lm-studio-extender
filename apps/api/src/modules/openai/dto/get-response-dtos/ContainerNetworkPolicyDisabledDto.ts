@@ -5,7 +5,8 @@ export class ContainerNetworkPolicyDisabledDto {
   /** Disable outbound network access. Always `disabled`. */
   @ApiProperty({
     description: `Disable outbound network access. Always \`disabled\`.`,
-    example: 'disabled',
+    type: 'string',
+    enum: ['disabled'],
   })
   @Equals('disabled')
   type!: 'disabled';

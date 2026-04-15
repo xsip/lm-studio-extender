@@ -45,7 +45,8 @@ export class ResponseReasoningTextDoneEventDto {
   /** The type of the event. Always `response.reasoning_text.done`. */
   @ApiProperty({
     description: `The type of the event. Always \`response.reasoning_text.done\`.`,
-    example: 'response.reasoning_text.done',
+    type: 'string',
+    enum: ['response.reasoning_text.done'],
   })
   @Equals('response.reasoning_text.done')
   type!: 'response.reasoning_text.done';

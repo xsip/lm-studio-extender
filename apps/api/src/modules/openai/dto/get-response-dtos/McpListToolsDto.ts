@@ -35,7 +35,8 @@ export class McpListToolsDto {
   /** The type of the item. Always `mcp_list_tools`. */
   @ApiProperty({
     description: `The type of the item. Always \`mcp_list_tools\`.`,
-    example: 'mcp_list_tools',
+    type: 'string',
+    enum: ['mcp_list_tools'],
   })
   @Equals('mcp_list_tools')
   type!: 'mcp_list_tools';

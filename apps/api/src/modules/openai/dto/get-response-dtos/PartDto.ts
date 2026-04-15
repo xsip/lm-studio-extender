@@ -13,7 +13,8 @@ export class PartDto {
   /** The type of the summary part. Always `summary_text`. */
   @ApiProperty({
     description: `The type of the summary part. Always \`summary_text\`.`,
-    example: 'summary_text',
+    type: 'string',
+    enum: ['summary_text'],
   })
   @Equals('summary_text')
   type!: 'summary_text';

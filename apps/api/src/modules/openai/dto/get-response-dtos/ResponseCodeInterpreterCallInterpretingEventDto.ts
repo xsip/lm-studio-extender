@@ -33,7 +33,8 @@ export class ResponseCodeInterpreterCallInterpretingEventDto {
   /** The type of the event. Always `response.code_interpreter_call.interpreting`. */
   @ApiProperty({
     description: `The type of the event. Always \`response.code_interpreter_call.interpreting\`.`,
-    example: 'response.code_interpreter_call.interpreting',
+    type: 'string',
+    enum: ['response.code_interpreter_call.interpreting'],
   })
   @Equals('response.code_interpreter_call.interpreting')
   type!: 'response.code_interpreter_call.interpreting';

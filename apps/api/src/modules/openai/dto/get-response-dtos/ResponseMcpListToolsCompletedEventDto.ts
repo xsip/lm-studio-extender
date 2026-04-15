@@ -29,7 +29,8 @@ export class ResponseMcpListToolsCompletedEventDto {
   /** The type of the event. Always 'response.mcp_list_tools.completed'. */
   @ApiProperty({
     description: `The type of the event. Always 'response.mcp_list_tools.completed'.`,
-    example: 'response.mcp_list_tools.completed',
+    type: 'string',
+    enum: ['response.mcp_list_tools.completed'],
   })
   @Equals('response.mcp_list_tools.completed')
   type!: 'response.mcp_list_tools.completed';

@@ -49,7 +49,8 @@ export class ResponseImageGenCallPartialImageEventDto {
   /** The type of the event. Always 'response.image_generation_call.partial_image'. */
   @ApiProperty({
     description: `The type of the event. Always 'response.image_generation_call.partial_image'.`,
-    example: 'response.image_generation_call.partial_image',
+    type: 'string',
+    enum: ['response.image_generation_call.partial_image'],
   })
   @Equals('response.image_generation_call.partial_image')
   type!: 'response.image_generation_call.partial_image';

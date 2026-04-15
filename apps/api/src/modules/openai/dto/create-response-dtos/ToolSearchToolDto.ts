@@ -5,7 +5,8 @@ export class ToolSearchToolDto {
   /** The type of the tool. Always `tool_search`. */
   @ApiProperty({
     description: `The type of the tool. Always \`tool_search\`.`,
-    example: 'tool_search',
+    type: 'string',
+    enum: ['tool_search'],
   })
   @Equals('tool_search')
   type!: 'tool_search';

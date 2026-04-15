@@ -5,7 +5,8 @@ export class SourceDto {
   /** The type of source. Always `url`. */
   @ApiProperty({
     description: `The type of source. Always \`url\`.`,
-    example: 'url',
+    type: 'string',
+    enum: ['url'],
   })
   @Equals('url')
   type!: 'url';

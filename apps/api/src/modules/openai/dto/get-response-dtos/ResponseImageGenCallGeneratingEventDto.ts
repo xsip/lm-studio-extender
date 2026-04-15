@@ -29,7 +29,8 @@ export class ResponseImageGenCallGeneratingEventDto {
   /** The type of the event. Always 'response.image_generation_call.generating'. */
   @ApiProperty({
     description: `The type of the event. Always 'response.image_generation_call.generating'.`,
-    example: 'response.image_generation_call.generating',
+    type: 'string',
+    enum: ['response.image_generation_call.generating'],
   })
   @Equals('response.image_generation_call.generating')
   type!: 'response.image_generation_call.generating';

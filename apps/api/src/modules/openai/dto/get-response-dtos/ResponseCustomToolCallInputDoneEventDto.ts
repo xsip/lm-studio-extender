@@ -37,7 +37,8 @@ export class ResponseCustomToolCallInputDoneEventDto {
   /** The event type identifier. */
   @ApiProperty({
     description: `The event type identifier.`,
-    example: 'response.custom_tool_call_input.done',
+    type: 'string',
+    enum: ['response.custom_tool_call_input.done'],
   })
   @Equals('response.custom_tool_call_input.done')
   type!: 'response.custom_tool_call_input.done';

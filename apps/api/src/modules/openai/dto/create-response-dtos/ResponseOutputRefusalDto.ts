@@ -13,7 +13,8 @@ export class ResponseOutputRefusalDto {
   /** The type of the refusal. Always `refusal`. */
   @ApiProperty({
     description: `The type of the refusal. Always \`refusal\`.`,
-    example: 'refusal',
+    type: 'string',
+    enum: ['refusal'],
   })
   @Equals('refusal')
   type!: 'refusal';

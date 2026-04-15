@@ -17,6 +17,7 @@ export class CodeInterpreterDto {
   specifies uploaded file IDs to make available to your code, along with an
   optional \`memory_limit\` setting.`,
     oneOf: [
+      { type: 'string' },
       { $ref: getSchemaPath(CodeInterpreterToolAutoDto) },
     ],
   })
@@ -25,7 +26,8 @@ export class CodeInterpreterDto {
   /** The type of the code interpreter tool. Always `code_interpreter`. */
   @ApiProperty({
     description: `The type of the code interpreter tool. Always \`code_interpreter\`.`,
-    example: 'code_interpreter',
+    type: 'string',
+    enum: ['code_interpreter'],
   })
   @Equals('code_interpreter')
   type!: 'code_interpreter';

@@ -13,7 +13,8 @@ export class LogsDto {
   /** The type of the output. Always `logs`. */
   @ApiProperty({
     description: `The type of the output. Always \`logs\`.`,
-    example: 'logs',
+    type: 'string',
+    enum: ['logs'],
   })
   @Equals('logs')
   type!: 'logs';

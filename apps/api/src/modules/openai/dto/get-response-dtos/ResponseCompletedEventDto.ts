@@ -25,7 +25,8 @@ export class ResponseCompletedEventDto {
   /** The type of the event. Always `response.completed`. */
   @ApiProperty({
     description: `The type of the event. Always \`response.completed\`.`,
-    example: 'response.completed',
+    type: 'string',
+    enum: ['response.completed'],
   })
   @Equals('response.completed')
   type!: 'response.completed';

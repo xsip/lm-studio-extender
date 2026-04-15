@@ -5,7 +5,8 @@ export class TimeoutDto {
   /** The outcome type. Always `timeout`. */
   @ApiProperty({
     description: `The outcome type. Always \`timeout\`.`,
-    example: 'timeout',
+    type: 'string',
+    enum: ['timeout'],
   })
   @Equals('timeout')
   type!: 'timeout';

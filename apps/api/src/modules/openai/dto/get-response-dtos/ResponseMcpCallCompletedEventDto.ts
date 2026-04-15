@@ -29,7 +29,8 @@ export class ResponseMcpCallCompletedEventDto {
   /** The type of the event. Always 'response.mcp_call.completed'. */
   @ApiProperty({
     description: `The type of the event. Always 'response.mcp_call.completed'.`,
-    example: 'response.mcp_call.completed',
+    type: 'string',
+    enum: ['response.mcp_call.completed'],
   })
   @Equals('response.mcp_call.completed')
   type!: 'response.mcp_call.completed';

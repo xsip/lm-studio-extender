@@ -35,12 +35,13 @@ export class NamespaceToolDto {
     ],
   })
   @IsArray()
-  tools!: CustomToolDto | _Inline_6nksgqDto[];
+  tools!: (CustomToolDto | _Inline_6nksgqDto)[];
 
   /** The type of the tool. Always `namespace`. */
   @ApiProperty({
     description: `The type of the tool. Always \`namespace\`.`,
-    example: 'namespace',
+    type: 'string',
+    enum: ['namespace'],
   })
   @Equals('namespace')
   type!: 'namespace';

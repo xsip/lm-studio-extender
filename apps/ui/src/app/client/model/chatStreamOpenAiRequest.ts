@@ -7,10 +7,18 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { ResponseCreateParamsNonStreamingDtoConversation } from './responseCreateParamsNonStreamingDtoConversation';
 import { ResponseCreateParamsStreamingDto } from './responseCreateParamsStreamingDto';
-import { ResponsesModelDto } from './responsesModelDto';
+import { ResponseInputFileContentDto } from './responseInputFileContentDto';
+import { ResponseCreateParamsNonStreamingDtoToolChoice } from './responseCreateParamsNonStreamingDtoToolChoice';
 import { ResponseTextConfigDto } from './responseTextConfigDto';
-import { ResponseCreateParamsDto } from './responseCreateParamsDto';
+import { ResponseToolSearchOutputItemParamDtoToolsInner } from './responseToolSearchOutputItemParamDtoToolsInner';
+import { ResponseCreateParamsNonStreamingDtoInputInner } from './responseCreateParamsNonStreamingDtoInputInner';
+import { ReasoningDto } from './reasoningDto';
+import { ContextManagementDto } from './contextManagementDto';
+import { ResponseCreateParamsNonStreamingDtoModel } from './responseCreateParamsNonStreamingDtoModel';
+import { StreamOptionsDto } from './streamOptionsDto';
+import { ResponsePromptDto } from './responsePromptDto';
 import { ResponseCreateParamsNonStreamingDto } from './responseCreateParamsNonStreamingDto';
 
 
@@ -18,5 +26,5 @@ import { ResponseCreateParamsNonStreamingDto } from './responseCreateParamsNonSt
  * @type ChatStreamOpenAiRequest
  * @export
  */
-export type ChatStreamOpenAiRequest = ResponseCreateParamsDto | ResponseCreateParamsNonStreamingDto | ResponseCreateParamsStreamingDto;
+export type ChatStreamOpenAiRequest = ResponseCreateParamsNonStreamingDto | ResponseCreateParamsStreamingDto | ResponseInputFileContentDto;
 

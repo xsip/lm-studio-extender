@@ -21,7 +21,8 @@ export class FilePathDto {
   /** The type of the file path. Always `file_path`. */
   @ApiProperty({
     description: `The type of the file path. Always \`file_path\`.`,
-    example: 'file_path',
+    type: 'string',
+    enum: ['file_path'],
   })
   @Equals('file_path')
   type!: 'file_path';

@@ -45,7 +45,7 @@ export class ResponseCodeInterpreterToolCallDto {
       { $ref: getSchemaPath(ImageDto) },
     ],
   })
-  outputs!: null | LogsDto | ImageDto[];
+  outputs!: null | (LogsDto | ImageDto)[];
 
   /**
    * The status of the code interpreter tool call. Valid values are `in_progress`,
@@ -62,7 +62,8 @@ export class ResponseCodeInterpreterToolCallDto {
   /** The type of the code interpreter tool call. Always `code_interpreter_call`. */
   @ApiProperty({
     description: `The type of the code interpreter tool call. Always \`code_interpreter_call\`.`,
-    example: 'code_interpreter_call',
+    type: 'string',
+    enum: ['code_interpreter_call'],
   })
   @Equals('code_interpreter_call')
   type!: 'code_interpreter_call';

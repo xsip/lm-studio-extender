@@ -59,7 +59,8 @@ export class ResponseTextDeltaEventDto {
   /** The type of the event. Always `response.output_text.delta`. */
   @ApiProperty({
     description: `The type of the event. Always \`response.output_text.delta\`.`,
-    example: 'response.output_text.delta',
+    type: 'string',
+    enum: ['response.output_text.delta'],
   })
   @Equals('response.output_text.delta')
   type!: 'response.output_text.delta';

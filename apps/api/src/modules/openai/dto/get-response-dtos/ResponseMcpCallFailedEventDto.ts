@@ -29,7 +29,8 @@ export class ResponseMcpCallFailedEventDto {
   /** The type of the event. Always 'response.mcp_call.failed'. */
   @ApiProperty({
     description: `The type of the event. Always 'response.mcp_call.failed'.`,
-    example: 'response.mcp_call.failed',
+    type: 'string',
+    enum: ['response.mcp_call.failed'],
   })
   @Equals('response.mcp_call.failed')
   type!: 'response.mcp_call.failed';

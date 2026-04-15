@@ -13,7 +13,8 @@ export class InlineSkillSourceDto {
   /** The media type of the inline skill payload. Must be `application/zip`. */
   @ApiProperty({
     description: `The media type of the inline skill payload. Must be \`application/zip\`.`,
-    example: 'application/zip',
+    type: 'string',
+    enum: ['application/zip'],
   })
   @Equals('application/zip')
   media_type!: 'application/zip';
@@ -21,7 +22,8 @@ export class InlineSkillSourceDto {
   /** The type of the inline skill source. Must be `base64`. */
   @ApiProperty({
     description: `The type of the inline skill source. Must be \`base64\`.`,
-    example: 'base64',
+    type: 'string',
+    enum: ['base64'],
   })
   @Equals('base64')
   type!: 'base64';

@@ -33,7 +33,8 @@ export class InlineSkillDto {
   /** Defines an inline skill for this request. */
   @ApiProperty({
     description: `Defines an inline skill for this request.`,
-    example: 'inline',
+    type: 'string',
+    enum: ['inline'],
   })
   @Equals('inline')
   type!: 'inline';

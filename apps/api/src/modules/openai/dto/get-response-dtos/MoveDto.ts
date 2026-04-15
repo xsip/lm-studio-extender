@@ -9,7 +9,8 @@ export class MoveDto {
   @ApiProperty({
     description: `Specifies the event type. For a move action, this property is always set to
   \`move\`.`,
-    example: 'move',
+    type: 'string',
+    enum: ['move'],
   })
   @Equals('move')
   type!: 'move';

@@ -27,12 +27,13 @@ export class ResponseOutputMessageDto {
     ],
   })
   @IsArray()
-  content!: ResponseOutputTextDto | ResponseOutputRefusalDto[];
+  content!: (ResponseOutputTextDto | ResponseOutputRefusalDto)[];
 
   /** The role of the output message. Always `assistant`. */
   @ApiProperty({
     description: `The role of the output message. Always \`assistant\`.`,
-    example: 'assistant',
+    type: 'string',
+    enum: ['assistant'],
   })
   @Equals('assistant')
   role!: 'assistant';
@@ -52,7 +53,8 @@ export class ResponseOutputMessageDto {
   /** The type of the output message. Always `message`. */
   @ApiProperty({
     description: `The type of the output message. Always \`message\`.`,
-    example: 'message',
+    type: 'string',
+    enum: ['message'],
   })
   @Equals('message')
   type!: 'message';

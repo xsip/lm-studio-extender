@@ -9,7 +9,8 @@ export class ToolSearchCallDto {
   /** The item type. Always `tool_search_call`. */
   @ApiProperty({
     description: `The item type. Always \`tool_search_call\`.`,
-    example: 'tool_search_call',
+    type: 'string',
+    enum: ['tool_search_call'],
   })
   @Equals('tool_search_call')
   type!: 'tool_search_call';

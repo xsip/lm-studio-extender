@@ -57,7 +57,8 @@ export class ResponseContentPartDoneEventDto {
   /** The type of the event. Always `response.content_part.done`. */
   @ApiProperty({
     description: `The type of the event. Always \`response.content_part.done\`.`,
-    example: 'response.content_part.done',
+    type: 'string',
+    enum: ['response.content_part.done'],
   })
   @Equals('response.content_part.done')
   type!: 'response.content_part.done';

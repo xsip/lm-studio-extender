@@ -16,7 +16,8 @@ export class ContainerAutoDto {
   /** Automatically creates a container for this request */
   @ApiProperty({
     description: `Automatically creates a container for this request`,
-    example: 'container_auto',
+    type: 'string',
+    enum: ['container_auto'],
   })
   @Equals('container_auto')
   type!: 'container_auto';
@@ -66,5 +67,5 @@ export class ContainerAutoDto {
   })
   @IsOptional()
   @IsArray()
-  skills?: SkillReferenceDto | InlineSkillDto[];
+  skills?: (SkillReferenceDto | InlineSkillDto)[];
 }

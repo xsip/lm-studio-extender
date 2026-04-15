@@ -9,7 +9,8 @@ export class ResponseComputerToolCallOutputScreenshotDto {
   @ApiProperty({
     description: `Specifies the event type. For a computer screenshot, this property is always set
   to \`computer_screenshot\`.`,
-    example: 'computer_screenshot',
+    type: 'string',
+    enum: ['computer_screenshot'],
   })
   @Equals('computer_screenshot')
   type!: 'computer_screenshot';

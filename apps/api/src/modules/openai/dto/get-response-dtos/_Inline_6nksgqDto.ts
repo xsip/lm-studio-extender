@@ -6,7 +6,10 @@ export class _Inline_6nksgqDto {
   @IsString()
   name!: string;
 
-  @ApiProperty({ example: 'function' })
+  @ApiProperty({
+    type: 'string',
+    enum: ['function'],
+  })
   @Equals('function')
   type!: 'function';
 

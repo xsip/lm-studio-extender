@@ -12,7 +12,8 @@ export class CodeInterpreterToolAutoDto {
   /** Always `auto`. */
   @ApiProperty({
     description: `Always \`auto\`.`,
-    example: 'auto',
+    type: 'string',
+    enum: ['auto'],
   })
   @Equals('auto')
   type!: 'auto';

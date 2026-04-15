@@ -5,7 +5,8 @@ export class OpenPageDto {
   /** The action type. */
   @ApiProperty({
     description: `The action type.`,
-    example: 'open_page',
+    type: 'string',
+    enum: ['open_page'],
   })
   @Equals('open_page')
   type!: 'open_page';

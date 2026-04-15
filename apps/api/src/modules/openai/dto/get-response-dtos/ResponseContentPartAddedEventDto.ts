@@ -57,7 +57,8 @@ export class ResponseContentPartAddedEventDto {
   /** The type of the event. Always `response.content_part.added`. */
   @ApiProperty({
     description: `The type of the event. Always \`response.content_part.added\`.`,
-    example: 'response.content_part.added',
+    type: 'string',
+    enum: ['response.content_part.added'],
   })
   @Equals('response.content_part.added')
   type!: 'response.content_part.added';

@@ -25,7 +25,8 @@ export class ResponseCreatedEventDto {
   /** The type of the event. Always `response.created`. */
   @ApiProperty({
     description: `The type of the event. Always \`response.created\`.`,
-    example: 'response.created',
+    type: 'string',
+    enum: ['response.created'],
   })
   @Equals('response.created')
   type!: 'response.created';

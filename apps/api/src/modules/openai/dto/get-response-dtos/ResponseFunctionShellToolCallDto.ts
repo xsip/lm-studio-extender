@@ -65,7 +65,8 @@ export class ResponseFunctionShellToolCallDto {
   /** The type of the item. Always `shell_call`. */
   @ApiProperty({
     description: `The type of the item. Always \`shell_call\`.`,
-    example: 'shell_call',
+    type: 'string',
+    enum: ['shell_call'],
   })
   @Equals('shell_call')
   type!: 'shell_call';

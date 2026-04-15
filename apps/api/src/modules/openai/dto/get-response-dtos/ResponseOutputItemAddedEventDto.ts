@@ -107,7 +107,8 @@ export class ResponseOutputItemAddedEventDto {
   /** The type of the event. Always `response.output_item.added`. */
   @ApiProperty({
     description: `The type of the event. Always \`response.output_item.added\`.`,
-    example: 'response.output_item.added',
+    type: 'string',
+    enum: ['response.output_item.added'],
   })
   @Equals('response.output_item.added')
   type!: 'response.output_item.added';

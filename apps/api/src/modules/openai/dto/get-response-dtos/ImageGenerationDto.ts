@@ -12,7 +12,8 @@ export class ImageGenerationDto {
   /** The type of the image generation tool. Always `image_generation`. */
   @ApiProperty({
     description: `The type of the image generation tool. Always \`image_generation\`.`,
-    example: 'image_generation',
+    type: 'string',
+    enum: ['image_generation'],
   })
   @Equals('image_generation')
   type!: 'image_generation';
@@ -80,6 +81,7 @@ export class ImageGenerationDto {
     description: `The image generation model to use. Default: \`gpt-image-1\`.`,
     oneOf: [
       { $ref: getSchemaPath(_Inline_0Dto) },
+      { type: 'string' },
     ],
   })
   @IsOptional()

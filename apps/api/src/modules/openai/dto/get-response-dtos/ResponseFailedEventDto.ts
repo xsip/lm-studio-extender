@@ -25,7 +25,8 @@ export class ResponseFailedEventDto {
   /** The type of the event. Always `response.failed`. */
   @ApiProperty({
     description: `The type of the event. Always \`response.failed\`.`,
-    example: 'response.failed',
+    type: 'string',
+    enum: ['response.failed'],
   })
   @Equals('response.failed')
   type!: 'response.failed';

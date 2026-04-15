@@ -16,7 +16,8 @@ export class SearchDto {
   /** The action type. */
   @ApiProperty({
     description: `The action type.`,
-    example: 'search',
+    type: 'string',
+    enum: ['search'],
   })
   @Equals('search')
   type!: 'search';

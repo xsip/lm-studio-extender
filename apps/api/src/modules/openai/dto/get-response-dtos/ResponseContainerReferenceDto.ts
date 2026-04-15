@@ -9,7 +9,8 @@ export class ResponseContainerReferenceDto {
   /** The environment type. Always `container_reference`. */
   @ApiProperty({
     description: `The environment type. Always \`container_reference\`.`,
-    example: 'container_reference',
+    type: 'string',
+    enum: ['container_reference'],
   })
   @Equals('container_reference')
   type!: 'container_reference';

@@ -20,7 +20,8 @@ export class McpDto {
   /** The type of the MCP tool. Always `mcp`. */
   @ApiProperty({
     description: `The type of the MCP tool. Always \`mcp\`.`,
-    example: 'mcp',
+    type: 'string',
+    enum: ['mcp'],
   })
   @Equals('mcp')
   type!: 'mcp';
@@ -29,8 +30,10 @@ export class McpDto {
   @ApiProperty({
     required: false,
     description: `List of allowed tool names or a filter object.`,
+    isArray: true,
     oneOf: [
       { $ref: getSchemaPath(McpToolFilterDto) },
+      { type: 'string' },
     ],
   })
   @IsOptional()
@@ -118,6 +121,7 @@ export class McpDto {
     description: `Specify which of the MCP server's tools require approval.`,
     oneOf: [
       { $ref: getSchemaPath(McpToolApprovalFilterDto) },
+      { type: 'string' },
     ],
   })
   @IsOptional()

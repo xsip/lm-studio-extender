@@ -45,7 +45,8 @@ export class ResponseRefusalDoneEventDto {
   /** The type of the event. Always `response.refusal.done`. */
   @ApiProperty({
     description: `The type of the event. Always \`response.refusal.done\`.`,
-    example: 'response.refusal.done',
+    type: 'string',
+    enum: ['response.refusal.done'],
   })
   @Equals('response.refusal.done')
   type!: 'response.refusal.done';

@@ -25,7 +25,8 @@ export class ResponseInProgressEventDto {
   /** The type of the event. Always `response.in_progress`. */
   @ApiProperty({
     description: `The type of the event. Always \`response.in_progress\`.`,
-    example: 'response.in_progress',
+    type: 'string',
+    enum: ['response.in_progress'],
   })
   @Equals('response.in_progress')
   type!: 'response.in_progress';

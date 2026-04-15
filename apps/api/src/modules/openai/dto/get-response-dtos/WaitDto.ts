@@ -9,7 +9,8 @@ export class WaitDto {
   @ApiProperty({
     description: `Specifies the event type. For a wait action, this property is always set to
   \`wait\`.`,
-    example: 'wait',
+    type: 'string',
+    enum: ['wait'],
   })
   @Equals('wait')
   type!: 'wait';

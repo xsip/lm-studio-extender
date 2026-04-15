@@ -25,7 +25,8 @@ export class ResponseQueuedEventDto {
   /** The type of the event. Always 'response.queued'. */
   @ApiProperty({
     description: `The type of the event. Always 'response.queued'.`,
-    example: 'response.queued',
+    type: 'string',
+    enum: ['response.queued'],
   })
   @Equals('response.queued')
   type!: 'response.queued';

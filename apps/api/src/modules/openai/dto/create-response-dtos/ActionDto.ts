@@ -18,7 +18,8 @@ export class ActionDto {
   /** The type of the local shell action. Always `exec`. */
   @ApiProperty({
     description: `The type of the local shell action. Always \`exec\`.`,
-    example: 'exec',
+    type: 'string',
+    enum: ['exec'],
   })
   @Equals('exec')
   type!: 'exec';

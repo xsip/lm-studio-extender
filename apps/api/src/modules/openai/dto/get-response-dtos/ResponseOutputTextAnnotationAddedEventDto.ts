@@ -49,7 +49,8 @@ export class ResponseOutputTextAnnotationAddedEventDto {
   /** The type of the event. Always 'response.output_text.annotation.added'. */
   @ApiProperty({
     description: `The type of the event. Always 'response.output_text.annotation.added'.`,
-    example: 'response.output_text.annotation.added',
+    type: 'string',
+    enum: ['response.output_text.annotation.added'],
   })
   @Equals('response.output_text.annotation.added')
   type!: 'response.output_text.annotation.added';

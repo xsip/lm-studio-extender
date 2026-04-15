@@ -37,7 +37,8 @@ export class McpCallDto {
   /** The type of the item. Always `mcp_call`. */
   @ApiProperty({
     description: `The type of the item. Always \`mcp_call\`.`,
-    example: 'mcp_call',
+    type: 'string',
+    enum: ['mcp_call'],
   })
   @Equals('mcp_call')
   type!: 'mcp_call';

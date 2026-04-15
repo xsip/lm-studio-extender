@@ -29,7 +29,8 @@ export class ResponseFileSearchCallCompletedEventDto {
   /** The type of the event. Always `response.file_search_call.completed`. */
   @ApiProperty({
     description: `The type of the event. Always \`response.file_search_call.completed\`.`,
-    example: 'response.file_search_call.completed',
+    type: 'string',
+    enum: ['response.file_search_call.completed'],
   })
   @Equals('response.file_search_call.completed')
   type!: 'response.file_search_call.completed';

@@ -29,7 +29,8 @@ export class ResponseFunctionToolCallDto {
   /** The type of the function tool call. Always `function_call`. */
   @ApiProperty({
     description: `The type of the function tool call. Always \`function_call\`.`,
-    example: 'function_call',
+    type: 'string',
+    enum: ['function_call'],
   })
   @Equals('function_call')
   type!: 'function_call';

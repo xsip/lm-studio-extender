@@ -15,9 +15,18 @@ export class EasyInputMessageDto {
    * Text, image, or audio input to the model, used to generate a response. Can also
    * contain previous assistant responses.
    */
-  @ApiProperty({ description: `Text, image, or audio input to the model, used to generate a response. Can also
-  contain previous assistant responses.` })
-  content!: string | ResponseInputTextDto | ResponseInputImageDto | ResponseInputFileDto[];
+  @ApiProperty({
+    description: `Text, image, or audio input to the model, used to generate a response. Can also
+  contain previous assistant responses.`,
+    isArray: true,
+    oneOf: [
+      { type: 'string' },
+      { $ref: getSchemaPath(ResponseInputTextDto) },
+      { $ref: getSchemaPath(ResponseInputImageDto) },
+      { $ref: getSchemaPath(ResponseInputFileDto) },
+    ],
+  })
+  content!: string | (ResponseInputTextDto | ResponseInputImageDto | ResponseInputFileDto)[];
 
   /**
    * The role of the message input. One of `user`, `assistant`, `system`, or
@@ -53,7 +62,8 @@ export class EasyInputMessageDto {
   @ApiProperty({
     required: false,
     description: `The type of the message input. Always \`message\`.`,
-    example: 'message',
+    type: 'string',
+    enum: ['message'],
   })
   @IsOptional()
   @Equals('message')

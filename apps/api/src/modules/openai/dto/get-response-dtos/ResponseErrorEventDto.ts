@@ -35,7 +35,8 @@ export class ResponseErrorEventDto {
   /** The type of the event. Always `error`. */
   @ApiProperty({
     description: `The type of the event. Always \`error\`.`,
-    example: 'error',
+    type: 'string',
+    enum: ['error'],
   })
   @Equals('error')
   type!: 'error';

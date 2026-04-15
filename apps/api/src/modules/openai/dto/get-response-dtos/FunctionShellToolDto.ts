@@ -14,7 +14,8 @@ export class FunctionShellToolDto {
   /** The type of the shell tool. Always `shell`. */
   @ApiProperty({
     description: `The type of the shell tool. Always \`shell\`.`,
-    example: 'shell',
+    type: 'string',
+    enum: ['shell'],
   })
   @Equals('shell')
   type!: 'shell';

@@ -25,7 +25,8 @@ export class ResponseIncompleteEventDto {
   /** The type of the event. Always `response.incomplete`. */
   @ApiProperty({
     description: `The type of the event. Always \`response.incomplete\`.`,
-    example: 'response.incomplete',
+    type: 'string',
+    enum: ['response.incomplete'],
   })
   @Equals('response.incomplete')
   type!: 'response.incomplete';

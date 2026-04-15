@@ -41,7 +41,8 @@ export class ResponseMcpCallArgumentsDeltaEventDto {
   /** The type of the event. Always 'response.mcp_call_arguments.delta'. */
   @ApiProperty({
     description: `The type of the event. Always 'response.mcp_call_arguments.delta'.`,
-    example: 'response.mcp_call_arguments.delta',
+    type: 'string',
+    enum: ['response.mcp_call_arguments.delta'],
   })
   @Equals('response.mcp_call_arguments.delta')
   type!: 'response.mcp_call_arguments.delta';

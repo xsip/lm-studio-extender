@@ -13,7 +13,18 @@ import {
   ResponseReasoningTextDeltaEvent,
   McpItemTracking,
 } from '../../openai-stream.service';
-import { ChatMetadataService } from '../../client';
+import {
+  ChatMetadataService,
+  EasyInputMessageDto,
+  McpCallDto,
+  McpListToolsDto,
+  MessageOutputDto,
+  ReasoningOutputDto,
+  ResponseInputTextDto,
+  ResponseOutputItemAddedEventDto,
+  ResponseOutputItemDoneEventDto,
+  ResponseReasoningItemDto,
+} from '../../client';
 
 export interface ChatMessage {
   role: 'user' | 'ai' | 'error' | 'info' | 'tool_call' | 'reasoning' | 'mcp_list_tools';
@@ -113,25 +124,31 @@ export class ChatService {
     this.sub = this.streamService.events$.subscribe({
       next: (event) => {
         switch (event.type) {
-
           // ── A new output item starts ──────────────────────────────────────
-          case 'response.output_item.added': {
+          case ResponseOutputItemAddedEventDto.TypeEnum.ResponseOutputItemAdded: {
             const e = event as ResponseOutputItemAddedEvent;
             const item = e.item as any;
 
-            if (item.type === 'reasoning') {
+            if (item.type === ReasoningOutputDto.TypeEnum.Reasoning) {
               this.chatMessages.update((msgs) => [
                 ...msgs,
-                { role: 'reasoning', text: '', streaming: true, collapsed: false, date: new Date(), itemId: item.id },
+                {
+                  role: 'reasoning',
+                  text: '',
+                  streaming: true,
+                  collapsed: false,
+                  date: new Date(),
+                  itemId: item.id,
+                },
               ]);
-            } else if (item.type === 'message') {
+            } else if (item.type === MessageOutputDto.TypeEnum.Message) {
               this.chatMessages.update((msgs) => [
                 ...msgs,
                 { role: 'ai', text: '', streaming: true, itemId: item.id },
               ]);
-            } else if (item.type === 'mcp_list_tools') {
+            } else if (item.type === McpListToolsDto.TypeEnum.McpListTools) {
               // Track but don't show in chat
-            } else if (item.type === 'mcp_call') {
+            } else if (item.type === McpCallDto.TypeEnum.McpCall) {
               const serverLabel = item.server_label ?? item.name ?? undefined;
               this.mcpTracking.set(item.id, {
                 itemId: item.id,
@@ -157,25 +174,28 @@ export class ChatService {
           }
 
           // ── An output item is fully done ─────────────────────────────────
-          case 'response.output_item.done': {
-            const e = event as ResponseOutputItemDoneEvent;
-            const item = e.item as any;
+          case ResponseOutputItemDoneEventDto.TypeEnum.ResponseOutputItemDone: {
+            const e = event as ResponseOutputItemDoneEventDto;
+            const item = e.item;
 
-            if (item.type === 'reasoning') {
+            if (item.type === ResponseReasoningItemDto.TypeEnum.Reasoning && item.id) {
               this.patchByItemId(item.id, { streaming: false, collapsed: true });
             } else if (item.type === 'message') {
               // stats will be applied by response.completed
               this.patchByItemId(item.id, { streaming: false });
-            } else if (item.type === 'mcp_call') {
+            } else if (item.type === McpCallDto.TypeEnum.McpCall) {
               const tracking = this.mcpTracking.get(item.id);
-              if (item.status === 'completed') {
+              if (item.status === 'completed' && 'output' in item) {
                 // Extract output from item.output if present
                 let outputText: string = item.output ?? '';
                 try {
                   const parsed = JSON.parse(outputText);
                   if (Array.isArray(parsed) && parsed[0]?.text != null) outputText = parsed[0].text;
-                  else if (typeof parsed === 'object' && parsed !== null) outputText = JSON.stringify(parsed, null, 2);
-                } catch { /* leave as-is */ }
+                  else if (typeof parsed === 'object' && parsed !== null)
+                    outputText = JSON.stringify(parsed, null, 2);
+                } catch {
+                  /* leave as-is */
+                }
                 this.patchByItemId(item.id, {
                   toolOutput: outputText || undefined,
                   toolName: tracking?.toolName ?? item.name ?? '…',
@@ -310,7 +330,33 @@ export class ChatService {
     });
 
     this.streamService.chat(
-      { model: selectedModelId, input, store: true },
+      {
+        model: selectedModelId,
+        input: [
+          /*{
+            role: 'user',
+            content: [
+              {
+                type: 'input_file',
+                filename: 'base64emoji.png',
+                file_data:
+                  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVEiJtZZPbBtFFMZ/M7ubXdtdb1xSFyeilBapySVU8h8OoFaooFSqiihIVIpQBKci6KEg9Q6H9kovIHoCIVQJJCKE1ENFjnAgcaSGC6rEnxBwA04Tx43t2FnvDAfjkNibxgHxnWb2e/u992bee7tCa00YFsffekFY+nUzFtjW0LrvjRXrCDIAaPLlW0nHL0SsZtVoaF98mLrx3pdhOqLtYPHChahZcYYO7KvPFxvRl5XPp1sN3adWiD1ZAqD6XYK1b/dvE5IWryTt2udLFedwc1+9kLp+vbbpoDh+6TklxBeAi9TL0taeWpdmZzQDry0AcO+jQ12RyohqqoYoo8RDwJrU+qXkjWtfi8Xxt58BdQuwQs9qC/afLwCw8tnQbqYAPsgxE1S6F3EAIXux2oQFKm0ihMsOF71dHYx+f3NND68ghCu1YIoePPQN1pGRABkJ6Bus96CutRZMydTl+TvuiRW1m3n0eDl0vRPcEysqdXn+jsQPsrHMquGeXEaY4Yk4wxWcY5V/9scqOMOVUFthatyTy8QyqwZ+kDURKoMWxNKr2EeqVKcTNOajqKoBgOE28U4tdQl5p5bwCw7BWquaZSzAPlwjlithJtp3pTImSqQRrb2Z8PHGigD4RZuNX6JYj6wj7O4TFLbCO/Mn/m8R+h6rYSUb3ekokRY6f/YukArN979jcW+V/S8g0eT/N3VN3kTqWbQ428m9/8k0P/1aIhF36PccEl6EhOcAUCrXKZXXWS3XKd2vc/TRBG9O5ELC17MmWubD2nKhUKZa26Ba2+D3P+4/MNCFwg59oWVeYhkzgN/JDR8deKBoD7Y+ljEjGZ0sosXVTvbc6RHirr2reNy1OXd6pJsQ+gqjk8VWFYmHrwBzW/n+uMPFiRwHB2I7ih8ciHFxIkd/3Omk5tCDV1t+2nNu5sxxpDFNx+huNhVT3/zMDz8usXC3ddaHBj1GHj/As08fwTS7Kt1HBTmyN29vdwAw+/wbwLVOJ3uAD1wi/dUH7Qei66PfyuRj4Ik9is+hglfbkbfR3cnZm7chlUWLdwmprtCohX4HUtlOcQjLYCu+fzGJH2QRKvP3UNz8bWk1qMxjGTOMThZ3kvgLI5AzFfo379UAAAAASUVORK5CYII=',
+              },
+            ],
+          },*/
+          {
+            type: 'message',
+            role: 'user',
+            content: [
+              {
+                type: 'input_text',
+                text: input,
+              },
+            ],
+          },
+        ],
+        store: true,
+      },
       this.currentChatId() ?? undefined,
     );
   }
@@ -336,6 +382,10 @@ export class ChatService {
   private safeParseJson(value: unknown): object | undefined {
     if (typeof value === 'object' && value !== null) return value as object;
     if (typeof value !== 'string') return undefined;
-    try { return JSON.parse(value); } catch { return undefined; }
+    try {
+      return JSON.parse(value);
+    } catch {
+      return undefined;
+    }
   }
 }

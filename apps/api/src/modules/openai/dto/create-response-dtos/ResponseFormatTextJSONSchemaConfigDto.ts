@@ -25,7 +25,8 @@ export class ResponseFormatTextJSONSchemaConfigDto {
   /** The type of response format being defined. Always `json_schema`. */
   @ApiProperty({
     description: `The type of response format being defined. Always \`json_schema\`.`,
-    example: 'json_schema',
+    type: 'string',
+    enum: ['json_schema'],
   })
   @Equals('json_schema')
   type!: 'json_schema';

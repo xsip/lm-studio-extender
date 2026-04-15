@@ -29,7 +29,8 @@ export class ResponseMcpListToolsFailedEventDto {
   /** The type of the event. Always 'response.mcp_list_tools.failed'. */
   @ApiProperty({
     description: `The type of the event. Always 'response.mcp_list_tools.failed'.`,
-    example: 'response.mcp_list_tools.failed',
+    type: 'string',
+    enum: ['response.mcp_list_tools.failed'],
   })
   @Equals('response.mcp_list_tools.failed')
   type!: 'response.mcp_list_tools.failed';

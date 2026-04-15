@@ -55,7 +55,8 @@ export class ToolChoiceAllowedDto {
   /** Allowed tool configuration type. Always `allowed_tools`. */
   @ApiProperty({
     description: `Allowed tool configuration type. Always \`allowed_tools\`.`,
-    example: 'allowed_tools',
+    type: 'string',
+    enum: ['allowed_tools'],
   })
   @Equals('allowed_tools')
   type!: 'allowed_tools';

@@ -25,7 +25,8 @@ export class ScrollDto {
   @ApiProperty({
     description: `Specifies the event type. For a scroll action, this property is always set to
   \`scroll\`.`,
-    example: 'scroll',
+    type: 'string',
+    enum: ['scroll'],
   })
   @Equals('scroll')
   type!: 'scroll';

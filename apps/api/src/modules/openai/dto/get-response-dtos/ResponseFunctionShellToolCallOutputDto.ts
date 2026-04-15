@@ -62,7 +62,8 @@ export class ResponseFunctionShellToolCallOutputDto {
   /** The type of the shell call output. Always `shell_call_output`. */
   @ApiProperty({
     description: `The type of the shell call output. Always \`shell_call_output\`.`,
-    example: 'shell_call_output',
+    type: 'string',
+    enum: ['shell_call_output'],
   })
   @Equals('shell_call_output')
   type!: 'shell_call_output';

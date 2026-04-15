@@ -45,7 +45,8 @@ export class ContainerFileCitationDto {
   /** The type of the container file citation. Always `container_file_citation`. */
   @ApiProperty({
     description: `The type of the container file citation. Always \`container_file_citation\`.`,
-    example: 'container_file_citation',
+    type: 'string',
+    enum: ['container_file_citation'],
   })
   @Equals('container_file_citation')
   type!: 'container_file_citation';

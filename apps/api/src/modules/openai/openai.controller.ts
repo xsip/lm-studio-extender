@@ -34,6 +34,62 @@ import { OpenAiService } from './openai.service';
 import { ModelOpenAiDto } from './dto/model-dtos';
 import { ResponseCreateParamsNonStreamingDto } from './dto/create-response-dtos';
 import { ResponseCreateParamsStreamingDto } from './dto/create-response-dtos/ResponseCreateParamsStreamingDto';
+import {
+  ResponseAudioDeltaEventDto,
+  ResponseAudioDoneEventDto,
+  ResponseAudioTranscriptDeltaEventDto,
+  ResponseAudioTranscriptDoneEventDto,
+  ResponseCodeInterpreterCallCodeDeltaEventDto,
+  ResponseCodeInterpreterCallCodeDoneEventDto,
+  ResponseCodeInterpreterCallCompletedEventDto,
+  ResponseCodeInterpreterCallInProgressEventDto,
+  ResponseCodeInterpreterCallInterpretingEventDto,
+  ResponseCompletedEventDto,
+  ResponseContentPartAddedEventDto,
+  ResponseContentPartDoneEventDto,
+  ResponseCreatedEventDto,
+  ResponseCustomToolCallInputDeltaEventDto,
+  ResponseCustomToolCallInputDoneEventDto,
+  ResponseErrorEventDto,
+  ResponseFailedEventDto,
+  ResponseFileSearchCallCompletedEventDto,
+  ResponseFileSearchCallInProgressEventDto,
+  ResponseFileSearchCallSearchingEventDto,
+  ResponseFunctionCallArgumentsDeltaEventDto,
+  ResponseFunctionCallArgumentsDoneEventDto,
+  ResponseImageGenCallCompletedEventDto,
+  ResponseImageGenCallGeneratingEventDto,
+  ResponseImageGenCallInProgressEventDto,
+  ResponseImageGenCallPartialImageEventDto,
+  ResponseIncompleteEventDto,
+  ResponseInProgressEventDto,
+  ResponseInputFileContentDto,
+  ResponseMcpCallArgumentsDeltaEventDto,
+  ResponseMcpCallArgumentsDoneEventDto,
+  ResponseMcpCallCompletedEventDto,
+  ResponseMcpCallFailedEventDto,
+  ResponseMcpCallInProgressEventDto,
+  ResponseMcpListToolsCompletedEventDto,
+  ResponseMcpListToolsFailedEventDto,
+  ResponseMcpListToolsInProgressEventDto,
+  ResponseOutputItemAddedEventDto,
+  ResponseOutputItemDoneEventDto,
+  ResponseOutputTextAnnotationAddedEventDto,
+  ResponseQueuedEventDto,
+  ResponseReasoningSummaryPartAddedEventDto,
+  ResponseReasoningSummaryPartDoneEventDto,
+  ResponseReasoningSummaryTextDeltaEventDto,
+  ResponseReasoningSummaryTextDoneEventDto,
+  ResponseReasoningTextDeltaEventDto,
+  ResponseReasoningTextDoneEventDto,
+  ResponseRefusalDeltaEventDto,
+  ResponseRefusalDoneEventDto,
+  ResponseTextDeltaEventDto,
+  ResponseTextDoneEventDto,
+  ResponseWebSearchCallCompletedEventDto,
+  ResponseWebSearchCallInProgressEventDto,
+  ResponseWebSearchCallSearchingEventDto,
+} from './dto/get-response-dtos';
 
 @ApiTags('OpenAI')
 @ApiBearerAuth()
@@ -57,7 +113,120 @@ export class OpenaiController {
   getModels(): Promise<ModelOpenAiDto[]> {
     return this.openAiService.getModels();
   }
+  /*
 
+export type ResponseStreamEvent =
+  | ResponseAudioDeltaEvent
+  | ResponseAudioDoneEvent
+  | ResponseAudioTranscriptDeltaEvent
+  | ResponseAudioTranscriptDoneEvent
+  | ResponseCodeInterpreterCallCodeDeltaEvent
+  | ResponseCodeInterpreterCallCodeDoneEvent
+  | ResponseCodeInterpreterCallCompletedEvent
+  | ResponseCodeInterpreterCallInProgressEvent
+  | ResponseCodeInterpreterCallInterpretingEvent
+  | ResponseCompletedEvent
+  | ResponseContentPartAddedEvent
+  | ResponseContentPartDoneEvent
+  | ResponseCreatedEvent
+  | ResponseErrorEvent
+  | ResponseFileSearchCallCompletedEvent
+  | ResponseFileSearchCallInProgressEvent
+  | ResponseFileSearchCallSearchingEvent
+  | ResponseFunctionCallArgumentsDeltaEvent
+  | ResponseFunctionCallArgumentsDoneEvent
+  | ResponseInProgressEvent
+  | ResponseFailedEvent
+  | ResponseIncompleteEvent
+  | ResponseOutputItemAddedEvent
+  | ResponseOutputItemDoneEvent
+  | ResponseReasoningSummaryPartAddedEvent
+  | ResponseReasoningSummaryPartDoneEvent
+  | ResponseReasoningSummaryTextDeltaEvent
+  | ResponseReasoningSummaryTextDoneEvent
+  | ResponseReasoningTextDeltaEvent
+  | ResponseReasoningTextDoneEvent
+  | ResponseRefusalDeltaEvent
+  | ResponseRefusalDoneEvent
+  | ResponseTextDeltaEvent
+  | ResponseTextDoneEvent
+  | ResponseWebSearchCallCompletedEvent
+  | ResponseWebSearchCallInProgressEvent
+  | ResponseWebSearchCallSearchingEvent
+  | ResponseImageGenCallCompletedEvent
+  | ResponseImageGenCallGeneratingEvent
+  | ResponseImageGenCallInProgressEvent
+  | ResponseImageGenCallPartialImageEvent
+  | ResponseMcpCallArgumentsDeltaEvent
+  | ResponseMcpCallArgumentsDoneEvent
+  | ResponseMcpCallCompletedEvent
+  | ResponseMcpCallFailedEvent
+  | ResponseMcpCallInProgressEvent
+  | ResponseMcpListToolsCompletedEvent
+  | ResponseMcpListToolsFailedEvent
+  | ResponseMcpListToolsInProgressEvent
+  | ResponseOutputTextAnnotationAddedEvent
+  | ResponseQueuedEvent
+  | ResponseCustomToolCallInputDeltaEvent
+  | ResponseCustomToolCallInputDoneEvent;
+
+ */
+
+  @ApiExtraModels(
+    ResponseAudioDeltaEventDto,
+    ResponseAudioDoneEventDto,
+    ResponseAudioTranscriptDeltaEventDto,
+    ResponseAudioTranscriptDoneEventDto,
+    ResponseCodeInterpreterCallCodeDeltaEventDto,
+    ResponseCodeInterpreterCallCodeDoneEventDto,
+    ResponseCodeInterpreterCallCompletedEventDto,
+    ResponseCodeInterpreterCallInProgressEventDto,
+    ResponseCodeInterpreterCallInterpretingEventDto,
+    ResponseCompletedEventDto,
+    ResponseContentPartAddedEventDto,
+    ResponseContentPartDoneEventDto,
+    ResponseCreatedEventDto,
+    ResponseErrorEventDto,
+    ResponseFileSearchCallCompletedEventDto,
+    ResponseFileSearchCallInProgressEventDto,
+    ResponseFileSearchCallSearchingEventDto,
+    ResponseFunctionCallArgumentsDeltaEventDto,
+    ResponseFunctionCallArgumentsDoneEventDto,
+    ResponseInProgressEventDto,
+    ResponseFailedEventDto,
+    ResponseIncompleteEventDto,
+    ResponseOutputItemAddedEventDto,
+    ResponseOutputItemDoneEventDto,
+    ResponseReasoningSummaryPartAddedEventDto,
+    ResponseReasoningSummaryPartDoneEventDto,
+    ResponseReasoningSummaryTextDeltaEventDto,
+    ResponseReasoningSummaryTextDoneEventDto,
+    ResponseReasoningTextDeltaEventDto,
+    ResponseReasoningTextDoneEventDto,
+    ResponseRefusalDeltaEventDto,
+    ResponseRefusalDoneEventDto,
+    ResponseTextDeltaEventDto,
+    ResponseTextDoneEventDto,
+    ResponseWebSearchCallCompletedEventDto,
+    ResponseWebSearchCallInProgressEventDto,
+    ResponseWebSearchCallSearchingEventDto,
+    ResponseImageGenCallCompletedEventDto,
+    ResponseImageGenCallGeneratingEventDto,
+    ResponseImageGenCallInProgressEventDto,
+    ResponseImageGenCallPartialImageEventDto,
+    ResponseMcpCallArgumentsDeltaEventDto,
+    ResponseMcpCallArgumentsDoneEventDto,
+    ResponseMcpCallCompletedEventDto,
+    ResponseMcpCallFailedEventDto,
+    ResponseMcpCallInProgressEventDto,
+    ResponseMcpListToolsCompletedEventDto,
+    ResponseMcpListToolsFailedEventDto,
+    ResponseMcpListToolsInProgressEventDto,
+    ResponseOutputTextAnnotationAddedEventDto,
+    ResponseQueuedEventDto,
+    ResponseCustomToolCallInputDeltaEventDto,
+    ResponseCustomToolCallInputDoneEventDto,
+  )
   @Post('chat-stream')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -94,6 +263,9 @@ export class OpenaiController {
         {
           $ref: getSchemaPath(ResponseCreateParamsStreamingDto),
         },
+        {
+          $ref: getSchemaPath(ResponseInputFileContentDto),
+        },
       ],
     },
   })
@@ -109,9 +281,7 @@ export class OpenaiController {
     @CurrentUser() user: User,
     @CurrentToken() token: string,
     @Body()
-    dto:
-      | ResponseCreateParamsNonStreamingDto
-      | ResponseCreateParamsStreamingDto,
+    dto: ResponseCreateParamsNonStreamingDto | ResponseCreateParamsStreamingDto,
     @Res() res: Response,
     @Query('internalChatId') internalChatId?: string,
   ): Promise<void> {

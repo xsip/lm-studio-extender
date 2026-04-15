@@ -45,7 +45,8 @@ export class ResponseReasoningSummaryTextDeltaEventDto {
   /** The type of the event. Always `response.reasoning_summary_text.delta`. */
   @ApiProperty({
     description: `The type of the event. Always \`response.reasoning_summary_text.delta\`.`,
-    example: 'response.reasoning_summary_text.delta',
+    type: 'string',
+    enum: ['response.reasoning_summary_text.delta'],
   })
   @Equals('response.reasoning_summary_text.delta')
   type!: 'response.reasoning_summary_text.delta';

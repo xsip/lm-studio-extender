@@ -21,7 +21,8 @@ export class GrammarDto {
   /** Grammar format. Always `grammar`. */
   @ApiProperty({
     description: `Grammar format. Always \`grammar\`.`,
-    example: 'grammar',
+    type: 'string',
+    enum: ['grammar'],
   })
   @Equals('grammar')
   type!: 'grammar';

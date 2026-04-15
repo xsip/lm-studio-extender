@@ -45,7 +45,8 @@ export class ResponseRefusalDeltaEventDto {
   /** The type of the event. Always `response.refusal.delta`. */
   @ApiProperty({
     description: `The type of the event. Always \`response.refusal.delta\`.`,
-    example: 'response.refusal.delta',
+    type: 'string',
+    enum: ['response.refusal.delta'],
   })
   @Equals('response.refusal.delta')
   type!: 'response.refusal.delta';

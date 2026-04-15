@@ -21,7 +21,8 @@ export class CreateFileDto {
   /** The operation type. Always `create_file`. */
   @ApiProperty({
     description: `The operation type. Always \`create_file\`.`,
-    example: 'create_file',
+    type: 'string',
+    enum: ['create_file'],
   })
   @Equals('create_file')
   type!: 'create_file';

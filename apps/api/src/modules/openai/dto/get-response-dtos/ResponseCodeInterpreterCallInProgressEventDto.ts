@@ -33,7 +33,8 @@ export class ResponseCodeInterpreterCallInProgressEventDto {
   /** The type of the event. Always `response.code_interpreter_call.in_progress`. */
   @ApiProperty({
     description: `The type of the event. Always \`response.code_interpreter_call.in_progress\`.`,
-    example: 'response.code_interpreter_call.in_progress',
+    type: 'string',
+    enum: ['response.code_interpreter_call.in_progress'],
   })
   @Equals('response.code_interpreter_call.in_progress')
   type!: 'response.code_interpreter_call.in_progress';

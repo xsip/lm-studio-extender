@@ -50,7 +50,8 @@ export class UserLocationDto {
   @ApiProperty({
     required: false,
     description: `The type of location approximation. Always \`approximate\`.`,
-    example: 'approximate',
+    type: 'string',
+    enum: ['approximate'],
   })
   @IsOptional()
   @Equals('approximate')

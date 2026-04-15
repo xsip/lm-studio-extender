@@ -37,7 +37,8 @@ export class ResponseMcpCallArgumentsDoneEventDto {
   /** The type of the event. Always 'response.mcp_call_arguments.done'. */
   @ApiProperty({
     description: `The type of the event. Always 'response.mcp_call_arguments.done'.`,
-    example: 'response.mcp_call_arguments.done',
+    type: 'string',
+    enum: ['response.mcp_call_arguments.done'],
   })
   @Equals('response.mcp_call_arguments.done')
   type!: 'response.mcp_call_arguments.done';

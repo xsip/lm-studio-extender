@@ -13,7 +13,8 @@ export class FindDto {
   /** The action type. */
   @ApiProperty({
     description: `The action type.`,
-    example: 'find_in_page',
+    type: 'string',
+    enum: ['find_in_page'],
   })
   @Equals('find_in_page')
   type!: 'find_in_page';

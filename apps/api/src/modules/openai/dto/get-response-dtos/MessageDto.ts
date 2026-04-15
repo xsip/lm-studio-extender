@@ -26,7 +26,7 @@ export class MessageDto {
     ],
   })
   @IsArray()
-  content!: ResponseInputTextDto | ResponseInputImageDto | ResponseInputFileDto[];
+  content!: (ResponseInputTextDto | ResponseInputImageDto | ResponseInputFileDto)[];
 
   /** The role of the message input. One of `user`, `system`, or `developer`. */
   @ApiProperty({
@@ -54,7 +54,8 @@ export class MessageDto {
   @ApiProperty({
     required: false,
     description: `The type of the message input. Always set to \`message\`.`,
-    example: 'message',
+    type: 'string',
+    enum: ['message'],
   })
   @IsOptional()
   @Equals('message')

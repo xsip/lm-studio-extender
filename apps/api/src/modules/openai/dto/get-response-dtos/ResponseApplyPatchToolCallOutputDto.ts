@@ -33,7 +33,8 @@ export class ResponseApplyPatchToolCallOutputDto {
   /** The type of the item. Always `apply_patch_call_output`. */
   @ApiProperty({
     description: `The type of the item. Always \`apply_patch_call_output\`.`,
-    example: 'apply_patch_call_output',
+    type: 'string',
+    enum: ['apply_patch_call_output'],
   })
   @Equals('apply_patch_call_output')
   type!: 'apply_patch_call_output';

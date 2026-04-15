@@ -17,7 +17,8 @@ export class DoubleClickDto {
   @ApiProperty({
     description: `Specifies the event type. For a double click action, this property is always set
   to \`double_click\`.`,
-    example: 'double_click',
+    type: 'string',
+    enum: ['double_click'],
   })
   @Equals('double_click')
   type!: 'double_click';

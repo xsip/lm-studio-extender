@@ -37,7 +37,8 @@ export class ResponseCustomToolCallInputDeltaEventDto {
   /** The event type identifier. */
   @ApiProperty({
     description: `The event type identifier.`,
-    example: 'response.custom_tool_call_input.delta',
+    type: 'string',
+    enum: ['response.custom_tool_call_input.delta'],
   })
   @Equals('response.custom_tool_call_input.delta')
   type!: 'response.custom_tool_call_input.delta';

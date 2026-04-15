@@ -57,7 +57,8 @@ export class ResponseApplyPatchToolCallDto {
   /** The type of the item. Always `apply_patch_call`. */
   @ApiProperty({
     description: `The type of the item. Always \`apply_patch_call\`.`,
-    example: 'apply_patch_call',
+    type: 'string',
+    enum: ['apply_patch_call'],
   })
   @Equals('apply_patch_call')
   type!: 'apply_patch_call';

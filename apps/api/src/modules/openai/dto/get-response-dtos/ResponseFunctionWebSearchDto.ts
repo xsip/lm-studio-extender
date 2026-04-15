@@ -45,7 +45,8 @@ export class ResponseFunctionWebSearchDto {
   /** The type of the web search tool call. Always `web_search_call`. */
   @ApiProperty({
     description: `The type of the web search tool call. Always \`web_search_call\`.`,
-    example: 'web_search_call',
+    type: 'string',
+    enum: ['web_search_call'],
   })
   @Equals('web_search_call')
   type!: 'web_search_call';

@@ -67,7 +67,8 @@ export class ResponseComputerToolCallDto {
   /** The type of the computer call. Always `computer_call`. */
   @ApiProperty({
     description: `The type of the computer call. Always \`computer_call\`.`,
-    example: 'computer_call',
+    type: 'string',
+    enum: ['computer_call'],
   })
   @Equals('computer_call')
   type!: 'computer_call';
@@ -114,5 +115,5 @@ export class ResponseComputerToolCallDto {
   })
   @IsOptional()
   @IsArray()
-  actions?: ClickDto | DoubleClickDto | DragDto | KeypressDto | MoveDto | ScreenshotDto | ScrollDto | TypeDto | WaitDto[];
+  actions?: (ClickDto | DoubleClickDto | DragDto | KeypressDto | MoveDto | ScreenshotDto | ScrollDto | TypeDto | WaitDto)[];
 }

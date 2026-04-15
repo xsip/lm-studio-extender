@@ -29,7 +29,8 @@ export class ResponseMcpCallInProgressEventDto {
   /** The type of the event. Always 'response.mcp_call.in_progress'. */
   @ApiProperty({
     description: `The type of the event. Always 'response.mcp_call.in_progress'.`,
-    example: 'response.mcp_call.in_progress',
+    type: 'string',
+    enum: ['response.mcp_call.in_progress'],
   })
   @Equals('response.mcp_call.in_progress')
   type!: 'response.mcp_call.in_progress';

@@ -14,7 +14,8 @@ export class ItemReferenceDto {
   @ApiProperty({
     required: false,
     description: `The type of item to reference. Always \`item_reference\`.`,
-    example: 'item_reference',
+    type: 'string',
+    enum: ['item_reference'],
   })
   @IsOptional()
   @IsIn(['item_reference'])

@@ -13,7 +13,8 @@ export class ToolChoiceCustomDto {
   /** For custom tool calling, the type is always `custom`. */
   @ApiProperty({
     description: `For custom tool calling, the type is always \`custom\`.`,
-    example: 'custom',
+    type: 'string',
+    enum: ['custom'],
   })
   @Equals('custom')
   type!: 'custom';

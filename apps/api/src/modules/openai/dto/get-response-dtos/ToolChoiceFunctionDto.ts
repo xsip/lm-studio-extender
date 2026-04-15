@@ -13,7 +13,8 @@ export class ToolChoiceFunctionDto {
   /** For function calling, the type is always `function`. */
   @ApiProperty({
     description: `For function calling, the type is always \`function\`.`,
-    example: 'function',
+    type: 'string',
+    enum: ['function'],
   })
   @Equals('function')
   type!: 'function';

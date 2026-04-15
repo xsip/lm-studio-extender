@@ -59,7 +59,8 @@ export class ResponseTextDoneEventDto {
   /** The type of the event. Always `response.output_text.done`. */
   @ApiProperty({
     description: `The type of the event. Always \`response.output_text.done\`.`,
-    example: 'response.output_text.done',
+    type: 'string',
+    enum: ['response.output_text.done'],
   })
   @Equals('response.output_text.done')
   type!: 'response.output_text.done';

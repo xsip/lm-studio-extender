@@ -29,7 +29,8 @@ export class ResponseFileSearchCallSearchingEventDto {
   /** The type of the event. Always `response.file_search_call.searching`. */
   @ApiProperty({
     description: `The type of the event. Always \`response.file_search_call.searching\`.`,
-    example: 'response.file_search_call.searching',
+    type: 'string',
+    enum: ['response.file_search_call.searching'],
   })
   @Equals('response.file_search_call.searching')
   type!: 'response.file_search_call.searching';

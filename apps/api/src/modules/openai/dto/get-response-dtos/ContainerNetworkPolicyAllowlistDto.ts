@@ -17,7 +17,8 @@ export class ContainerNetworkPolicyAllowlistDto {
   /** Allow outbound network access only to specified domains. Always `allowlist`. */
   @ApiProperty({
     description: `Allow outbound network access only to specified domains. Always \`allowlist\`.`,
-    example: 'allowlist',
+    type: 'string',
+    enum: ['allowlist'],
   })
   @Equals('allowlist')
   type!: 'allowlist';

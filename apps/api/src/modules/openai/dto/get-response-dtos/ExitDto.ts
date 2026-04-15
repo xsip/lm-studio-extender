@@ -13,7 +13,8 @@ export class ExitDto {
   /** The outcome type. Always `exit`. */
   @ApiProperty({
     description: `The outcome type. Always \`exit\`.`,
-    example: 'exit',
+    type: 'string',
+    enum: ['exit'],
   })
   @Equals('exit')
   type!: 'exit';

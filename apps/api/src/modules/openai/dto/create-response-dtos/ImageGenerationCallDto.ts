@@ -28,7 +28,8 @@ export class ImageGenerationCallDto {
   /** The type of the image generation call. Always `image_generation_call`. */
   @ApiProperty({
     description: `The type of the image generation call. Always \`image_generation_call\`.`,
-    example: 'image_generation_call',
+    type: 'string',
+    enum: ['image_generation_call'],
   })
   @Equals('image_generation_call')
   type!: 'image_generation_call';

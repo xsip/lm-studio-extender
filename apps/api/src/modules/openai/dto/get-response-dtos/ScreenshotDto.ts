@@ -9,7 +9,8 @@ export class ScreenshotDto {
   @ApiProperty({
     description: `Specifies the event type. For a screenshot action, this property is always set
   to \`screenshot\`.`,
-    example: 'screenshot',
+    type: 'string',
+    enum: ['screenshot'],
   })
   @Equals('screenshot')
   type!: 'screenshot';

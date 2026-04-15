@@ -13,7 +13,8 @@ export class SkillReferenceDto {
   /** References a skill created with the /v1/skills endpoint. */
   @ApiProperty({
     description: `References a skill created with the /v1/skills endpoint.`,
-    example: 'skill_reference',
+    type: 'string',
+    enum: ['skill_reference'],
   })
   @Equals('skill_reference')
   type!: 'skill_reference';

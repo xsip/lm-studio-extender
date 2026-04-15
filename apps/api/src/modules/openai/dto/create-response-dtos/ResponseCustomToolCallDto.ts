@@ -29,7 +29,8 @@ export class ResponseCustomToolCallDto {
   /** The type of the custom tool call. Always `custom_tool_call`. */
   @ApiProperty({
     description: `The type of the custom tool call. Always \`custom_tool_call\`.`,
-    example: 'custom_tool_call',
+    type: 'string',
+    enum: ['custom_tool_call'],
   })
   @Equals('custom_tool_call')
   type!: 'custom_tool_call';

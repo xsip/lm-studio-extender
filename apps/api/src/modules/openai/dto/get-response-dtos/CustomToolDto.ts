@@ -20,7 +20,8 @@ export class CustomToolDto {
   /** The type of the custom tool. Always `custom`. */
   @ApiProperty({
     description: `The type of the custom tool. Always \`custom\`.`,
-    example: 'custom',
+    type: 'string',
+    enum: ['custom'],
   })
   @Equals('custom')
   type!: 'custom';

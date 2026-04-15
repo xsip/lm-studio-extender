@@ -21,7 +21,8 @@ export class ResponseCompactionItemDto {
   /** The type of the item. Always `compaction`. */
   @ApiProperty({
     description: `The type of the item. Always \`compaction\`.`,
-    example: 'compaction',
+    type: 'string',
+    enum: ['compaction'],
   })
   @Equals('compaction')
   type!: 'compaction';

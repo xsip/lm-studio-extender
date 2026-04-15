@@ -1,6 +1,62 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable, ReplaySubject } from 'rxjs';
 import { Router } from '@angular/router';
+import {
+  ChatStreamOpenAiRequest,
+  ResponseAudioDeltaEventDto,
+  ResponseAudioDoneEventDto,
+  ResponseAudioTranscriptDeltaEventDto,
+  ResponseAudioTranscriptDoneEventDto,
+  ResponseCodeInterpreterCallCodeDeltaEventDto,
+  ResponseCodeInterpreterCallCodeDoneEventDto,
+  ResponseCodeInterpreterCallCompletedEventDto,
+  ResponseCodeInterpreterCallInProgressEventDto,
+  ResponseCodeInterpreterCallInterpretingEventDto,
+  ResponseCompletedEventDto,
+  ResponseContentPartAddedEventDto,
+  ResponseContentPartDoneEventDto,
+  ResponseCreatedEventDto,
+  ResponseCustomToolCallInputDeltaEventDto,
+  ResponseCustomToolCallInputDoneEventDto,
+  ResponseErrorEventDto,
+  ResponseFailedEventDto,
+  ResponseFileSearchCallCompletedEventDto,
+  ResponseFileSearchCallInProgressEventDto,
+  ResponseFileSearchCallSearchingEventDto,
+  ResponseFunctionCallArgumentsDeltaEventDto,
+  ResponseFunctionCallArgumentsDoneEventDto,
+  ResponseImageGenCallCompletedEventDto,
+  ResponseImageGenCallGeneratingEventDto,
+  ResponseImageGenCallInProgressEventDto,
+  ResponseImageGenCallPartialImageEventDto,
+  ResponseIncompleteEventDto,
+  ResponseInProgressEventDto,
+  ResponseMcpCallArgumentsDeltaEventDto,
+  ResponseMcpCallArgumentsDoneEventDto,
+  ResponseMcpCallCompletedEventDto,
+  ResponseMcpCallFailedEventDto,
+  ResponseMcpCallInProgressEventDto,
+  ResponseMcpListToolsCompletedEventDto,
+  ResponseMcpListToolsFailedEventDto,
+  ResponseMcpListToolsInProgressEventDto,
+  ResponseOutputItemAddedEventDto,
+  ResponseOutputItemDoneEventDto,
+  ResponseOutputTextAnnotationAddedEventDto,
+  ResponseQueuedEventDto,
+  ResponseReasoningSummaryPartAddedEventDto,
+  ResponseReasoningSummaryPartDoneEventDto,
+  ResponseReasoningSummaryTextDeltaEventDto,
+  ResponseReasoningSummaryTextDoneEventDto,
+  ResponseReasoningTextDeltaEventDto,
+  ResponseReasoningTextDoneEventDto,
+  ResponseRefusalDeltaEventDto,
+  ResponseRefusalDoneEventDto,
+  ResponseTextDeltaEventDto,
+  ResponseTextDoneEventDto,
+  ResponseWebSearchCallCompletedEventDto,
+  ResponseWebSearchCallInProgressEventDto,
+  ResponseWebSearchCallSearchingEventDto,
+} from './client';
 
 // ---------------------------------------------------------------------------
 // OpenAI Responses API SSE event interfaces
@@ -144,7 +200,7 @@ export interface McpItemTracking {
   input?: Record<string, unknown>;
   outputIndex: number;
 }
-
+/*
 export type OpenAiEvent =
   | ResponseCreatedEvent
   | ResponseInProgressEvent
@@ -164,6 +220,64 @@ export type OpenAiEvent =
   | OpenAiStreamCreatedChatEvent
   | OpenAiStreamApiInfoEvent
   | OpenAiStreamErrorEvent;
+ */
+export type OpenAiEvent =
+  | ResponseAudioDeltaEventDto
+  | ResponseAudioDoneEventDto
+  | ResponseAudioTranscriptDeltaEventDto
+  | ResponseAudioTranscriptDoneEventDto
+  | ResponseCodeInterpreterCallCodeDeltaEventDto
+  | ResponseCodeInterpreterCallCodeDoneEventDto
+  | ResponseCodeInterpreterCallCompletedEventDto
+  | ResponseCodeInterpreterCallInProgressEventDto
+  | ResponseCodeInterpreterCallInterpretingEventDto
+  | ResponseCompletedEventDto
+  | ResponseContentPartAddedEventDto
+  | ResponseContentPartDoneEventDto
+  | ResponseCreatedEventDto
+  | ResponseErrorEventDto
+  | ResponseFileSearchCallCompletedEventDto
+  | ResponseFileSearchCallInProgressEventDto
+  | ResponseFileSearchCallSearchingEventDto
+  | ResponseFunctionCallArgumentsDeltaEventDto
+  | ResponseFunctionCallArgumentsDoneEventDto
+  | ResponseInProgressEventDto
+  | ResponseFailedEventDto
+  | ResponseIncompleteEventDto
+  | ResponseOutputItemAddedEventDto
+  | ResponseOutputItemDoneEventDto
+  | ResponseReasoningSummaryPartAddedEventDto
+  | ResponseReasoningSummaryPartDoneEventDto
+  | ResponseReasoningSummaryTextDeltaEventDto
+  | ResponseReasoningSummaryTextDoneEventDto
+  | ResponseReasoningTextDeltaEventDto
+  | ResponseReasoningTextDoneEventDto
+  | ResponseRefusalDeltaEventDto
+  | ResponseRefusalDoneEventDto
+  | ResponseTextDeltaEventDto
+  | ResponseTextDoneEventDto
+  | ResponseWebSearchCallCompletedEventDto
+  | ResponseWebSearchCallInProgressEventDto
+  | ResponseWebSearchCallSearchingEventDto
+  | ResponseImageGenCallCompletedEventDto
+  | ResponseImageGenCallGeneratingEventDto
+  | ResponseImageGenCallInProgressEventDto
+  | ResponseImageGenCallPartialImageEventDto
+  | ResponseMcpCallArgumentsDeltaEventDto
+  | ResponseMcpCallArgumentsDoneEventDto
+  | ResponseMcpCallCompletedEventDto
+  | ResponseMcpCallFailedEventDto
+  | ResponseMcpCallInProgressEventDto
+  | ResponseMcpListToolsCompletedEventDto
+  | ResponseMcpListToolsFailedEventDto
+  | ResponseMcpListToolsInProgressEventDto
+  | ResponseOutputTextAnnotationAddedEventDto
+  | ResponseQueuedEventDto
+  | ResponseCustomToolCallInputDeltaEventDto
+  | ResponseCustomToolCallInputDoneEventDto
+  // custom
+  | OpenAiStreamCreatedChatEvent
+  | OpenAiStreamApiInfoEvent;
 
 export interface OpenAiChatEnd {
   responseId: string;
@@ -205,10 +319,7 @@ export class OpenAiStreamService {
   // Public API
   // ---------------------------------------------------------------------------
 
-  async chat(
-    body: Record<string, unknown>,
-    chatId?: string,
-  ): Promise<void> {
+  async chat(body: ChatStreamOpenAiRequest, chatId?: string): Promise<void> {
     try {
       const token = localStorage.getItem('jwt_token');
       const url = `api/openai/chat-stream${chatId ? `?internalChatId=${chatId}` : ''}`;

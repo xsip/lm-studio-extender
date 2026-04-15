@@ -29,7 +29,8 @@ export class ResponseWebSearchCallInProgressEventDto {
   /** The type of the event. Always `response.web_search_call.in_progress`. */
   @ApiProperty({
     description: `The type of the event. Always \`response.web_search_call.in_progress\`.`,
-    example: 'response.web_search_call.in_progress',
+    type: 'string',
+    enum: ['response.web_search_call.in_progress'],
   })
   @Equals('response.web_search_call.in_progress')
   type!: 'response.web_search_call.in_progress';
