@@ -45,7 +45,11 @@ export class ChatMetadataService {
   // ── Read all (for user) ───────────────────────────────────────────────────
 
   async findAll(userId: Types.ObjectId): Promise<ChatMetadataDocument[]> {
-    return this.metaModel.find({ userId }).sort({ createdAt: -1 }).exec();
+    return this.metaModel
+      .find({ userId })
+      .select('-cryptoKey')
+      .sort({ createdAt: -1 })
+      .exec();
   }
 
   // ── Read one ──────────────────────────────────────────────────────────────
@@ -115,10 +119,7 @@ export class ChatMetadataService {
 
   // ── Guards ────────────────────────────────────────────────────────────────
 
-  private assertOwner(
-    userId: Types.ObjectId,
-    doc: ChatMetadataDocument,
-  ): void {
+  private assertOwner(userId: Types.ObjectId, doc: ChatMetadataDocument): void {
     if (!doc.userId.equals(userId)) {
       throw new ForbiddenException(
         'You do not have access to this chat metadata',

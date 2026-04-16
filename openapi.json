@@ -1527,6 +1527,12 @@
             "items": {
               "$ref": "#/components/schemas/EphemeralMcpIntegrationDto"
             }
+          },
+          "useCrypto": {
+            "type": "boolean"
+          },
+          "cryptoKey": {
+            "type": "string"
           }
         },
         "required": [
@@ -1577,6 +1583,12 @@
             "format": "date-time",
             "type": "string"
           },
+          "useCrypto": {
+            "type": "boolean"
+          },
+          "cryptoKey": {
+            "type": "string"
+          },
           "lastMessageSentAt": {
             "format": "date-time",
             "type": "string"
@@ -1614,6 +1626,12 @@
           },
           "lastMessageSentAt": {
             "format": "date-time",
+            "type": "string"
+          },
+          "useCrypto": {
+            "type": "boolean"
+          },
+          "cryptoKey": {
             "type": "string"
           }
         }

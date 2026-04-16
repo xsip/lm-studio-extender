@@ -1,12 +1,9 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "useDaemonProcess": false,
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
-    "production": [
-      "default",
-      "!{projectRoot}/**/*.spec.ts",
-      "!{projectRoot}/jest.config.ts"
-    ],
+    "production": ["default", "!{projectRoot}/**/*.spec.ts", "!{projectRoot}/jest.config.ts"],
     "sharedGlobals": []
   },
   "plugins": [

@@ -7,7 +7,7 @@ import { IsIn } from 'class-validator';
 export type ChatMetadataDocument = ChatMetadata & Document;
 export enum ChatClient {
   OPENAI = 'OPENAI',
-  LMSTUDIO = 'LMSTUDIO'
+  LMSTUDIO = 'LMSTUDIO',
 }
 @Schema({ collection: 'chat_metadata', timestamps: true })
 export class ChatMetadata {
@@ -43,6 +43,12 @@ export class ChatMetadata {
 
   @Prop({ required: false, type: Date })
   lastMessageSentAt: Date;
+
+  @Prop({ required: false, type: Boolean })
+  useCrypto?: boolean;
+
+  @Prop({ required: false, type: String })
+  cryptoKey?: string;
   // `createdAt` / `updatedAt` injected automatically
 }
 
@@ -81,6 +87,12 @@ export class ChatMetadataDto {
 
   @ApiProperty()
   updatedAt: Date;
+
+  @ApiPropertyOptional()
+  useCrypto?: boolean;
+
+  @ApiPropertyOptional()
+  cryptoKey?: string;
 
   @ApiProperty()
   lastMessageSentAt?: Date;

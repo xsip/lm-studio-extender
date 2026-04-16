@@ -58,9 +58,9 @@ export class ChatMetadataController {
   @ApiOkResponse({ type: [ChatMetadataDto] })
   async findAll(@CurrentUser() user: User) {
     try {
-    const userId = (user as any)._id as Types.ObjectId;
-    const res = await this.chatMetadataService.findAll(userId);
-    return res;
+      const userId = (user as any)._id as Types.ObjectId;
+      const res = await this.chatMetadataService.findAll(userId);
+      return res;
     } catch (error) {
       console.log(error);
     }

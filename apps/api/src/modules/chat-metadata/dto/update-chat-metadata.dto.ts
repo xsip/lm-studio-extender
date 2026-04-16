@@ -1,5 +1,6 @@
 import {
   IsArray,
+  IsBoolean,
   IsDate,
   IsOptional,
   IsString,
@@ -36,4 +37,14 @@ export class UpdateChatMetadataDto {
   @IsOptional()
   @IsDate()
   lastMessageSentAt: Date;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  useCrypto?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  cryptoKey?: string;
 }

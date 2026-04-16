@@ -28,6 +28,8 @@ export interface CreateChatMetadataDto {
      * MCP integrations to associate with this session
      */
     tools?: Array<EphemeralMcpIntegrationDto>;
+    useCrypto?: boolean;
+    cryptoKey?: string;
 }
 export namespace CreateChatMetadataDto {
     export const ClientEnum = {

@@ -16,5 +16,7 @@ export interface UpdateChatMetadataDto {
     reasoningMode?: string;
     tools?: Array<EphemeralMcpIntegrationDto>;
     lastMessageSentAt?: string;
+    useCrypto?: boolean;
+    cryptoKey?: string;
 }
 

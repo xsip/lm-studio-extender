@@ -18,10 +18,10 @@ import dayjs from 'dayjs';
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(
-      private readonly reflector: Reflector,
-      private readonly jwtService: JwtService,
-      private readonly tokenService: TokenLimitService,
-      @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+    private readonly reflector: Reflector,
+    private readonly jwtService: JwtService,
+    private readonly tokenService: TokenLimitService,
+    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -30,7 +30,6 @@ export class JwtAuthGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
-
 
     if (isPublic) return true;
 
@@ -57,7 +56,7 @@ export class JwtAuthGuard implements CanActivate {
     // This also catches deleted / deactivated accounts that still hold a valid JWT.
     const dbUser = await this.userModel
       .findOne({ username: payload.user })
-      .select('-passwordHash')  // never expose the hash downstream
+      .select('-passwordHash') // never expose the hash downstream
       .lean()
       .exec();
 
@@ -78,10 +77,8 @@ export class JwtAuthGuard implements CanActivate {
     ) {
       const updatedUser = await this.tokenService.resetTokenLimit(dbUser._id);
       request['user'] = updatedUser;
-
     } else {
       request['user'] = dbUser;
-
     }
 
     // Attach the sanitised DB record — role/tenant always up-to-date.

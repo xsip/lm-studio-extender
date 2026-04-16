@@ -26,6 +26,8 @@ export interface ChatMetadataDto {
     tools?: Array<EphemeralMcpIntegrationDto>;
     createdAt: string;
     updatedAt: string;
+    useCrypto?: boolean;
+    cryptoKey?: string;
     lastMessageSentAt: string;
 }
 export namespace ChatMetadataDto {

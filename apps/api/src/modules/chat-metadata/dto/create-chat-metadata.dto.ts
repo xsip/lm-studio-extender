@@ -1,5 +1,5 @@
 import {
-  IsArray,
+  IsArray, IsBoolean,
   IsIn,
   IsOptional,
   IsString,
@@ -37,4 +37,14 @@ export class CreateChatMetadataDto {
   @ValidateNested({ each: true })
   @Type(() => EphemeralMcpIntegrationDto)
   tools?: EphemeralMcpIntegrationDto[];
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  useCrypto?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  cryptoKey?: string;
 }
