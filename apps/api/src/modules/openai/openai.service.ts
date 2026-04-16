@@ -113,7 +113,7 @@ export class OpenAiService {
       | ResponseCreateParamsNonStreamingDto
       | ResponseCreateParamsStreamingDto = {
       model: dto.model,
-      input: dto.input as string,
+      input: dto.input as any[],
       reasoning: dto.reasoning,
       stream: true,
       tools: [
@@ -123,8 +123,13 @@ export class OpenAiService {
           server_url: this.selfMcpUrl,
           headers: {
             authorization: `Bearer ${token}`,
+            chatId: internalChatId,
           },
-          allowed_tools: ['greeting-tool', 'get-token-usage-tool'],
+          allowed_tools: [
+            'greeting-tool',
+            'get-token-usage-tool',
+            'decrypt-message-tool',
+          ],
         } as any,
       ],
       previous_response_id: dto.previous_response_id,
@@ -161,6 +166,39 @@ export class OpenAiService {
       );
       if (previousResponseId) {
         mappedDto.previous_response_id = previousResponseId;
+      }
+      const chatMeta = await this.chatMetadataService.findOne(userId, chatId);
+      if (chatMeta.useCrypto && chatMeta.cryptoKey) {
+        mappedDto.instructions = `
+You MUST follow these rules EXACTLY:
+
+STEP 1 — TOOL CALL
+- ALWAYS call the tool "decrypt-message-tool"
+- Pass the FULL, ORIGINAL, UNMODIFIED user message in "full_user_message"
+- DO NOT answer yet
+
+STEP 2 — AFTER TOOL RESPONSE
+- You will receive the decrypted message
+- IGNORE the original encrypted input completely
+- Treat the decrypted message as if the user just sent it
+
+STEP 3 — FINAL RESPONSE
+- Determine the user's intent from the decrypted message
+- If it is a question, you MUST answer it
+- If it is a request, you MUST fulfill it
+- DO NOT repeat or restate the decrypted message
+- DO NOT mention the tool, decryption, or the process
+
+The final response must be a direct answer to the decrypted message, not a repetition of it.
+`;
+        (mappedDto.input as any[]) = [
+          {
+            role: 'developer',
+            content: mappedDto.instructions,
+          },
+
+          ...(mappedDto.input as any[]),
+        ];
       }
     }
 

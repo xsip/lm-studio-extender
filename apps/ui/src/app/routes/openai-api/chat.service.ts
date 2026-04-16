@@ -27,6 +27,7 @@ import {
   ResponseReasoningItemDto,
 } from '../../client';
 import { AppendedFile } from './chat-input.component';
+import * as CryptoJS from 'crypto-js';
 
 export interface ChatMessage {
   role: 'user' | 'ai' | 'error' | 'info' | 'tool_call' | 'reasoning' | 'mcp_list_tools';
@@ -113,11 +114,14 @@ export class ChatService {
     selectedModelId: string,
     reasoning: ReasoningDto.EffortEnum | undefined,
     appendedFiles: AppendedFile[] | undefined,
+    encryptionKey: string | undefined,
     onChatListRefresh: () => void,
   ): void {
     if (this.form.invalid || this.streaming()) return;
-
-    const input = this.form.getRawValue().input!.trim();
+    let input = this.form.getRawValue().input!.trim();
+    if (encryptionKey) {
+      input = CryptoJS.AES.encrypt(input, encryptionKey)?.toString();
+    }
     this.lastUserInput.set(input);
     this.form.reset();
     this.streaming.set(true);
@@ -374,12 +378,13 @@ export class ChatService {
     selectedModelId: string,
     reasoning: ReasoningDto.EffortEnum | undefined,
     appendedFiles: AppendedFile[] | undefined,
+    encryptionKey: string | undefined,
     onChatListRefresh: () => void,
   ): void {
     const input = this.lastUserInput();
     if (!input || this.streaming()) return;
     this.form.setValue({ input });
-    this.submit(selectedModelId, reasoning, appendedFiles,onChatListRefresh);
+    this.submit(selectedModelId, reasoning, appendedFiles, encryptionKey, onChatListRefresh);
   }
 
   reset(): void {

@@ -1,14 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { Tool, Context } from '@rekog/mcp-nest';
+import { Context, Tool } from '@rekog/mcp-nest';
 import { z } from 'zod';
-import { User, SubscriptionType } from '../modules/auth/user.schema';
+import { SubscriptionType, User } from '../modules/auth/user.schema';
 import { TokenLimitService } from '../modules/token-limit/token-limit.service';
 import type { Request } from 'express';
 import dayjs from 'dayjs';
+import { ChatMetadataService } from '../modules/chat-metadata/chat-metadata.service';
+import { Types } from 'mongoose';
+import * as CryptoJS from 'crypto-js';
 
 @Injectable()
 export class TokenUsageTool {
-  constructor(private readonly tokenLimitService: TokenLimitService) {}
+  constructor(
+    private readonly tokenLimitService: TokenLimitService,
+    private readonly chatMetaDataService: ChatMetadataService,
+  ) {}
 
   @Tool({
     name: 'greeting-tool',
@@ -52,5 +58,50 @@ export class TokenUsageTool {
       `You used ${user.usedTokens ?? 0} tokens out of ${limit} tokens ` +
       `(subscription: ${subscription}).${configInfo}`
     );
+  }
+
+  @Tool({
+    name: 'decrypt-message-tool',
+    description:
+      'Decrypts a user message. MUST receive the full, exact, unmodified user input',
+    parameters: z.object({
+      full_user_message: z.string().default('Test'),
+    }),
+  })
+  async decryptMessage(
+    { full_user_message }: { full_user_message: string },
+    context: Context,
+    request: Request,
+  ) {
+    // @ts-ignore
+    const user = request.user as User;
+    const chatId = request.headers['chatid'] as string;
+
+    if (!full_user_message) {
+      return `Didnt receive any message to decrypt!`;
+    }
+
+    try {
+      const chatMetaData = await this.chatMetaDataService.findOne(
+        (user as any)._id as Types.ObjectId,
+        chatId,
+      );
+
+      if (!chatMetaData) {
+        return `Sorry, but chat with id ${chatId} not found.`;
+      }
+
+      if (!chatMetaData.useCrypto) return `This chat doesnt use encryption!`;
+
+      if (!chatMetaData.cryptoKey)
+        return `UseCrypto is true, but crypto key not set. Can't decrypt!`;
+
+      return CryptoJS.AES.decrypt(
+        full_user_message,
+        chatMetaData.cryptoKey,
+      )?.toString(CryptoJS.enc.Utf8);
+    } catch (e: any) {
+      return `There was an error decrypting your message!!`;
+    }
   }
 }

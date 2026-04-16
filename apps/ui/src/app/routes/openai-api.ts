@@ -38,6 +38,7 @@ import { ChatMessagesComponent } from './lm-studio-api/chat-messages.component';
 import { InfoComponent } from './lm-studio-api/info.component';
 import { ModelReasoningCapability } from './lm-studio-api/model-selector.component';
 import { AppendedFile, OpenAiChatInputComponent } from './openai-api/chat-input.component';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'app-openai-api',
@@ -280,13 +281,14 @@ export class OpenAiApi implements OnDestroy, OnInit {
     }
   }
 
+  private chatId?: string;
   ngOnInit(): void {
     this.loadChatList();
     this.loadModels();
 
     const chatId = this.route.snapshot.paramMap.get('chatId');
     this.chatService.currentChatId.set(chatId);
-
+    this.chatId = chatId ?? undefined;
     if (chatId) {
       this.loadChatHistory(chatId);
       this.loadChatMeta(chatId);
@@ -488,6 +490,7 @@ export class OpenAiApi implements OnDestroy, OnInit {
     this.chatService.chatMessages.set([]);
     this.chatService.currentChatId.set(chatId);
     this.router.navigate(['/chat-openai', chatId]);
+    this.chatId = chatId;
     this.loadChatHistory(chatId);
     this.loadChatMeta(chatId);
   }
@@ -502,23 +505,37 @@ export class OpenAiApi implements OnDestroy, OnInit {
   // ── Messaging ─────────────────────────────────────────────────────────────
 
   submit(): void {
+    if(this.chatId) {
+      this.chatMetaService
+        .getChatMetadata(this.chatId)
+        .pipe(take(1))
+        .subscribe((res) => {
+          this.chatService.submit(
+            this.selectedModel()?.id ?? '',
+            this.reasoning(),
+            this.appendedFiles(),
+            res.useCrypto && res.cryptoKey ? res.cryptoKey : undefined,
+            () => this.loadChatList(),
+          );
+
+          this.chatInputRef?.clearFiles();
+        });
+      return;
+    }
+
     this.chatService.submit(
       this.selectedModel()?.id ?? '',
       this.reasoning(),
       this.appendedFiles(),
+      undefined,
       () => this.loadChatList(),
     );
+
     this.chatInputRef?.clearFiles();
   }
 
   resend(): void {
-    this.chatService.resend(
-      this.selectedModel()?.id ?? '',
-      this.reasoning(),
-      this.appendedFiles(),
-      () => this.loadChatList(),
-    );
-    this.chatInputRef?.clearFiles();
+    this.submit();
   }
 
   // ── Chat rename / delete ──────────────────────────────────────────────────
