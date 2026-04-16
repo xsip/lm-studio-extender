@@ -7,7 +7,7 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'chat-lm-studio',
+    redirectTo: 'chat-openai',
   },
   {
     path: 'chat-lm-studio',
