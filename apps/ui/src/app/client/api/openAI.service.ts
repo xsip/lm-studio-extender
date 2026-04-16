@@ -19,6 +19,8 @@ import { OpenApiHttpParams, QueryParamStyle } from '../query.params';
 // @ts-ignore
 import { ChatStreamOpenAiRequest } from '../model/chatStreamOpenAiRequest';
 // @ts-ignore
+import { CompletionsStreamOpenAiRequest } from '../model/completionsStreamOpenAiRequest';
+// @ts-ignore
 import { ModelOpenAiDto } from '../model/modelOpenAiDto';
 
 // @ts-ignore
@@ -108,6 +110,88 @@ export class OpenAIService extends BaseService {
             {
                 context: localVarHttpContext,
                 body: chatStreamOpenAiRequest,
+                params: localVarQueryParameters.toHttpParams(),
+                responseType: "blob",
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Stream a chat response via SSE
+     * Streams the LM Studio response as Server-Sent Events. Each exchange is persisted in MongoDB under the given &#x60;internalChatId&#x60;. If &#x60;internalChatId&#x60; is supplied, the latest &#x60;response_id&#x60; for that session is fetched from the DB and set as &#x60;previous_response_id&#x60; on the request so LM Studio maintains conversation context. If &#x60;internalChatId&#x60; is omitted a new session is created and its generated ID is returned via a &#x60;created_chat&#x60; SSE event before the stream closes.
+     * @endpoint post /openai/completions-stream
+     * @param completionsStreamOpenAiRequest 
+     * @param internalChatId MD5 hex string identifying an existing chat session. Omit to start a new session.
+     * @param name Optional human-readable label for this chat session.
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     * @param options additional options
+     */
+    public completionsStreamOpenAi(completionsStreamOpenAiRequest: CompletionsStreamOpenAiRequest, internalChatId?: string, name?: any, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/event-stream', context?: HttpContext, transferCache?: boolean}): Observable<Blob>;
+    public completionsStreamOpenAi(completionsStreamOpenAiRequest: CompletionsStreamOpenAiRequest, internalChatId?: string, name?: any, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/event-stream', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<Blob>>;
+    public completionsStreamOpenAi(completionsStreamOpenAiRequest: CompletionsStreamOpenAiRequest, internalChatId?: string, name?: any, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/event-stream', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<Blob>>;
+    public completionsStreamOpenAi(completionsStreamOpenAiRequest: CompletionsStreamOpenAiRequest, internalChatId?: string, name?: any, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'text/event-stream', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (completionsStreamOpenAiRequest === null || completionsStreamOpenAiRequest === undefined) {
+            throw new Error('Required parameter completionsStreamOpenAiRequest was null or undefined when calling completionsStreamOpenAi.');
+        }
+
+        let localVarQueryParameters = new OpenApiHttpParams(this.encoder);
+
+        localVarQueryParameters = this.addToHttpParams(
+            localVarQueryParameters,
+            'internalChatId',
+            <any>internalChatId,
+            QueryParamStyle.Form,
+            true,
+        );
+
+
+        localVarQueryParameters = this.addToHttpParams(
+            localVarQueryParameters,
+            'name',
+            <any>name,
+            QueryParamStyle.Form,
+            true,
+        );
+
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (bearer) required
+        localVarHeaders = this.configuration.addCredentialToHeaders('bearer', 'Authorization', localVarHeaders, 'Bearer ');
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'text/event-stream'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+        }
+
+        let localVarPath = `/openai/completions-stream`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request('post', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                body: completionsStreamOpenAiRequest,
                 params: localVarQueryParameters.toHttpParams(),
                 responseType: "blob",
                 ...(withCredentials ? { withCredentials } : {}),

@@ -7,22 +7,21 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { ApproximateDto } from './approximateDto';
 
 
-export interface UserLocationDto { 
+export interface ChatCompletionContentPartTextDto { 
     /**
-     * Approximate location parameters for the search.
+     * The text content.
      */
-    approximate: ApproximateDto;
+    text: string;
     /**
-     * The type of location approximation. Always `approximate`.
+     * The type of the content part.
      */
-    type: UserLocationDto.TypeEnum;
+    type: ChatCompletionContentPartTextDto.TypeEnum;
 }
-export namespace UserLocationDto {
+export namespace ChatCompletionContentPartTextDto {
     export const TypeEnum = {
-        Approximate: 'approximate'
+        Text: 'text'
     } as const;
     export type TypeEnum = typeof TypeEnum[keyof typeof TypeEnum];
 }

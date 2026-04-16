@@ -36,7 +36,7 @@ export interface ResponseCreateParamsStreamingDto {
   /**
    * Text, image, or file inputs to the model, used to generate a response.      Learn more:      - [Text inputs and outputs](https://platform.openai.com/docs/guides/text)   - [Image inputs](https://platform.openai.com/docs/guides/images)   - [File inputs](https://platform.openai.com/docs/guides/pdf-files)   - [Conversation state](https://platform.openai.com/docs/guides/conversation-state)   - [Function calling](https://platform.openai.com/docs/guides/function-calling)
    */
-  input?: string | Array<ResponseCreateParamsNonStreamingDtoInputInner>;
+  input?: Array<ResponseCreateParamsNonStreamingDtoInputInner>;
   /**
    * A system (or developer) message inserted into the model\'s context.      When using along with `previous_response_id`, the instructions from a previous   response will not be carried over to the next response. This makes it simple to   swap out system (or developer) messages in new responses.
    */
@@ -89,7 +89,7 @@ export interface ResponseCreateParamsStreamingDto {
   /**
    * If set to true, the model response data will be streamed to the client as it is   generated using   [server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#Event_stream_format).   See the   [Streaming section below](https://platform.openai.com/docs/api-reference/responses-streaming)   for more information.
    */
-  stream: true;
+  stream: boolean;
   /**
    * Options for streaming responses. Only set this when you set `stream: true`.
    */

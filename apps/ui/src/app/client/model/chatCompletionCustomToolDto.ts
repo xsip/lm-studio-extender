@@ -7,22 +7,22 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { ApproximateDto } from './approximateDto';
+import { CustomDto } from './customDto';
 
 
-export interface UserLocationDto { 
+export interface ChatCompletionCustomToolDto { 
     /**
-     * Approximate location parameters for the search.
+     * Properties of the custom tool.
      */
-    approximate: ApproximateDto;
+    custom: CustomDto;
     /**
-     * The type of location approximation. Always `approximate`.
+     * The type of the custom tool. Always `custom`.
      */
-    type: UserLocationDto.TypeEnum;
+    type: ChatCompletionCustomToolDto.TypeEnum;
 }
-export namespace UserLocationDto {
+export namespace ChatCompletionCustomToolDto {
     export const TypeEnum = {
-        Approximate: 'approximate'
+        Custom: 'custom'
     } as const;
     export type TypeEnum = typeof TypeEnum[keyof typeof TypeEnum];
 }

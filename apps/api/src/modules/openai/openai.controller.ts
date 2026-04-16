@@ -269,7 +269,10 @@ export class OpenaiController {
     // ───────────────────────────────────────────────────────────────────────
   }
 
-  @ApiExtraModels()
+  @ApiExtraModels(
+    ChatCompletionCreateParamsNonStreamingDto,
+    ChatCompletionCreateParamsStreamingDto,
+  )
   @Post('completions-stream')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
