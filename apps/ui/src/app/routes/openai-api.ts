@@ -155,6 +155,7 @@ import { AppendedFile, OpenAiChatInputComponent } from './openai-api/chat-input.
       <div class="flex flex-1 overflow-hidden relative min-h-0 bg-surface-base">
         @if (showChatsSidebar()) {
           <app-chat-sidebar
+            #chatSidebar
             client="OPENAI"
             [chatList]="chatList()"
             [chatsLoading]="chatsLoading()"
@@ -162,6 +163,8 @@ import { AppendedFile, OpenAiChatInputComponent } from './openai-api/chat-input.
             (chatOpened)="openChat($event)"
             (commitRename)="onRename($event)"
             (chatDeleted)="deleteChat($event)"
+            (openChatSettings)="onOpenChatSettings($event)"
+            (saveCryptoSettings)="onSaveCryptoSettings($event)"
           />
         }
 
@@ -242,6 +245,7 @@ export class OpenAiApi implements OnDestroy, OnInit {
   });
   @ViewChild('messageContainer') private messageContainer?: ElementRef<HTMLElement>;
   @ViewChild('chatInput') private chatInputRef?: OpenAiChatInputComponent;
+  @ViewChild('chatSidebar') private chatSidebarRef?: ChatSidebarComponent;
 
   readonly showChatsSidebar = signal(true);
   readonly showInfoPanel = signal(false);
@@ -498,8 +502,11 @@ export class OpenAiApi implements OnDestroy, OnInit {
   // ── Messaging ─────────────────────────────────────────────────────────────
 
   submit(): void {
-    this.chatService.submit(this.selectedModel()?.id ?? '', this.reasoning(),this.appendedFiles(), () =>
-      this.loadChatList(),
+    this.chatService.submit(
+      this.selectedModel()?.id ?? '',
+      this.reasoning(),
+      this.appendedFiles(),
+      () => this.loadChatList(),
     );
     this.chatInputRef?.clearFiles();
   }
@@ -533,6 +540,41 @@ export class OpenAiApi implements OnDestroy, OnInit {
       next: () => {
         this.chatList.update((list) => list.filter((c) => c._id !== chatId));
         if (this.chatService.currentChatId() === chatId) this.newChat();
+      },
+    });
+  }
+
+  onOpenChatSettings(chatId: string): void {
+    this.chatMetaService.getChatMetadata(chatId).subscribe({
+      next: (chat) => {
+        this.chatSidebarRef?.loadSettingsData(
+          chat.name ?? '',
+          chat.useCrypto ?? false,
+          chat.cryptoKey ?? '',
+        );
+      },
+      error: () => {
+        this.chatSidebarRef?.loadSettingsData('', false, '');
+      },
+    });
+  }
+
+  onSaveCryptoSettings({
+    chatId,
+    name,
+    useCrypto,
+    cryptoKey,
+  }: {
+    chatId: string;
+    name: string;
+    useCrypto: boolean;
+    cryptoKey: string;
+  }): void {
+    this.chatMetaService.updateChatMetadata(chatId, { name, useCrypto, cryptoKey }).subscribe({
+      next: () => {
+        this.chatList.update((list) =>
+          list.map((c) => (c._id === chatId ? { ...c, name, useCrypto } : c)),
+        );
       },
     });
   }

@@ -19,7 +19,10 @@ import { ChatSidebarComponent } from './lm-studio-api/chat-sidebar.component';
 import { ChatMessagesComponent } from './lm-studio-api/chat-messages.component';
 import { ChatInputComponent } from './lm-studio-api/chat-input.component';
 import { EventLogComponent, EventEntry } from './lm-studio-api/event-log.component';
-import { ModelSelectorComponent, ModelReasoningCapability } from './lm-studio-api/model-selector.component';
+import {
+  ModelSelectorComponent,
+  ModelReasoningCapability,
+} from './lm-studio-api/model-selector.component';
 import { InfoComponent } from './lm-studio-api/info.component';
 import { LmStudioEvent } from '../lmstudio-stream.service';
 
@@ -156,6 +159,7 @@ import { LmStudioEvent } from '../lmstudio-stream.service';
       <div class="flex flex-1 overflow-hidden relative min-h-0 bg-surface-base">
         @if (showChatsSidebar()) {
           <app-chat-sidebar
+            #chatSidebar
             client="LMSTUDIO"
             [chatList]="chatList()"
             [chatsLoading]="chatsLoading()"
@@ -163,6 +167,8 @@ import { LmStudioEvent } from '../lmstudio-stream.service';
             (chatOpened)="openChat($event)"
             (commitRename)="onRename($event)"
             (chatDeleted)="deleteChat($event)"
+            (openChatSettings)="onOpenChatSettings($event)"
+            (saveCryptoSettings)="onSaveCryptoSettings($event)"
           />
         }
 
@@ -238,6 +244,7 @@ export class LmStudioApi implements OnDestroy, OnInit {
   private readonly lmStudioService = inject(LMStudioService);
 
   @ViewChild('messageContainer') private messageContainer?: ElementRef<HTMLElement>;
+  @ViewChild('chatSidebar') private chatSidebarRef?: ChatSidebarComponent;
 
   readonly showEventPanel = signal(false);
   readonly showChatsSidebar = signal(true);
@@ -488,6 +495,41 @@ export class LmStudioApi implements OnDestroy, OnInit {
       next: () => {
         this.chatList.update((list) => list.filter((c) => c._id !== chatId));
         if (this.chatService.currentChatId() === chatId) this.newChat();
+      },
+    });
+  }
+
+  onOpenChatSettings(chatId: string): void {
+    this.chatMetaService.getChatMetadata(chatId).subscribe({
+      next: (chat) => {
+        this.chatSidebarRef?.loadSettingsData(
+          chat.name ?? '',
+          chat.useCrypto ?? false,
+          chat.cryptoKey ?? '',
+        );
+      },
+      error: () => {
+        this.chatSidebarRef?.loadSettingsData('', false, '');
+      },
+    });
+  }
+
+  onSaveCryptoSettings({
+    chatId,
+    name,
+    useCrypto,
+    cryptoKey,
+  }: {
+    chatId: string;
+    name: string;
+    useCrypto: boolean;
+    cryptoKey: string;
+  }): void {
+    this.chatMetaService.updateChatMetadata(chatId, { name, useCrypto, cryptoKey }).subscribe({
+      next: () => {
+        this.chatList.update((list) =>
+          list.map((c) => (c._id === chatId ? { ...c, name, useCrypto } : c)),
+        );
       },
     });
   }
