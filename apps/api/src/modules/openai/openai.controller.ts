@@ -113,64 +113,6 @@ export class OpenaiController {
   getModels(): Promise<ModelOpenAiDto[]> {
     return this.openAiService.getModels();
   }
-  /*
-
-export type ResponseStreamEvent =
-  | ResponseAudioDeltaEvent
-  | ResponseAudioDoneEvent
-  | ResponseAudioTranscriptDeltaEvent
-  | ResponseAudioTranscriptDoneEvent
-  | ResponseCodeInterpreterCallCodeDeltaEvent
-  | ResponseCodeInterpreterCallCodeDoneEvent
-  | ResponseCodeInterpreterCallCompletedEvent
-  | ResponseCodeInterpreterCallInProgressEvent
-  | ResponseCodeInterpreterCallInterpretingEvent
-  | ResponseCompletedEvent
-  | ResponseContentPartAddedEvent
-  | ResponseContentPartDoneEvent
-  | ResponseCreatedEvent
-  | ResponseErrorEvent
-  | ResponseFileSearchCallCompletedEvent
-  | ResponseFileSearchCallInProgressEvent
-  | ResponseFileSearchCallSearchingEvent
-  | ResponseFunctionCallArgumentsDeltaEvent
-  | ResponseFunctionCallArgumentsDoneEvent
-  | ResponseInProgressEvent
-  | ResponseFailedEvent
-  | ResponseIncompleteEvent
-  | ResponseOutputItemAddedEvent
-  | ResponseOutputItemDoneEvent
-  | ResponseReasoningSummaryPartAddedEvent
-  | ResponseReasoningSummaryPartDoneEvent
-  | ResponseReasoningSummaryTextDeltaEvent
-  | ResponseReasoningSummaryTextDoneEvent
-  | ResponseReasoningTextDeltaEvent
-  | ResponseReasoningTextDoneEvent
-  | ResponseRefusalDeltaEvent
-  | ResponseRefusalDoneEvent
-  | ResponseTextDeltaEvent
-  | ResponseTextDoneEvent
-  | ResponseWebSearchCallCompletedEvent
-  | ResponseWebSearchCallInProgressEvent
-  | ResponseWebSearchCallSearchingEvent
-  | ResponseImageGenCallCompletedEvent
-  | ResponseImageGenCallGeneratingEvent
-  | ResponseImageGenCallInProgressEvent
-  | ResponseImageGenCallPartialImageEvent
-  | ResponseMcpCallArgumentsDeltaEvent
-  | ResponseMcpCallArgumentsDoneEvent
-  | ResponseMcpCallCompletedEvent
-  | ResponseMcpCallFailedEvent
-  | ResponseMcpCallInProgressEvent
-  | ResponseMcpListToolsCompletedEvent
-  | ResponseMcpListToolsFailedEvent
-  | ResponseMcpListToolsInProgressEvent
-  | ResponseOutputTextAnnotationAddedEvent
-  | ResponseQueuedEvent
-  | ResponseCustomToolCallInputDeltaEvent
-  | ResponseCustomToolCallInputDoneEvent;
-
- */
 
   @ApiExtraModels(
     ResponseAudioDeltaEventDto,
