@@ -318,11 +318,16 @@ The final response must be a direct answer to the decrypted message, not a repet
     res.flushHeaders();
 
     const stream: Stream<OpenAI.ChatCompletionChunk> =
-      (await this.openAi.completions.create({
+      (await this.openAi.chat.completions.create({
         ...dto,
         stream: true,
         store: true,
       } as any)) as any as Stream<OpenAI.ChatCompletionChunk>;
+
+    for await (const event of stream) {
+      res.write(`data: ${JSON.stringify(event)}\n\n`);
+    }
+
     this.writeSseEvent(res, 'error', {
       type: 'error',
       error: {
