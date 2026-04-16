@@ -119,9 +119,7 @@ export class ChatService {
   ): void {
     if (this.form.invalid || this.streaming()) return;
     let input = this.form.getRawValue().input!.trim();
-    if (encryptionKey) {
-      input = CryptoJS.AES.encrypt(input, encryptionKey)?.toString();
-    }
+
     this.lastUserInput.set(input);
     this.form.reset();
     this.streaming.set(true);

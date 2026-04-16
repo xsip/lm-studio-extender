@@ -19,14 +19,45 @@ import OpenAI from 'openai';
 import { ModelOpenAiDto } from './dto/model-dtos';
 
 import {
+  ApplyPatchCallDto,
+  ApplyPatchCallOutputDto,
+  ComputerCallOutputDto,
+  EasyInputMessageDto,
+  FunctionCallOutputDto,
+  ImageGenerationCallDto,
+  ItemReferenceDto,
+  LocalShellCallDto,
+  LocalShellCallOutputDto,
+  McpApprovalRequestDto,
+  McpApprovalResponseDto,
+  McpListToolsDto,
+  MessageDto,
+  ResponseCodeInterpreterToolCallDto,
+  ResponseCompactionItemParamDto,
+  ResponseComputerToolCallDto,
   ResponseCreateParamsNonStreamingDto,
   ResponseCreateParamsStreamingDto,
+  ResponseCustomToolCallDto,
+  ResponseCustomToolCallOutputDto,
+  ResponseFileSearchToolCallDto,
+  ResponseFunctionToolCallDto,
+  ResponseFunctionWebSearchDto,
+  ResponseOutputMessageDto,
+  ResponseReasoningItemDto,
+  ResponseToolSearchOutputItemParamDto,
+  ShellCallDto,
+  ShellCallOutputDto,
+  ToolSearchCallDto,
 } from './dto/create-response-dtos';
 import { ResponseStreamEvent } from 'openai/resources/responses/responses';
 import { Stream } from 'openai/streaming';
 import dayjs from 'dayjs';
-import { ChatClient } from '../chat-metadata/chat-metadata.schema';
+import {
+  ChatClient,
+  ChatMetadataDocument,
+} from '../chat-metadata/chat-metadata.schema';
 import { McpCallDto } from './dto/get-response-dtos';
+import * as CryptoJS from 'crypto-js';
 
 interface ChatEndEvent {
   type: 'chat.end';
@@ -156,7 +187,7 @@ export class OpenAiService {
         lastMessageSentAt: new Date(),
       });
     }
-
+    let chatMeta: ChatMetadataDocument | undefined;
     if (!isNewChat) {
       const previousResponseId = await this.chatsService.getLatestResponseId(
         userId,
@@ -165,8 +196,12 @@ export class OpenAiService {
       if (previousResponseId) {
         mappedDto.previous_response_id = previousResponseId;
       }
-      const chatMeta = await this.chatMetadataService.findOne(userId, chatId);
+      chatMeta = await this.chatMetadataService.findOne(userId, chatId);
       if (chatMeta.useCrypto && chatMeta.cryptoKey) {
+        mappedDto.input = this.encryptChatMessage(
+          mappedDto.input as any,
+          chatMeta,
+        ) as any;
         mappedDto.instructions = `
 You MUST follow these rules EXACTLY:
 
@@ -307,5 +342,78 @@ The final response must be a direct answer to the decrypted message, not a repet
     throw new InternalServerErrorException(
       `AI Model issue: ${(err as Error)?.message ? (err as Error)?.message : 'unknown'}`,
     );
+  }
+
+  encryptChatMessage(
+    input:
+      | string
+      | (
+          | EasyInputMessageDto
+          | MessageDto
+          | ResponseOutputMessageDto
+          | ResponseFileSearchToolCallDto
+          | ResponseComputerToolCallDto
+          | ComputerCallOutputDto
+          | ResponseFunctionWebSearchDto
+          | ResponseFunctionToolCallDto
+          | FunctionCallOutputDto
+          | ToolSearchCallDto
+          | ResponseToolSearchOutputItemParamDto
+          | ResponseReasoningItemDto
+          | ResponseCompactionItemParamDto
+          | ImageGenerationCallDto
+          | ResponseCodeInterpreterToolCallDto
+          | LocalShellCallDto
+          | LocalShellCallOutputDto
+          | ShellCallDto
+          | ShellCallOutputDto
+          | ApplyPatchCallDto
+          | ApplyPatchCallOutputDto
+          | McpListToolsDto
+          | McpApprovalRequestDto
+          | McpApprovalResponseDto
+          | McpCallDto
+          | ResponseCustomToolCallOutputDto
+          | ResponseCustomToolCallDto
+          | ItemReferenceDto
+        )[],
+    chatMeta?: ChatMetadataDocument,
+  ) {
+    if (!chatMeta || (chatMeta && (!chatMeta.useCrypto || !chatMeta.cryptoKey)))
+      return input;
+    if (typeof input === 'string') {
+      return CryptoJS.AES.encrypt(input, chatMeta.cryptoKey!)?.toString();
+    } else if (typeof input === 'object' && Array.isArray(input)) {
+      return input.map((e) => {
+        if ('content' in e) {
+          if (typeof e.content === 'string')
+            return {
+              ...e,
+              content: CryptoJS.AES.encrypt(
+                e.content,
+                chatMeta.cryptoKey!,
+              )?.toString(),
+            };
+          else if (typeof e.content === 'object' && Array.isArray(e.content)) {
+            return {
+              ...e,
+              content: e.content.map((ii) => {
+                if ('text' in ii) {
+                  return {
+                    ...ii,
+                    text: CryptoJS.AES.encrypt(
+                      ii.text,
+                      chatMeta.cryptoKey!,
+                    )?.toString(),
+                  };
+                }
+                return ii;
+              }),
+            };
+          }
+        }
+        return e;
+      });
+    }
   }
 }
