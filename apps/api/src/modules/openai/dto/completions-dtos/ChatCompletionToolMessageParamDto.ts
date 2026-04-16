@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, getSchemaPath } from '@nestjs/swagger';
 import { Equals, IsString } from 'class-validator';
 
 import { ChatCompletionContentPartTextDto } from './ChatCompletionContentPartTextDto';

@@ -740,6 +740,70 @@
         ]
       }
     },
+    "/openai/completions-stream": {
+      "post": {
+        "description": "Streams the LM Studio response as Server-Sent Events. Each exchange is persisted in MongoDB under the given `internalChatId`. If `internalChatId` is supplied, the latest `response_id` for that session is fetched from the DB and set as `previous_response_id` on the request so LM Studio maintains conversation context. If `internalChatId` is omitted a new session is created and its generated ID is returned via a `created_chat` SSE event before the stream closes.",
+        "operationId": "completionsStreamOpenAi",
+        "parameters": [
+          {
+            "name": "internalChatId",
+            "required": false,
+            "in": "query",
+            "description": "MD5 hex string identifying an existing chat session. Omit to start a new session.",
+            "schema": {
+              "example": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4",
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "required": false,
+            "in": "query",
+            "description": "Optional human-readable label for this chat session.",
+            "schema": {}
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/ChatCompletionCreateParamsNonStreamingDto"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ChatCompletionCreateParamsStreamingDto"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Server-Sent Events stream. When no `internalChatId` was supplied, a synthetic `event: created_chat / data: {\"type\":\"created_chat\",\"result\":\"<md5>\"}` event is emitted just before the stream closes.",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Stream a chat response via SSE",
+        "tags": [
+          "OpenAI"
+        ]
+      }
+    },
     "/auth/me": {
       "get": {
         "operationId": "getMe",

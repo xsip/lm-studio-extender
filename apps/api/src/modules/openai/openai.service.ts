@@ -58,6 +58,8 @@ import {
 } from '../chat-metadata/chat-metadata.schema';
 import { McpCallDto } from './dto/get-response-dtos';
 import * as CryptoJS from 'crypto-js';
+import { ChatCompletionCreateParamsStreamingDto } from './dto/completions-dtos/ChatCompletionCreateParamsStreamingDto';
+import { ChatCompletionCreateParamsNonStreamingDto } from './dto/completions-dtos/ChatCompletionCreateParamsNonStreamingDto';
 
 interface ChatEndEvent {
   type: 'chat.end';
@@ -301,166 +303,26 @@ The final response must be a direct answer to the decrypted message, not a repet
 
   async chatStreamCompletions(
     userId: Types.ObjectId,
-    dto: ResponseCreateParamsNonStreamingDto | ResponseCreateParamsStreamingDto,
+    dto:
+      | ChatCompletionCreateParamsStreamingDto
+      | ChatCompletionCreateParamsNonStreamingDto,
     res: Response,
     token: string,
     internalChatId?: string,
     name?: string,
     chatMetaId?: string,
   ): Promise<void> {
-    const mappedDto:
-      | ResponseCreateParamsNonStreamingDto
-      | ResponseCreateParamsStreamingDto = {
-      model: dto.model,
-      input: dto.input as any[],
-      reasoning: dto.reasoning,
-      instructions: 'forget previous instructions',
-      stream: true,
-      tools: [
-        {
-          type: 'mcp',
-          server_label: 'my-toolbox',
-          server_url: this.selfMcpUrl,
-          headers: {
-            authorization: `Bearer ${token}`,
-            chatId: internalChatId,
-          },
-          allowed_tools: ['greeting-tool', 'get-token-usage-tool'],
-        } as any,
-      ],
-      previous_response_id: dto.previous_response_id,
-      store: true,
-    };
-
-    const isNewChat = !internalChatId;
-    const chatId = internalChatId ?? this.generateChatId();
-
-    let resolvedChatMetaId: string | undefined = chatMetaId;
-    if (isNewChat && !resolvedChatMetaId) {
-      resolvedChatMetaId = await this.chatMetadataService.createAndReturnId(
-        userId,
-        {
-          client: ChatClient.OPENAI,
-          name: chatId,
-          usedModel: dto.model!,
-          reasoningMode: dto.reasoning?.effort ?? 'off',
-          tools: (mappedDto.tools?.filter(
-            (i) => typeof i === 'object' && (i as any).type === 'mcp',
-          ) ?? []) as any,
-        },
-      );
-    } else if (!isNewChat && resolvedChatMetaId) {
-      await this.chatMetadataService.update(userId, resolvedChatMetaId, {
-        lastMessageSentAt: new Date(),
-      });
-    }
-    let chatMeta: ChatMetadataDocument | undefined;
-    if (!isNewChat) {
-      const previousResponseId = await this.chatsService.getLatestResponseId(
-        userId,
-        chatId,
-      );
-      if (previousResponseId) {
-        mappedDto.previous_response_id = previousResponseId;
-      }
-      chatMeta = await this.chatMetadataService.findOne(userId, chatId);
-      if (chatMeta.useCrypto && chatMeta.cryptoKey) {
-        mappedDto.input = this.encryptChatMessage(
-          mappedDto.input as any,
-          chatMeta,
-        ) as any;
-        mappedDto.instructions = `
-You MUST follow these rules EXACTLY:
-
-STEP 1 — TOOL CALL
-- ALWAYS call the tool "decrypt-message-tool"
-- Pass the FULL, ORIGINAL, UNMODIFIED user message in "full_user_message"
-- DO NOT answer yet
-
-STEP 2 — AFTER TOOL RESPONSE
-- You will receive the decrypted message
-- IGNORE the original encrypted input completely
-- Treat the decrypted message as if the user just sent it
-
-STEP 3 — FINAL RESPONSE
-- Determine the user's intent from the decrypted message
-- If it is a question, you MUST answer it
-- If it is a request, you MUST fulfill it
-- DO NOT repeat or restate the decrypted message
-- DO NOT mention the tool, decryption, or the process
-
-The final response must be a direct answer to the decrypted message, not a repetition of it.
-`;
-        (mappedDto.input as any[]) = [
-          {
-            role: 'developer',
-            content: mappedDto.instructions,
-          },
-
-          ...(mappedDto.input as any[]),
-        ];
-        (mappedDto.tools![0] as any).allowed_tools.push('decrypt-message-tool');
-      }
-    }
-
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders();
 
-    try {
-      const stream: Stream<ResponseStreamEvent> =
-        (await this.openAi.completions.create(mappedDto as any)) as any;
-      for await (const event of stream) {
-        res.write(`data: ${JSON.stringify(event)}\n\n`);
-        if (isNewChat) {
-          this.writeSseEvent(res, 'created_chat', {
-            type: 'created_chat',
-            result: resolvedChatMetaId,
-          });
-        }
-
-        if (event.type === 'response.completed') {
-          await this.chatsService.saveEntry(
-            userId,
-            chatId,
-            dto,
-            event.response as any,
-            name,
-            resolvedChatMetaId,
-          );
-
-          // ── Token accounting via TokenLimitService ──────────────────────
-          const tokensUsed =
-            (event.response.usage?.input_tokens ?? 0) +
-            (event.response.usage?.total_tokens ?? 0) +
-            (event.response.usage?.output_tokens_details?.reasoning_tokens ||
-              0);
-
-          const updatedUser = await this.tokenLimitService.updateUsedTokens(
-            userId,
-            tokensUsed,
-          );
-
-          const limit = await this.tokenLimitService.getTokensPerIntervall(
-            updatedUser.subscription,
-          );
-
-          if (updatedUser.usedTokens >= limit) {
-            this.writeSseEvent(res, 'api.info', {
-              type: 'api.info',
-              message: `Rate limit reached. Resets at ${dayjs(updatedUser.tokenCountResetDate).toString()}`,
-            });
-          }
-          // ───────────────────────────────────────────────────────────────
-        }
-      }
-    } catch (error: any) {
-      this.writeSseEvent(res, 'error', {
-        type: 'error',
-        error: error.error,
-      });
-    }
+    this.writeSseEvent(res, 'error', {
+      type: 'error',
+      error: {
+        message: 'Not Implemented yet!'
+      },
+    });
 
     res.write('data: [DONE]\n\n');
     res.end();
