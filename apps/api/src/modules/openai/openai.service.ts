@@ -317,10 +317,16 @@ The final response must be a direct answer to the decrypted message, not a repet
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders();
 
+    const stream: Stream<OpenAI.ChatCompletionChunk> =
+      (await this.openAi.completions.create({
+        ...dto,
+        stream: true,
+        store: true,
+      } as any)) as any as Stream<OpenAI.ChatCompletionChunk>;
     this.writeSseEvent(res, 'error', {
       type: 'error',
       error: {
-        message: 'Not Implemented yet!'
+        message: 'Not Implemented yet!',
       },
     });
 
