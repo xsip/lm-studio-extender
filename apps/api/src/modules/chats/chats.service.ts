@@ -12,13 +12,19 @@ import { ChatResponseDto } from '../lm-studio/dto/chat-response.dto';
 import { ResponseCreateParamsNonStreamingDto } from '../openai/dto/create-response-dtos';
 import { ResponseCreateParamsStreamingDto } from '../openai/dto/create-response-dtos/ResponseCreateParamsStreamingDto';
 import { ResponseDto } from '../openai/dto/get-response-dtos';
-
+import * as CryptoJS from 'crypto-js';
+import { ChatMetadataService } from '../chat-metadata/chat-metadata.service';
+import {
+  ChatClient,
+  ChatMetadata,
+} from '../chat-metadata/chat-metadata.schema';
 @Injectable()
 export class ChatsService {
   private readonly logger = new Logger(ChatsService.name);
 
   constructor(
     @InjectModel(Chat.name) private readonly chatModel: Model<ChatDocument>,
+    private readonly chatMetadataService: ChatMetadataService,
   ) {}
 
   /**
@@ -111,7 +117,85 @@ export class ChatsService {
       );
     }
 
-    return entries as unknown as ChatEntryDto[];
+    const chatMeta = await this.chatMetadataService.findOne(
+      userId,
+      internalChatId,
+    );
+
+    return entries.map((e) => {
+      return {
+        ...e,
+        request: {
+          input:
+            chatMeta.client === ChatClient.OPENAI
+              ? this.decryptOpenAiRequest(
+                  e.request as ResponseCreateParamsStreamingDto,
+                  chatMeta,
+                )
+              : this.decryptLmStudioRequest(
+                  e.request as ChatRequestDto,
+                  chatMeta,
+                ),
+        },
+      };
+    }) as unknown as ChatEntryDto[];
+  }
+
+  decryptOpenAiRequest(
+    r: ResponseCreateParamsStreamingDto,
+    chatMetadata: ChatMetadata,
+  ) {
+    if (!chatMetadata.useCrypto || !chatMetadata.cryptoKey) return r;
+
+    if (typeof r.input === 'string')
+      return this.decrypt(r.input, chatMetadata.cryptoKey!) ?? r.input;
+    else if (typeof r.input === 'object' && Array.isArray(r.input)) {
+      return r.input.map((i) => {
+        if ('content' in i) {
+          if (typeof i.content === 'string')
+            return {
+              ...i,
+              content: this.decrypt(i.content, chatMetadata.cryptoKey!),
+            };
+          else if (typeof i.content === 'object' && Array.isArray(i.content)) {
+            return {
+              ...i,
+
+              content: i.content.map((ii) => {
+                if ('text' in ii) {
+                  return {
+                    ...ii,
+                    text: this.decrypt(ii.text, chatMetadata.cryptoKey!),
+                  };
+                }
+              }),
+            };
+          }
+        }
+        return i;
+      });
+    }
+  }
+
+  decryptLmStudioRequest(r: ChatRequestDto, chatMetadata: ChatMetadata) {
+    if (!chatMetadata.useCrypto || !chatMetadata.cryptoKey) return r;
+
+    if (typeof r.input === 'string') {
+      return this.decrypt(r.input, chatMetadata.cryptoKey!) ?? r.input;
+    } else if (typeof r.input === 'object' && Array.isArray(r.input)) {
+      return r.input.map((e) => {
+        if (e.type === 'message')
+          return {
+            ...e,
+            content: this.decrypt(e.content, chatMetadata.cryptoKey!)
+          };
+        else if (e.type == 'image')
+          return {
+            ...e,
+            data_url: e.data_url,
+          };
+      });
+    }
   }
 
   /** Return all unique chat sessions belonging to this user, newest-first. */
@@ -142,5 +226,23 @@ export class ChatsService {
         { $sort: { lastActivity: -1 } },
       ])
       .exec();
+  }
+
+
+  decrypt(input: string, key: string) {
+    try {
+
+
+    const res = CryptoJS.AES.decrypt(
+      input,
+      key,
+    )?.toString(CryptoJS.enc.Utf8);
+    if(!res || res === ' ')
+      return input;
+    return res;
+    } catch (e: any) {
+      console.log(e);
+      return input;
+    }
   }
 }
