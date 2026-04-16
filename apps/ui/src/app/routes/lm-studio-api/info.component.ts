@@ -1,6 +1,6 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AuthService, MeDto, ModelDto } from '../../client';
+import { AuthService, MeDto, ModelDto, OpenAIService } from '../../client';
 import { LMStudioService } from '../../client';
 
 @Component({
@@ -318,8 +318,10 @@ import { LMStudioService } from '../../client';
   `,
 })
 export class InfoComponent implements OnInit {
+  readonly uiType = input.required<'OPENAI' | 'LMSTUDIO'>();
   private readonly authService = inject(AuthService);
   private readonly lmStudioService = inject(LMStudioService);
+  private readonly openaiService = inject(OpenAIService);
   readonly isDark = signal(this.readStoredTheme());
   readonly user = signal<MeDto | null>(null);
   readonly userLoading = signal(false);
@@ -374,16 +376,36 @@ export class InfoComponent implements OnInit {
   private loadModels(): void {
     this.modelsLoading.set(true);
     this.modelsError.set(false);
-    this.lmStudioService.getModels().subscribe({
-      next: (res) => {
-        this.models.set(res.models ?? []);
-        this.modelsLoading.set(false);
-      },
-      error: () => {
-        this.modelsError.set(true);
-        this.modelsLoading.set(false);
-      },
-    });
+    if(this.uiType() === 'LMSTUDIO') {
+      this.lmStudioService.getModels().subscribe({
+        next: (res) => {
+          this.models.set(res.models ?? []);
+          this.modelsLoading.set(false);
+        },
+        error: () => {
+          this.modelsError.set(true);
+          this.modelsLoading.set(false);
+        },
+      });
+    } else {
+      this.openaiService.getModelsOpenAi().subscribe({
+        next: (res) => {
+          this.models.set((res ?? []).map((m) => {
+            return {
+              key: m.id,
+              publisher: m.owned_by,
+              type: 'llm'
+            } as ModelDto;
+          }));
+          this.modelsLoading.set(false);
+        },
+        error: () => {
+          this.modelsError.set(true);
+          this.modelsLoading.set(false);
+        },
+      });
+    }
+
   }
 
   toggleDarkMode(): void {

@@ -222,7 +222,7 @@ import { take } from 'rxjs';
               </button>
             </div>
             <div class="flex-1 overflow-hidden">
-              <app-info />
+              <app-info [uiType]="'OPENAI'" />
             </div>
           </div>
         }

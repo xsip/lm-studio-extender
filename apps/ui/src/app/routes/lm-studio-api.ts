@@ -227,7 +227,7 @@ import { LmStudioEvent } from '../lmstudio-stream.service';
               </button>
             </div>
             <div class="flex-1 overflow-hidden">
-              <app-info />
+              <app-info [uiType]="'LMSTUDIO'" />
             </div>
           </div>
         }
