@@ -26,6 +26,7 @@ import { ResponseStreamEvent } from 'openai/resources/responses/responses';
 import { Stream } from 'openai/streaming';
 import dayjs from 'dayjs';
 import { ChatClient } from '../chat-metadata/chat-metadata.schema';
+import { McpCallDto } from './dto/get-response-dtos';
 
 interface ChatEndEvent {
   type: 'chat.end';
@@ -115,6 +116,7 @@ export class OpenAiService {
       model: dto.model,
       input: dto.input as any[],
       reasoning: dto.reasoning,
+      instructions: 'forget previous instructions',
       stream: true,
       tools: [
         {
@@ -125,11 +127,7 @@ export class OpenAiService {
             authorization: `Bearer ${token}`,
             chatId: internalChatId,
           },
-          allowed_tools: [
-            'greeting-tool',
-            'get-token-usage-tool',
-            'decrypt-message-tool',
-          ],
+          allowed_tools: ['greeting-tool', 'get-token-usage-tool'],
         } as any,
       ],
       previous_response_id: dto.previous_response_id,
@@ -199,6 +197,7 @@ The final response must be a direct answer to the decrypted message, not a repet
 
           ...(mappedDto.input as any[]),
         ];
+        (mappedDto.tools![0] as any).allowed_tools.push('decrypt-message-tool');
       }
     }
 
