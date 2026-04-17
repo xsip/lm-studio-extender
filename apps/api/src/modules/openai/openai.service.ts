@@ -242,10 +242,10 @@ STEP 3 — FINAL RESPONSE
 The final response must be a direct answer to the decrypted message, not a repetition of it.
 `;
       (mappedDto.input as any[]) = [
-        {
+        /*{
           role: 'developer',
           content: mappedDto.instructions,
-        },
+        },*/
 
         ...(mappedDto.input as any[]),
       ];
