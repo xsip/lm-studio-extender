@@ -68,14 +68,14 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
           <a
             routerLink="/chat-lm-studio"
             routerLinkActive="border-accent text-accent bg-accent/10"
-            [routerLinkActiveOptions]="{ exact: true }"
+            [routerLinkActiveOptions]="{ exact: false }"
             class="px-2.5 py-1 text-[11px] rounded-md font-medium border border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors"
             >LM Studio</a
           >
           <a
             routerLink="/chat-openai"
             routerLinkActive="border-accent text-accent bg-accent/10"
-            [routerLinkActiveOptions]="{ exact: true }"
+            [routerLinkActiveOptions]="{ exact: false }"
             class="px-2.5 py-1 text-[11px] rounded-md font-medium border border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors"
             >OpenAI</a
           >
