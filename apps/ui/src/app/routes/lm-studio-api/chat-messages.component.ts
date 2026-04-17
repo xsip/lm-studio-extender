@@ -9,9 +9,15 @@ import { CreateChatMetadataDto } from '../../client';
   imports: [CommonModule, DatePipe, MarkdownPipe, StripMarkdownPipe],
   template: `
     @if (messages().length === 0 && !streaming()) {
-      <div class="flex-1 flex items-center justify-center text-xs text-text-muted tracking-wide">
-        No messages yet
-      </div>
+      @if (client() === 'OPENAI') {
+        <div class="flex-1 flex items-center justify-center text-xs text-text-muted tracking-wide">
+          No messages yet
+        </div>
+      } @else {
+        <div class="flex-1 flex items-center justify-center text-xs text-text-muted tracking-wide">
+          No messages yet
+        </div>
+      }
     }
 
     @for (msg of messages(); track $index) {
