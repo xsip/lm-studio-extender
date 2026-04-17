@@ -1,379 +1,345 @@
-# LM Studio Extender
+# LM Studio Chat Client
 
-A full-stack wrapper around the [LM Studio](https://lmstudio.ai/) local inference API that adds authentication, subscription-based token rate limiting, persistent multi-session chat history, MCP tool integration, and a purpose-built Angular frontend.
+A full-stack AI chat client that connects to a locally running [LM Studio](https://lmstudio.ai/) instance via both its native API and its OpenAI-compatible `responses/create` endpoint. Built with Angular, NestJS, and MongoDB, with first-class MCP (Model Context Protocol) tool support and optional end-to-end AES message encryption.
 
 ---
 
-![Header](https://raw.githubusercontent.com/xsip/lm-studio-extender/refs/heads/main/preview.png)
+## Table of Contents
 
-![Header](https://raw.githubusercontent.com/xsip/lm-studio-extender/refs/heads/main/img.png)
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Prerequisites](#prerequisites)
+- [Environment Variables](#environment-variables)
+- [Getting Started](#getting-started)
+- [MCP Tool Integration](#mcp-tool-integration)
+- [Message Encryption](#message-encryption)
+- [Authentication & Authorization](#authentication--authorization)
+- [Token Usage & Rate Limiting](#token-usage--rate-limiting)
+- [API Overview](#api-overview)
 
+---
 
 ## Overview
 
-LM Studio exposes a raw OpenAI-compatible REST API with no auth, no persistence, and no multi-user support. This project sits in front of it and provides all of that, turning a single-user local inference server into a proper multi-user application.
+This monorepo hosts two applications:
 
-The project also supports connecting directly to **OpenAI's servers** (or any OpenAI-compatible endpoint) via the Responses API — giving you the same auth, persistence, and rate-limiting layer for real OpenAI models alongside local ones.
+| App | Location | Description |
+|-----|----------|-------------|
+| `api` | `apps/api` | NestJS REST backend, MCP server, and LM Studio proxy |
+| `ui` | `apps/ui` | Angular 21 single-page chat interface |
 
-```
-Angular UI  ──►  NestJS API  ──►  LM Studio (localhost)
-                    │         ──►  OpenAI API (cloud)
-                 MongoDB
-```
-
----
-
-## Features
-
-### Authentication
-- JWT-based login with bcrypt password hashing
-- Invite-only registration gated by a `REGISTER_SECRET` environment variable
-- Account activation flow via MD5 hash link (email-ready for production)
-- Role-based access control (`user` / `admin`) via `RolesGuard`
-- Global JWT guard — all endpoints are protected by default; public routes are opted out explicitly
-
-### Subscription & Token Rate Limiting
-- Per-user token usage tracking stored in MongoDB
-- Subscription tiers (`free`, `basic`) each have an independently configurable rate limit
-- Token limit configs define `tokensPerInterval` and `minutesTillReset` — fully manageable via REST
-- On each streaming request the API checks the user's consumed tokens against their tier's limit and resets the counter automatically when the interval expires
-- Exceeding the limit returns `403 Forbidden` with the exact reset timestamp
-- Rate limit status is also communicated to the frontend via an `api.info` SSE event after the `response.completed` event
-
-### Chat — Streaming & Persistence
-- **SSE streaming** via `POST /lmstudio/chat-stream` and `POST /openai/chat-stream` — streams output token-by-token to the frontend
-- **Conversation context** is maintained automatically: the API fetches the latest `response_id` for a session from MongoDB and passes it as `previous_response_id` on the request so the model retains context across turns
-- **Session management** — omit `internalChatId` to start a new session (the generated ID is returned via a `created_chat` SSE event); supply it to continue an existing one
-- All exchanges are persisted in MongoDB under user-scoped sessions
-- Non-streaming `POST /lmstudio/chat` for simple one-shot requests
-
-### Multiple Chat Windows
-- Each user can maintain any number of independent chat sessions simultaneously
-- Sessions are identified by an MD5 `internalChatId` and scoped to the authenticated user — other users cannot read or write to them
-- Chat metadata (name, last activity) is managed separately from message content, allowing the UI to list and label sessions without loading full history
-- Each session records which provider (`lmstudio` or `openai`) and model was used, visible in the sidebar
-
-### MCP Integration
-- NestJS app exposes its own MCP server via `@rekog/mcp-nest`, supporting both **Streamable HTTP** and **SSE** transports
-- Per-request **ephemeral MCP servers** can be injected into any chat call — the frontend passes a `server_url` and optional `allowed_tools` and the API forwards them to the model as part of the request
-- For the OpenAI Responses API, the app's own MCP server (`SELF_MCP_URL`) is automatically injected into every streaming request, giving models access to built-in tools (`greeting-tool`, `get-token-usage-tool`) without any frontend configuration
-- Enables models to call external tools (web fetch, custom APIs, etc.) on a per-request basis without any persistent server configuration
-
-### OpenAI Responses API
-- Full integration with OpenAI's **Responses API** (`POST /v1/responses`) via the official `openai` Node.js SDK
-- Same auth, token-limiting, session persistence, and MCP injection as the LM Studio path
-- Supports the complete Responses API request surface: `reasoning`, `tools`, `previous_response_id`, `store`, and all tool-call types
-- The `stream: true` flag is always enforced — the endpoint always streams
-- Model list is proxied from the configured `baseURL`; the UI renders an OpenAI-specific model selector
-- All OpenAI stream event types are typed end-to-end with generated DTOs (see `apps/api/src/modules/openai/dto/`)
-
-### Model Support
-- `GET /lmstudio/models` proxies LM Studio's model list including capabilities and quantization info
-- `GET /openai/models` proxies the model list from the configured OpenAI-compatible endpoint (paginated via SDK `hasNextPage`)
-- Chat requests support the full LM Studio parameter surface: `temperature`, `top_p`, `top_k`, `min_p`, `repeat_penalty`, `max_output_tokens`, `context_length`, `reasoning`
-- **Vision** support via `ImageInputDto` — base64 data URLs can be included alongside text messages
-- **Reasoning effort** control (`off` / `low` / `medium` / `high` / `on`) for models that support it
-
-### API & Developer Experience
-- Full **OpenAPI / Swagger UI** available at `/api` when `USE_SWAGGER=true`
-- `openapi.json` is written to disk on startup (used to generate the Angular API client)
-- Angular client is generated from the spec via `npm run gen:client` — no hand-written HTTP calls in the frontend
-- `mcp-proxy.js` sidecar bridges legacy SSE MCP transport to Streamable HTTP for clients that need it
+The backend acts as an authenticated proxy between the Angular frontend and LM Studio. All chat sessions are persisted in MongoDB, token usage is tracked per user, and the backend exposes itself as an MCP server so LM Studio can call back into it during inference.
 
 ---
 
 ## Architecture
 
-### Backend — `apps/api` (NestJS 11)
+```
+┌──────────────────────────────────────────────────────────┐
+│                     Angular UI (port 4200)               │
+│   LM Studio API route │ OpenAI Responses API route       │
+└───────────────┬───────────────────────┬──────────────────┘
+                │ SSE stream             │ SSE stream
+┌───────────────▼───────────────────────▼──────────────────┐
+│                 NestJS API (port 8888)                    │
+│                                                          │
+│  ┌──────────────┐  ┌──────────────┐  ┌────────────────┐  │
+│  │ LmStudio     │  │ OpenAI       │  │ Auth / JWT     │  │
+│  │ Module       │  │ Module       │  │ Module         │  │
+│  └──────┬───────┘  └──────┬───────┘  └────────────────┘  │
+│         │                 │                               │
+│  ┌──────▼─────────────────▼───────┐  ┌────────────────┐  │
+│  │     Chats / ChatMetadata       │  │ MCP Server     │  │
+│  │     MongoDB persistence        │  │ (@rekog/mcp-   │  │
+│  └────────────────────────────────┘  │  nest)         │  │
+│                                      └────────┬───────┘  │
+└──────────────────────────────────────────────┼───────────┘
+                                               │ MCP callback (SSE / HTTP)
+┌──────────────────────────────────────────────▼───────────┐
+│                     LM Studio (port 1234)                │
+│            /api/v1/chat  │  /v1/responses/create         │
+└──────────────────────────────────────────────────────────┘
+```
 
-| Module | Responsibility |
-|---|---|
-| `AuthModule` | JWT issuance, bcrypt hashing, registration flow, guards |
-| `LmStudioModule` | Proxy to LM Studio REST API, SSE streaming, token tracking |
-| `OpenaiModule` | OpenAI Responses API streaming, model listing, token tracking |
-| `ChatsModule` | Persisted message history, session lookup, user-scoped access |
-| `ChatMetadataModule` | Session labels, last-activity timestamps, cascade deletes |
-| `TokenLimitModule` | Per-subscription rate limit configs, reset scheduling |
-| `McpModule` | Exposes the app itself as an MCP server over HTTP + SSE |
-
-#### OpenAI Module internals
-
-**`OpenAiService`** wraps the official `openai` SDK. It is instantiated with `baseURL` pointing to `LM_STUDIO_BASE_URL/v1` by default, but can be redirected to `https://api.openai.com/v1` (or any compatible endpoint) by changing that env var. Key responsibilities:
-
-- `getModels()` — calls `openAi.models.list()` and follows pagination automatically via `hasNextPage()` / `getNextPage()`.
-- `chatStream()` — resolves the previous `response_id` for the session from MongoDB, injects the self-MCP server with the caller's JWT as an `authorization` header, sets `stream: true`, and pipes the `openai.responses.create()` async iterator to the SSE response. Token accounting runs on the `response.completed` event.
-
-**`OpenaiController`** mirrors `LmStudioController` exactly: it runs the token-window reset and rate-limit check before delegating to `OpenAiService.chatStream()`. Both streaming and non-streaming DTO variants are accepted on the body; `stream: true` is always enforced internally.
-
-### Frontend — `apps/ui` (Angular 21)
-- Standalone components, signal-based where applicable
-- Generated API client from OpenAPI spec (no raw `HttpClient` calls in application code)
-- JWT stored and attached via `AuthInterceptor`
-- Multiple simultaneous chat windows with independent session state
-- Provider tabs in the top bar switch between the **LM Studio** route (`/chat-lm-studio`) and the **OpenAI** route (`/chat-openai`) — each has its own model selector and chat service
-- `OpenAiStreamService` in `apps/ui/src/app/openai-stream.service.ts` parses the full set of Responses API SSE event types (text deltas, reasoning deltas, MCP call lifecycle, tool call lifecycle, image gen lifecycle, audio, etc.)
-- Markdown rendering with KaTeX math support
-- Tailwind CSS 4 styling
-
-### Database — MongoDB
-| Collection | Contents |
-|---|---|
-| `users` | Credentials, roles, subscription tier, token counters |
-| `chats` | Individual message entries keyed by `internalChatId`, tagged with `client` (`lmstudio` or `openai`) |
-| `chats_metadata` | Session labels, timestamps, `client` field, `usedModel`, `reasoningMode`, injected MCP tools |
-| `token_limit_configs` | Rate limit parameters per subscription tier |
+During inference, LM Studio calls back into the NestJS MCP server with the user's JWT token forwarded in the `Authorization` header, so MCP tools have full access to the authenticated user's context.
 
 ---
 
-## API Reference
+## Features
 
-### Auth
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| POST | `/auth/login` | Public | Returns a signed JWT (1 h expiry) |
-| POST | `/auth/register` | Public | Creates an inactive user account |
-| GET | `/auth/activate?hash=` | Public | Activates account, returns JWT |
-
-### LM Studio
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| GET | `/lmstudio/models` | JWT | List loaded models |
-| POST | `/lmstudio/chat` | JWT | One-shot chat completion |
-| POST | `/lmstudio/chat-stream` | JWT | SSE streaming chat with persistence |
-
-### OpenAI
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| GET | `/openai/models` | JWT | List models from the configured OpenAI-compatible endpoint |
-| POST | `/openai/chat-stream` | JWT | SSE streaming chat via the Responses API with persistence |
-
-**`POST /openai/chat-stream` query parameters**
-
-| Parameter | Required | Description |
-|---|---|---|
-| `internalChatId` | No | MD5 hex string of an existing session. Omit to create a new one. The new session ID is returned via a `created_chat` SSE event. |
-| `name` | No | Human-readable label for the session (used when creating a new one). |
-
-**Request body** accepts either `ResponseCreateParamsNonStreamingDto` or `ResponseCreateParamsStreamingDto` (both are defined from the OpenAI spec). Key fields:
-
-| Field | Type | Description |
-|---|---|---|
-| `model` | `string` | Model identifier (e.g. `gpt-4o`, `o3`) |
-| `input` | `string \| array` | User message(s) — text, image URLs, or file references |
-| `reasoning` | `{ effort: 'low' \| 'medium' \| 'high' }` | Optional reasoning effort for supported models |
-| `previous_response_id` | `string` | Resolved automatically from DB; can be overridden |
-| `tools` | `array` | Additional tool definitions merged with the injected MCP server |
-
-**SSE event stream**
-
-The stream follows the OpenAI Responses API event protocol. Additional synthetic events emitted by this API:
-
-| Event type | `data` payload | Description |
-|---|---|---|
-| `created_chat` | `{ type: "created_chat", result: "<chatMetaId>" }` | Emitted once on new sessions before the stream closes |
-| `api.info` | `{ type: "api.info", message: "Rate limit reached. Resets at <date>" }` | Emitted after `response.completed` when the user has hit their token limit |
-
-The stream always ends with `data: [DONE]`.
-
-### Chats
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| GET | `/chats` | JWT | List all sessions for the current user |
-| GET | `/chats/:internalChatId` | JWT | Get all messages in a session |
-
-### Chat Metadata
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| POST | `/chats-metadata` | JWT | Create a metadata entry for a session |
-| GET | `/chats-metadata` | JWT | List all metadata for the current user |
-| GET | `/chats-metadata/:id` | JWT | Get a single entry |
-| PATCH | `/chats-metadata/:id` | JWT | Update name or other fields |
-| DELETE | `/chats-metadata/:id` | JWT | Delete entry and cascade-delete messages |
-
-### Token Limit Configs
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| POST | `/token-limit-configs` | JWT | Create a config for a subscription tier |
-| GET | `/token-limit-configs` | JWT | List all configs |
-| GET | `/token-limit-configs/subscription/:tier` | JWT | Get config for a specific tier |
-| GET | `/token-limit-configs/:id` | JWT | Get config by ID |
-| PUT | `/token-limit-configs/:id` | JWT | Update a config |
-| DELETE | `/token-limit-configs/:id` | JWT | Delete a config |
+- **Dual API modes** — use LM Studio's native `/api/v1/chat` endpoint or the OpenAI-compatible `/v1/responses/create` endpoint from the same UI
+- **OpenAI completions endpoint** — additional support for `/v1/chat/completions` (streaming)
+- **Real-time SSE streaming** — responses are streamed token-by-token to the browser
+- **Persistent chat history** — every exchange is stored in MongoDB and rehydrated on demand
+- **Conversation continuity** — `previous_response_id` chaining keeps multi-turn context alive across page refreshes
+- **MCP tool server** — the backend registers itself as an MCP server; LM Studio can call tools mid-inference
+    - `get-token-usage-tool` — returns the authenticated user's current token usage and limit
+    - `decrypt-message-tool` — decrypts an AES-encrypted user message at inference time
+    - `greeting-tool` — example tool with progress reporting
+- **End-to-end AES message encryption** — per-chat opt-in; messages are encrypted with CryptoJS AES before leaving the browser, and the model decrypts them via MCP during inference
+- **JWT authentication** — login / register with bcrypt-hashed passwords; tokens expire after 1 hour
+- **Role-based access control** — `User` and `Admin` roles via `RolesGuard`
+- **Subscription-aware token rate limiting** — configurable token budgets per subscription tier (`free` / `basic`), with automatic reset intervals
+- **Model selector** — dynamically fetches available models from the running LM Studio instance
+- **Reasoning mode** — pass reasoning effort (`off` / `low` / `medium` / `high`) to supported models
+- **Swagger UI** — optional OpenAPI documentation (enabled via `USE_SWAGGER=true`)
+- **Markdown rendering** — assistant responses rendered as formatted Markdown in the chat UI
 
 ---
 
-## Setup
+## Tech Stack
 
-### Prerequisites
-- Node.js 20+
-- MongoDB (local or Atlas)
-- [LM Studio](https://lmstudio.ai/) running with at least one model loaded and the local server enabled **and/or** an OpenAI API key
-
-### Install
-
-```bash
-npm install
-```
-
-### Environment variables
-
-Create a `.env` file in the repo root (or in `apps/api/` if running standalone):
-
-```env
-# MongoDB
-MONGODB_URI=mongodb://localhost:27017/lmStudioWrapper
-
-# JWT — use a long random string in production
-JWT_SECRET=change_me
-
-# LM Studio local server URL (also used as baseURL for the OpenAI SDK)
-LM_STUDIO_BASE_URL=http://localhost:1234
-
-# OpenAI API key (set to your real key when pointing at openai.com)
-# Leave empty or set to any string when pointing at LM Studio
-LM_STUDIO_API_TOKEN=
-
-# To use the real OpenAI API instead of LM Studio, set:
-# LM_STUDIO_BASE_URL=https://api.openai.com
-# LM_STUDIO_API_TOKEN=sk-...
-
-# Registration
-REGISTER_SECRET=your_invite_secret
-RETURN_REGISTER_HASH=true   # set to false in production
-
-# MCP — URL this server is reachable at (injected into every OpenAI chat-stream call)
-SELF_MCP_URL=http://localhost:8888/tools/mcp
-
-# Optional
-PORT=8888
-USE_SWAGGER=true
-```
-
-### Run
-
-```bash
-# API (NestJS) — http://localhost:8888
-npx nx serve api
-
-# UI (Angular) — http://localhost:4200
-npx nx serve ui
-```
-
-The UI dev server proxies `/api/*` → `http://localhost:3000` via `apps/ui/proxy.conf.json`.
-
-### Generate OpenAPI client
-
-After changing any API controllers or DTOs:
-
-```bash
-# 1. Start the API with Swagger enabled
-USE_SWAGGER=true npx nx serve api
-
-# 2. Regenerate the Angular client
-npm run gen:client
-```
+| Layer | Technology |
+|-------|-----------|
+| Frontend | Angular 21, TailwindCSS 4, RxJS 7 |
+| Backend | NestJS 11, TypeScript 5.9 |
+| Database | MongoDB via Mongoose |
+| MCP | `@rekog/mcp-nest` (Streamable HTTP + SSE transports) |
+| Encryption | `crypto-js` (AES) |
+| Auth | JWT (`@nestjs/jwt`), bcrypt |
+| HTTP client | `@nestjs/axios` |
+| OpenAI SDK | `openai` npm package (pointed at LM Studio base URL) |
+| API docs | Swagger / OpenAPI (`@nestjs/swagger`) |
 
 ---
 
-## Monorepo Commands
-
-```bash
-npm start                     # serve both api and ui concurrently
-npm run build                 # build all projects
-npx nx serve api              # API only
-npx nx serve ui               # UI only
-npx nx test api               # Jest tests for API
-npx nx graph                  # visualise project dependency graph
-npx nx affected --target=build  # build only what changed
-```
-
-## Structure
+## Project Structure
 
 ```
-lm-studio-extender/
-├── apps/
-│   ├── api/          # NestJS backend (lm-studio-extender-api)
-│   │   └── src/modules/
-│   │       ├── auth/
-│   │       ├── lm-studio/
-│   │       ├── openai/         # OpenAI Responses API integration
-│   │       │   ├── dto/
-│   │       │   │   ├── create-response-dtos/   # Request-side DTOs
-│   │       │   │   ├── get-response-dtos/      # Response & SSE event DTOs
-│   │       │   │   └── model-dtos/
-│   │       │   ├── openai.controller.ts
-│   │       │   ├── openai.service.ts
-│   │       │   └── openai.module.ts
-│   │       ├── chats/
-│   │       ├── chat-metadata/
-│   │       └── token-limit/
-│   └── ui/           # Angular frontend (lm-studio-extender-ui)
-│       └── src/app/
-│           ├── client/         # Generated OpenAPI client
-│           ├── routes/
-│           │   ├── lm-studio-api/    # LM Studio chat UI
-│           │   └── openai-api/       # OpenAI chat UI
-│           ├── lmstudio-stream.service.ts
-│           └── openai-stream.service.ts
-├── packages/         # Shared libraries (future use)
-├── nx.json
-├── tsconfig.base.json
-└── package.json
+apps/
+├── api/                          # NestJS backend
+│   └── src/
+│       ├── app.module.ts         # Root module — MCP, Mongo, guards
+│       ├── main.ts               # Bootstrap, CORS, Swagger, body-parser
+│       ├── tools/
+│       │   └── token-usage.tool.ts  # MCP tools (greeting, token-usage, decrypt)
+│       └── modules/
+│           ├── auth/             # JWT auth, guards, user schema
+│           ├── chats/            # Chat message persistence
+│           ├── chat-metadata/    # Per-session metadata (model, crypto config, etc.)
+│           ├── lm-studio/        # Native LM Studio API proxy + streaming
+│           ├── openai/           # OpenAI-compatible responses + completions proxy
+│           └── token-limit/      # Token budget tracking & rate-limit enforcement
+└── ui/                           # Angular frontend
+    └── src/app/
+        ├── app.ts                # Root component — JWT expiry guard
+        ├── lmstudio-stream.service.ts   # SSE client for LM Studio API
+        ├── openai-stream.service.ts     # SSE client for OpenAI Responses API
+        ├── client/               # Auto-generated API client DTOs
+        └── routes/
+            ├── login.ts          # Login / register page
+            ├── lm-studio-api/    # Chat UI for native LM Studio endpoint
+            │   ├── chat-input.component.ts
+            │   ├── chat-messages.component.ts
+            │   ├── chat-sidebar.component.ts
+            │   ├── model-selector.component.ts
+            │   └── info.component.ts
+            └── openai-api/       # Chat UI for OpenAI Responses endpoint
+                ├── chat-input.component.ts
+                ├── chat.service.ts
+                └── model-selector.component.ts
 ```
+
+---
 
 ## Prerequisites
 
-- Node.js 20+
-- npm 10+
-- MongoDB (for API)
-- LM Studio running locally **and/or** OpenAI API credentials
+- **Node.js** 18+
+- **MongoDB** running locally (default: `mongodb://localhost:27017/lmStudioWrapper`) or a remote URI
+- **LM Studio** running locally with the local server enabled (default: `http://localhost:1234`)
+- A loaded model in LM Studio that supports tool/function calling for MCP features
 
-## Development
+---
 
-Start both apps concurrently:
+## Environment Variables
+
+Create a `.env` file in `apps/api/` (or set variables in your shell):
+
+```env
+# MongoDB connection URI
+MONGODB_URI=mongodb://localhost:27017/lmStudioWrapper
+
+# LM Studio local server
+LM_STUDIO_BASE_URL=http://localhost:1234
+LM_STUDIO_API_TOKEN=                        # optional — set if LM Studio requires a token
+
+# JWT signing secret — use a long random string in production
+JWT_SECRET=your-very-secret-key
+
+# URL the backend advertises to LM Studio for MCP callbacks
+# Must be reachable FROM LM Studio (use your machine's LAN IP if running in Docker)
+SELF_MCP_URL=http://192.168.0.34:8888/tools/mcp
+
+# Backend HTTP port (default: 8888)
+PORT=8888
+
+# Set to any non-empty value to enable Swagger UI at /api
+USE_SWAGGER=true
+```
+
+> **Note on `SELF_MCP_URL`:** LM Studio calls this URL during inference to invoke MCP tools. It must be the address where the NestJS server is reachable from LM Studio's perspective, not `localhost`, if LM Studio is running in a separate process or container.
+
+---
+
+## Getting Started
+
+### 1. Install dependencies
+
+```bash
+# From the monorepo root
+npm install
+```
+
+### 2. Start the API
+
+```bash
+nx serve api
+```
+
+The API will be available at `http://localhost:8888`.  
+If `USE_SWAGGER=true`, Swagger UI is at `http://localhost:8888/api`.
+
+### 3. Start the UI
+
+```bash
+nx serve ui
+```
+
+The UI will be available at `http://localhost:4200`.
+
+### 4. Start both simultaneously
+
 ```bash
 npm start
-# or individually:
-npm run api    # NestJS on http://localhost:3000
-npm run ui     # Angular on http://localhost:4200
+# runs: nx run-many --target=serve --projects=api,ui
 ```
 
-## Build
+### 4. Register a user
+
+Either use the Swagger UI or send a `POST /auth/register` request:
 
 ```bash
-npm run build        # build all
-npm run build:api    # build API only
-npm run build:ui     # build UI only
+curl -X POST http://localhost:8888/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"username": "alice", "password": "s3cret"}'
 ```
 
-## Test & Lint
+Then log in at `POST /auth/login` to receive a JWT.
 
-```bash
-npm test             # test all
-npm run lint         # lint all
-npx nx test api      # test API only
-npx nx test ui       # test UI only
-```
+---
 
-## Generate Angular API Client
+## MCP Tool Integration
 
-After modifying the API OpenAPI spec (`apps/api/openapi.json`):
-```bash
-npm run gen:client
-```
-This regenerates `apps/ui/src/app/client/` from the OpenAPI spec.
+The NestJS backend registers itself as an MCP server using `@rekog/mcp-nest`. It exposes two transports at `http://localhost:8888/tools/mcp`:
 
-## NX CLI
+- **Streamable HTTP** (with JSON response mode enabled)
+- **SSE**
 
-```bash
-npx nx graph                          # visualize project graph
-npx nx affected --target=build        # build only affected projects
-npx nx run-many --target=test --all   # run all tests
-```
+When the backend initiates a chat request to LM Studio, it injects an `ephemeral_mcp` integration pointing to `SELF_MCP_URL` with the user's JWT forwarded in the `Authorization` header. This means any MCP tool called by the model during inference has access to the authenticated user's data.
 
-## Configuration
+### Available Tools
 
-- **API port**: Set `PORT` env var (default `3000`)
-- **UI proxy**: `apps/ui/proxy.conf.json` — proxies `/api/*` to the API during development
-- **MongoDB**: Set `MONGODB_URI` env var in API
-- **OpenAI vs LM Studio**: Set `LM_STUDIO_BASE_URL` to `https://api.openai.com` and `LM_STUDIO_API_TOKEN` to your key to point the OpenAI module at the real API
+| Tool | Description |
+|------|-------------|
+| `get-token-usage-tool` | Returns the user's current token consumption, subscription tier, limit, and next reset time |
+| `decrypt-message-tool` | Decrypts an AES-encrypted user message using the per-chat crypto key stored in `chat_metadata` |
+| `greeting-tool` | Example tool — returns a greeting with streaming progress updates |
+
+To add new tools, create an `@Injectable()` class in `apps/api/src/tools/`, decorate methods with `@Tool(...)` from `@rekog/mcp-nest`, and register the class as a provider in `AppModule`.
+
+---
+
+## Message Encryption
+
+Per-chat AES-256 message encryption can be opted into when creating a new chat session on the OpenAI Responses API route. The goal is to keep plaintext message content out of LM Studio's own message store — only ciphertext is ever forwarded to the model server.
+
+### How It Works
+
+The encryption is powered by [CryptoJS](https://github.com/brix/crypto-js) (`crypto-js ^4.2`) on both ends, using AES in CBC mode with a per-chat secret key that lives exclusively in MongoDB.
+
+**End-to-end flow:**
+
+1. **Session creation** — when the user enables encryption for a new chat, a `cryptoKey` is generated and stored in the `chat_metadata` document alongside `useCrypto: true`. The key never leaves the server.
+
+2. **Message encryption (backend)** — before each request is forwarded to LM Studio, `OpenAiService.encryptChatMessage()` walks the entire input array and replaces every plaintext `content` string (or `text` field inside content parts) with its AES ciphertext:
+   ```
+   CryptoJS.AES.encrypt(plaintext, cryptoKey).toString()
+   ```
+   This means LM Studio only ever receives — and stores — opaque ciphertext.
+
+3. **System prompt injection** — alongside the encrypted messages, the backend injects a developer-turn instruction that instructs the model to:
+    - **Always** call `decrypt-message-tool` first, passing the full unmodified user message
+    - Completely ignore the original encrypted input after receiving the tool response
+    - Treat the decrypted text as the real user message and answer it directly
+    - Never mention the decryption step in its response
+
+4. **MCP decryption at inference time** — LM Studio calls back into the NestJS MCP server via the `decrypt-message-tool`. The tool receives the ciphertext, looks up the `cryptoKey` from `chat_metadata` using the `chatId` header forwarded with the request, and returns the plaintext to the model:
+   ```
+   CryptoJS.AES.decrypt(ciphertext, cryptoKey).toString(CryptoJS.enc.Utf8)
+   ```
+
+5. **Transparent response** — the model answers the decrypted question normally. From the user's perspective the conversation flows as usual; the encrypt/decrypt cycle is invisible.
+
+### Key Storage & Security Boundaries
+
+| What | Where | Plaintext? |
+|------|-------|-----------|
+| `cryptoKey` | `chat_metadata` MongoDB document | ✅ Yes — treat MongoDB as a trusted boundary |
+| Messages forwarded to LM Studio | LM Studio message store | ❌ No — always ciphertext |
+| Messages in the browser → API request | HTTP body to NestJS | ✅ Yes — HTTPS in production |
+| `chatId` forwarded to MCP tool | `chatId` request header | ✅ Yes — used for key lookup only |
+
+> **Security note:** The encryption is designed to protect message content from being readable inside LM Studio's own conversation storage. The security boundary is your NestJS API + MongoDB — if those are compromised, the keys are accessible. Use HTTPS in any non-local deployment.
+
+---
+
+## Authentication & Authorization
+
+- **Registration** — `POST /auth/register` creates a user with a bcrypt-hashed password. New accounts are inactive until an activation link is used.
+- **Login** — `POST /auth/login` returns a signed JWT (1-hour expiry).
+- **Guard** — `JwtAuthGuard` is applied globally as an `APP_GUARD`. Routes can be opted out with the `@Public()` decorator.
+- **Roles** — `RolesGuard` enforces `@Roles(Role.Admin)` / `@Roles(Role.User)` decorators.
+- **Token auto-refresh** — the Angular `App` root component checks JWT expiry on every navigation and redirects to `/login` when expired.
+
+---
+
+## Token Usage & Rate Limiting
+
+Token consumption is tracked per user and enforced against subscription-tier limits configured in the `token_limit_configs` MongoDB collection.
+
+| Field | Description |
+|-------|-------------|
+| `tokensPerInterval` | Maximum tokens allowed within one reset window |
+| `minutesTillReset` | How many minutes until the counter resets |
+| `subscription` | Which tier this config applies to (`free` or `basic`) |
+
+After each completed inference, `TokenLimitService.updateUsedTokens()` increments the user's `usedTokens` counter. If the limit is reached, a `api.info` SSE event is emitted to the client with the reset timestamp. The counter resets automatically when `tokenCountResetDate` elapses.
+
+Token limits can be managed via the `TokenLimitModule` controller.
+
+---
+
+## API Overview
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/auth/register` | Create a new user account |
+| `POST` | `/auth/login` | Authenticate and receive a JWT |
+| `GET` | `/lm-studio/models` | List models available in LM Studio |
+| `POST` | `/lm-studio/chat` | Non-streaming chat (LM Studio native API) |
+| `POST` | `/lm-studio/chat/stream` | Streaming SSE chat (LM Studio native API) |
+| `GET` | `/openai/models` | List models via OpenAI SDK |
+| `POST` | `/openai/chat/stream` | Streaming SSE via OpenAI Responses API |
+| `POST` | `/openai/completions/stream` | Streaming SSE via OpenAI Completions API |
+| `GET` | `/chat-metadata` | List the user's chat sessions |
+| `GET` | `/chat-metadata/:id` | Get a single chat session |
+| `POST` | `/chat-metadata` | Create a chat session |
+| `PATCH` | `/chat-metadata/:id` | Update a chat session |
+| `DELETE` | `/chat-metadata/:id` | Delete a chat session |
+| `GET` | `/chats/:chatId` | Retrieve messages for a session |
+| `GET` `/POST` | `/tools/mcp` | MCP server endpoint (SSE + Streamable HTTP) |
+
+Full interactive documentation is available at `http://localhost:8888/api` when `USE_SWAGGER=true`.
