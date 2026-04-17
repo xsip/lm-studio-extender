@@ -3,6 +3,8 @@
 A full-stack AI chat client that connects to a locally running [LM Studio](https://lmstudio.ai/) instance via both its native API and its OpenAI-compatible `responses/create` endpoint. Built with Angular, NestJS, and MongoDB, with first-class MCP (Model Context Protocol) tool support and optional end-to-end AES message encryption.
 
 ---
+![Header](https://raw.githubusercontent.com/xsip/lm-studio-extender/refs/heads/main/img.png)
+---
 
 ## Table of Contents
 
@@ -232,6 +234,8 @@ Then log in at `POST /auth/login` to receive a JWT.
 ---
 
 ## MCP Tool Integration
+
+![Header](https://raw.githubusercontent.com/xsip/lm-studio-extender/refs/heads/main/apps/ui/public/mcp-preview-light.png)
 
 The NestJS backend registers itself as an MCP server using `@rekog/mcp-nest`. It exposes two transports at `http://localhost:8888/tools/mcp`:
 
