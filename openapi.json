@@ -689,11 +689,44 @@
             }
           },
           {
-            "name": "name",
+            "name": "chatName",
             "required": false,
             "in": "query",
-            "description": "Optional human-readable label for this chat session.",
-            "schema": {}
+            "description": "Name for new chat",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "useCrypto",
+            "required": false,
+            "in": "query",
+            "description": "Use crypto for new chat",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "cryptoKey",
+            "required": false,
+            "in": "query",
+            "description": "Key for new chat encryption",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "openAiEndpointPreference",
+            "required": false,
+            "in": "query",
+            "description": "openAiEndpointPreference for new chat",
+            "schema": {
+              "enum": [
+                "RESPONSES",
+                "COMPLETION"
+              ],
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -756,11 +789,44 @@
             }
           },
           {
-            "name": "name",
+            "name": "chatName",
             "required": false,
             "in": "query",
-            "description": "Optional human-readable label for this chat session.",
-            "schema": {}
+            "description": "Name for new chat",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "useCrypto",
+            "required": false,
+            "in": "query",
+            "description": "Use crypto for new chat",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "cryptoKey",
+            "required": false,
+            "in": "query",
+            "description": "Key for new chat encryption",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "openAiEndpointPreference",
+            "required": false,
+            "in": "query",
+            "description": "openAiEndpointPreference for new chat",
+            "schema": {
+              "enum": [
+                "RESPONSES",
+                "COMPLETION"
+              ],
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -1604,6 +1670,10 @@
               "RESPONSES",
               "COMPLETION"
             ]
+          },
+          "lastMessageSentAt": {
+            "format": "date-time",
+            "type": "string"
           }
         },
         "required": [

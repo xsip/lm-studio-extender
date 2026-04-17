@@ -1,5 +1,7 @@
 import {
-  IsArray, IsBoolean,
+  IsArray,
+  IsBoolean,
+  IsDate,
   IsIn,
   IsOptional,
   IsString,
@@ -54,4 +56,9 @@ export class CreateChatMetadataDto {
   })
   @IsOptional()
   openAiEndpointPreference?: OpenAiEndpointPreference;
+
+  @ApiPropertyOptional({ type: Date })
+  @IsOptional()
+  @IsDate()
+  lastMessageSentAt?: Date;
 }

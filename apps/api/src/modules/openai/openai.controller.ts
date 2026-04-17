@@ -94,6 +94,7 @@ import { ChatCompletionCreateParamsStreamingDto } from './dto/completions-dtos/C
 import {
   ChatCompletionCreateParamsNonStreamingDto
 } from './dto/completions-dtos/ChatCompletionCreateParamsNonStreamingDto';
+import { OpenAiEndpointPreference } from '../chat-metadata/chat-metadata.schema';
 
 @ApiTags('OpenAI')
 @ApiBearerAuth()
@@ -196,9 +197,30 @@ export class OpenaiController {
     example: 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4',
   })
   @ApiQuery({
-    name: 'name',
+    name: 'useCrypto',
     required: false,
-    description: 'Optional human-readable label for this chat session.',
+    type: 'boolean',
+    description: 'Use crypto for new chat',
+  })
+  @ApiQuery({
+    name: 'chatName',
+    type: 'string',
+    required: false,
+    description: 'Name for new chat',
+  })
+  @ApiQuery({
+    name: 'cryptoKey',
+    type: 'string',
+    required: false,
+    description: 'Key for new chat encryption',
+  })
+  @ApiQuery({
+    name: 'openAiEndpointPreference',
+    type: 'string',
+    enum: OpenAiEndpointPreference,
+    default: OpenAiEndpointPreference.RESPONSES,
+    required: false,
+    description: 'openAiEndpointPreference for new chat',
   })
   @ApiBody({
     schema: {
@@ -230,6 +252,11 @@ export class OpenaiController {
     dto: ResponseCreateParamsNonStreamingDto | ResponseCreateParamsStreamingDto,
     @Res() res: Response,
     @Query('internalChatId') internalChatId?: string,
+    @Query('chatName') chatName?: string,
+    @Query('useCrypto') useCrypto?: boolean,
+    @Query('cryptoKey') cryptoKey?: string,
+    @Query('openAiEndpointPreference')
+    openAiEndpointPreference?: OpenAiEndpointPreference,
   ): Promise<void> {
     const userId = (user as any)._id as Types.ObjectId;
 
@@ -263,8 +290,12 @@ export class OpenaiController {
       res,
       token,
       internalChatId,
-      '',
-      internalChatId,
+      {
+        useCrypto,
+        cryptoKey,
+        chatName,
+        openAiEndpointPreference,
+      },
     );
     // ───────────────────────────────────────────────────────────────────────
   }
@@ -296,9 +327,30 @@ export class OpenaiController {
     example: 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4',
   })
   @ApiQuery({
-    name: 'name',
+    name: 'useCrypto',
     required: false,
-    description: 'Optional human-readable label for this chat session.',
+    type: 'boolean',
+    description: 'Use crypto for new chat',
+  })
+  @ApiQuery({
+    name: 'chatName',
+    type: 'string',
+    required: false,
+    description: 'Name for new chat',
+  })
+  @ApiQuery({
+    name: 'cryptoKey',
+    type: 'string',
+    required: false,
+    description: 'Key for new chat encryption',
+  })
+  @ApiQuery({
+    name: 'openAiEndpointPreference',
+    type: 'string',
+    enum: OpenAiEndpointPreference,
+    default: OpenAiEndpointPreference.RESPONSES,
+    required: false,
+    description: 'openAiEndpointPreference for new chat',
   })
   @ApiBody({
     schema: {
@@ -320,6 +372,7 @@ export class OpenaiController {
       'event is emitted just before the stream closes.',
     schema: { type: 'string', format: 'binary' },
   })
+  /*http://192.168.0.39:4200/api/openai/chat-stream?chatName=Test&useCrypto=true&cryptoKey=123456&openAiEndpointPreference=RESPONSES*/
   async completionsStream(
     @CurrentUser() user: User,
     @CurrentToken() token: string,
@@ -329,6 +382,11 @@ export class OpenaiController {
       | ChatCompletionCreateParamsStreamingDto,
     @Res() res: Response,
     @Query('internalChatId') internalChatId?: string,
+    @Query('chatName') chatName?: string,
+    @Query('useCrypto') useCrypto?: boolean,
+    @Query('cryptoKey') cryptoKey?: string,
+    @Query('openAiEndpointPreference')
+    openAiEndpointPreference?: OpenAiEndpointPreference,
   ): Promise<void> {
     const userId = (user as any)._id as Types.ObjectId;
 

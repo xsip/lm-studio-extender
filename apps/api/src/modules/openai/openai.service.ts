@@ -30,6 +30,7 @@ import {
   LocalShellCallOutputDto,
   McpApprovalRequestDto,
   McpApprovalResponseDto,
+  McpDto,
   McpListToolsDto,
   MessageDto,
   ResponseCodeInterpreterToolCallDto,
@@ -55,6 +56,7 @@ import dayjs from 'dayjs';
 import {
   ChatClient,
   ChatMetadataDocument,
+  OpenAiEndpointPreference,
 } from '../chat-metadata/chat-metadata.schema';
 import { McpCallDto } from './dto/get-response-dtos';
 import * as CryptoJS from 'crypto-js';
@@ -140,8 +142,12 @@ export class OpenAiService {
     res: Response,
     token: string,
     internalChatId?: string,
-    name?: string,
-    chatMetaId?: string,
+    newChatConfig?: {
+      openAiEndpointPreference?: OpenAiEndpointPreference;
+      useCrypto?: boolean;
+      cryptoKey?: string;
+      chatName?: string;
+    },
   ): Promise<void> {
     const mappedDto:
       | ResponseCreateParamsNonStreamingDto
@@ -170,14 +176,17 @@ export class OpenAiService {
     const isNewChat = !internalChatId;
     const chatId = internalChatId ?? this.generateChatId();
 
-    let resolvedChatMetaId: string | undefined = chatMetaId;
+    let resolvedChatMetaId: string | undefined = internalChatId;
     if (isNewChat && !resolvedChatMetaId) {
       resolvedChatMetaId = await this.chatMetadataService.createAndReturnId(
         userId,
         {
           client: ChatClient.OPENAI,
-          name: chatId,
+          name: newChatConfig?.chatName ?? '',
+          cryptoKey: newChatConfig?.cryptoKey,
+          useCrypto: newChatConfig?.useCrypto,
           usedModel: dto.model!,
+          lastMessageSentAt: new Date(),
           reasoningMode: dto.reasoning?.effort ?? 'off',
           tools: (mappedDto.tools?.filter(
             (i) => typeof i === 'object' && (i as any).type === 'mcp',
@@ -189,22 +198,28 @@ export class OpenAiService {
         lastMessageSentAt: new Date(),
       });
     }
-    let chatMeta: ChatMetadataDocument | undefined;
     if (!isNewChat) {
       const previousResponseId = await this.chatsService.getLatestResponseId(
         userId,
-        chatId,
+        resolvedChatMetaId!,
       );
       if (previousResponseId) {
         mappedDto.previous_response_id = previousResponseId;
       }
-      chatMeta = await this.chatMetadataService.findOne(userId, chatId);
-      if (chatMeta.useCrypto && chatMeta.cryptoKey) {
-        mappedDto.input = this.encryptChatMessage(
-          mappedDto.input as any,
-          chatMeta,
-        ) as any;
-        mappedDto.instructions = `
+    }
+
+    const chatMeta: ChatMetadataDocument =
+      await this.chatMetadataService.findOne(userId, resolvedChatMetaId!);
+
+    if (!(mappedDto.tools![0] as McpDto).headers['chatId']) {
+      (mappedDto.tools![0] as McpDto).headers['chatId'] = resolvedChatMetaId;
+    }
+    if (chatMeta.useCrypto && chatMeta.cryptoKey) {
+      mappedDto.input = this.encryptChatMessage(
+        mappedDto.input as any,
+        chatMeta,
+      ) as any;
+      mappedDto.instructions = `
 You MUST follow these rules EXACTLY:
 
 STEP 1 — TOOL CALL
@@ -226,16 +241,15 @@ STEP 3 — FINAL RESPONSE
 
 The final response must be a direct answer to the decrypted message, not a repetition of it.
 `;
-        (mappedDto.input as any[]) = [
-          {
-            role: 'developer',
-            content: mappedDto.instructions,
-          },
+      (mappedDto.input as any[]) = [
+        {
+          role: 'developer',
+          content: mappedDto.instructions,
+        },
 
-          ...(mappedDto.input as any[]),
-        ];
-        (mappedDto.tools![0] as any).allowed_tools.push('decrypt-message-tool');
-      }
+        ...(mappedDto.input as any[]),
+      ];
+      (mappedDto.tools![0] as any).allowed_tools.push('decrypt-message-tool');
     }
 
     res.setHeader('Content-Type', 'text/event-stream');
@@ -258,10 +272,10 @@ The final response must be a direct answer to the decrypted message, not a repet
         if (event.type === 'response.completed') {
           await this.chatsService.saveEntry(
             userId,
-            chatId,
+            resolvedChatMetaId!,
             mappedDto,
             event.response as any,
-            name,
+            '',
             resolvedChatMetaId,
           );
 
