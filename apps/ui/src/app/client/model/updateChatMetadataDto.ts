@@ -18,5 +18,14 @@ export interface UpdateChatMetadataDto {
     lastMessageSentAt?: string;
     useCrypto?: boolean;
     cryptoKey?: string;
+    openAiEndpointPreference?: UpdateChatMetadataDto.OpenAiEndpointPreferenceEnum;
 }
+export namespace UpdateChatMetadataDto {
+    export const OpenAiEndpointPreferenceEnum = {
+        Responses: 'RESPONSES',
+        Completion: 'COMPLETION'
+    } as const;
+    export type OpenAiEndpointPreferenceEnum = typeof OpenAiEndpointPreferenceEnum[keyof typeof OpenAiEndpointPreferenceEnum];
+}
+
 

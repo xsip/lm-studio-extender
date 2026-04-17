@@ -23,6 +23,21 @@ import ClientEnum = CreateChatMetadataDto.ClientEnum;
       </div>
 
       <div class="flex-1 overflow-y-auto py-1 min-h-0">
+        <button
+          type="button"
+          (click)="newChat.emit()"
+          class="w-full text-left px-3 py-2.5 text-xs transition-colors border-l-2 group"
+          [class]="
+            !currentChatId()
+              ? 'bg-surface-overlay border-accent text-text-primary'
+              : 'border-transparent text-text-secondary hover:bg-surface-overlay hover:text-text-primary'
+          "
+        >
+          <div class="flex items-center gap-1.5">
+            <div class="truncate font-medium text-sm">New Chat</div>
+          </div>
+          <div class="text-text-muted mt-0.5 text-[10px] font-mono truncate">Setup new Chat</div>
+        </button>
         @if (filteredChats.length === 0 && !chatsLoading()) {
           <div
             class="flex items-center justify-center h-full text-xs text-text-muted tracking-wide px-3 text-center"
@@ -383,6 +398,7 @@ export class ChatSidebarComponent {
 
   readonly chatOpened = output<string>();
   readonly commitRename = output<{ chatId: string; name: string }>();
+  readonly newChat = output<void>();
   readonly chatDeleted = output<string>();
   readonly openChatSettings = output<string>();
   readonly saveCryptoSettings = output<{

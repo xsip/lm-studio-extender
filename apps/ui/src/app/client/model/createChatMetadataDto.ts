@@ -30,6 +30,7 @@ export interface CreateChatMetadataDto {
     tools?: Array<EphemeralMcpIntegrationDto>;
     useCrypto?: boolean;
     cryptoKey?: string;
+    openAiEndpointPreference?: CreateChatMetadataDto.OpenAiEndpointPreferenceEnum;
 }
 export namespace CreateChatMetadataDto {
     export const ClientEnum = {
@@ -37,6 +38,11 @@ export namespace CreateChatMetadataDto {
         Lmstudio: 'LMSTUDIO'
     } as const;
     export type ClientEnum = typeof ClientEnum[keyof typeof ClientEnum];
+    export const OpenAiEndpointPreferenceEnum = {
+        Responses: 'RESPONSES',
+        Completion: 'COMPLETION'
+    } as const;
+    export type OpenAiEndpointPreferenceEnum = typeof OpenAiEndpointPreferenceEnum[keyof typeof OpenAiEndpointPreferenceEnum];
 }
 
 

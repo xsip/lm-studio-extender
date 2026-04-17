@@ -9,6 +9,7 @@ import {
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { EphemeralMcpIntegrationDto } from '../../lm-studio/dto/chat.dto';
+import { OpenAiEndpointPreference } from '../chat-metadata.schema';
 
 export class UpdateChatMetadataDto {
   @ApiPropertyOptional()
@@ -47,4 +48,10 @@ export class UpdateChatMetadataDto {
   @IsOptional()
   @IsString()
   cryptoKey?: string;
+
+  @ApiPropertyOptional({
+    enum: OpenAiEndpointPreference,
+  })
+  @IsOptional()
+  openAiEndpointPreference?: OpenAiEndpointPreference;
 }

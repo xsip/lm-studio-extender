@@ -3,12 +3,20 @@ import { Document, Types } from 'mongoose';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { EphemeralMcpIntegrationDto } from '../lm-studio/dto/chat.dto';
 import { IsIn } from 'class-validator';
+import { SubscriptionType } from '../auth/user.schema';
 
 export type ChatMetadataDocument = ChatMetadata & Document;
+
 export enum ChatClient {
   OPENAI = 'OPENAI',
   LMSTUDIO = 'LMSTUDIO',
 }
+
+export enum OpenAiEndpointPreference {
+  RESPONSES = 'RESPONSES',
+  COMPLETION = 'COMPLETION',
+}
+
 @Schema({ collection: 'chat_metadata', timestamps: true })
 export class ChatMetadata {
   /** Human-readable name for this chat session */
@@ -49,6 +57,14 @@ export class ChatMetadata {
 
   @Prop({ required: false, type: String })
   cryptoKey?: string;
+
+  @Prop({
+    required: false,
+    enum: Object.values(OpenAiEndpointPreference),
+    default: OpenAiEndpointPreference.RESPONSES,
+  })
+  openAiEndpointPreference?: OpenAiEndpointPreference;
+
   // `createdAt` / `updatedAt` injected automatically
 }
 
@@ -93,6 +109,11 @@ export class ChatMetadataDto {
 
   @ApiPropertyOptional()
   cryptoKey?: string;
+
+  @ApiPropertyOptional({
+    enum: OpenAiEndpointPreference,
+  })
+  openAiEndpointPreference?: OpenAiEndpointPreference;
 
   @ApiProperty()
   lastMessageSentAt?: Date;

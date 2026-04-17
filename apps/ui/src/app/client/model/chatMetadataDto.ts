@@ -28,6 +28,7 @@ export interface ChatMetadataDto {
     updatedAt: string;
     useCrypto?: boolean;
     cryptoKey?: string;
+    openAiEndpointPreference?: ChatMetadataDto.OpenAiEndpointPreferenceEnum;
     lastMessageSentAt: string;
 }
 export namespace ChatMetadataDto {
@@ -36,6 +37,11 @@ export namespace ChatMetadataDto {
         Lmstudio: 'LMSTUDIO'
     } as const;
     export type ClientEnum = typeof ClientEnum[keyof typeof ClientEnum];
+    export const OpenAiEndpointPreferenceEnum = {
+        Responses: 'RESPONSES',
+        Completion: 'COMPLETION'
+    } as const;
+    export type OpenAiEndpointPreferenceEnum = typeof OpenAiEndpointPreferenceEnum[keyof typeof OpenAiEndpointPreferenceEnum];
 }
 
 

@@ -1597,6 +1597,13 @@
           },
           "cryptoKey": {
             "type": "string"
+          },
+          "openAiEndpointPreference": {
+            "type": "string",
+            "enum": [
+              "RESPONSES",
+              "COMPLETION"
+            ]
           }
         },
         "required": [
@@ -1653,6 +1660,13 @@
           "cryptoKey": {
             "type": "string"
           },
+          "openAiEndpointPreference": {
+            "type": "string",
+            "enum": [
+              "RESPONSES",
+              "COMPLETION"
+            ]
+          },
           "lastMessageSentAt": {
             "format": "date-time",
             "type": "string"
@@ -1697,6 +1711,13 @@
           },
           "cryptoKey": {
             "type": "string"
+          },
+          "openAiEndpointPreference": {
+            "type": "string",
+            "enum": [
+              "RESPONSES",
+              "COMPLETION"
+            ]
           }
         }
       },
