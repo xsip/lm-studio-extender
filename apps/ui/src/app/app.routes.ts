@@ -7,6 +7,11 @@ import { ReadmeComponent } from './routes/readme';
 export const routes: Routes = [
   {
     path: '',
+    redirectTo: 'readme',
+    pathMatch: 'full',
+  },
+  {
+    path: 'readme',
     component: ReadmeComponent,
     pathMatch: 'full',
   },

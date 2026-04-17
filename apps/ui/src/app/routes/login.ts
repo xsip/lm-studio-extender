@@ -130,7 +130,7 @@ export class Login {
         const token = res?.access_token ?? res?.token ?? res;
         if (token && typeof token === 'string') {
           localStorage.setItem('jwt_token', token);
-          this.router.navigate(['/']);
+          this.router.navigate(['/chat-openai']);
         } else {
           this.errorMessage.set('Unexpected response from server.');
         }
