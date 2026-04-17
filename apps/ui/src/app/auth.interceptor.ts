@@ -15,7 +15,7 @@ export const authInterceptor: HttpInterceptorFn = (
 ): Observable<HttpEvent<unknown>> => {
   const router = inject(Router);
 
-  if(router.routerState.snapshot.url.indexOf('/readme')) {
+  if(router.routerState.snapshot.url.includes('/readme')) {
     return next(req);
   }
 
