@@ -125,16 +125,19 @@ export class ChatsService {
     return entries.map((e) => {
       return {
         ...e,
-        request:
-          chatMeta.client === ChatClient.OPENAI
-            ? this.decryptOpenAiRequest(
-                e.request as ResponseCreateParamsStreamingDto,
-                chatMeta,
-              )
-            : this.decryptLmStudioRequest(
-                e.request as ChatRequestDto,
-                chatMeta,
-              ),
+        request: {
+          ...e.request,
+          input:
+            chatMeta.client === ChatClient.OPENAI
+              ? this.decryptOpenAiRequest(
+                  e.request as ResponseCreateParamsStreamingDto,
+                  chatMeta,
+                )
+              : this.decryptLmStudioRequest(
+                  e.request as ChatRequestDto,
+                  chatMeta,
+                ),
+        },
       };
     }) as unknown as ChatEntryDto[];
   }
@@ -143,7 +146,7 @@ export class ChatsService {
     r: ResponseCreateParamsStreamingDto,
     chatMetadata: ChatMetadata,
   ) {
-    if (!chatMetadata.useCrypto || !chatMetadata.cryptoKey) return r;
+    if (!chatMetadata.useCrypto || !chatMetadata.cryptoKey) return r.input;
 
     if (typeof r.input === 'string')
       return this.decrypt(r.input, chatMetadata.cryptoKey!) ?? r.input;
