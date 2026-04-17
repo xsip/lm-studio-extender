@@ -588,7 +588,7 @@ export class OpenAiApi implements OnDestroy, OnInit {
           });
         else if (typeof entry.request.input === 'object' && Array.isArray(entry.request.input)) {
           for (const inputEntry of entry.request.input) {
-            if (inputEntry.type === 'message' || !inputEntry.type) {
+            if (inputEntry.type === 'message' || !inputEntry.type && (inputEntry as any).role !== 'developer') {
               messages.push({
                 role: 'user',
                 text: this.fromContentToText(inputEntry.content),
