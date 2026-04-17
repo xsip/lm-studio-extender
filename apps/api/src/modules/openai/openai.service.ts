@@ -259,7 +259,7 @@ The final response must be a direct answer to the decrypted message, not a repet
           await this.chatsService.saveEntry(
             userId,
             chatId,
-            dto,
+            mappedDto,
             event.response as any,
             name,
             resolvedChatMetaId,
