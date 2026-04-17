@@ -238,8 +238,12 @@ STEP 3 — FINAL RESPONSE
 - If it is a request, you MUST fulfill it
 - DO NOT repeat or restate the decrypted message
 - DO NOT mention the tool, decryption, or the process
-
-The final response must be a direct answer to the decrypted message, not a repetition of it.
+STEP 4 — ENCRYPT RESPONSE
+- Do NOT output plain text
+- Instead, ALWAYS call the tool "encrypt-response-tool"
+- Put your FULL final answer into the tool input in "full_ai_message"
+- After the tool returns, you MUST treat the tool result as your final message content
+- The conversation MUST end with the encrypted content, not a tool call
 `;
       (mappedDto.input as any[]) = [
         /*{
@@ -250,6 +254,7 @@ The final response must be a direct answer to the decrypted message, not a repet
         ...(mappedDto.input as any[]),
       ];
       (mappedDto.tools![0] as any).allowed_tools.push('decrypt-message-tool');
+      (mappedDto.tools![0] as any).allowed_tools.push('encrypt-response-tool');
     }
 
     res.setHeader('Content-Type', 'text/event-stream');

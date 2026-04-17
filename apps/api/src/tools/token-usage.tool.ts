@@ -104,4 +104,46 @@ export class TokenUsageTool {
       return `There was an error decrypting your message!!`;
     }
   }
+
+  @Tool({
+    name: 'encrypt-response-tool',
+    description:
+      'Encrypts a AI message. MUST receive the full, exact, unmodified AI response',
+    parameters: z.object({
+      full_ai_message: z.string().default('Test'),
+    }),
+  })
+  async encryptMessage(
+    { full_ai_message }: { full_ai_message: string },
+    context: Context,
+    request: Request,
+  ) {
+    // @ts-ignore
+    const user = request.user as User;
+    const chatId = request.headers['chatid'] as string;
+
+    if (!full_ai_message) {
+      return `Didnt receive any message to decrypt!`;
+    }
+
+    try {
+      const chatMetaData = await this.chatMetaDataService.findOne(
+        (user as any)._id as Types.ObjectId,
+        chatId,
+      );
+
+      if (!chatMetaData) {
+        return `Sorry, but chat with id ${chatId} not found.`;
+      }
+
+      if (!chatMetaData.useCrypto) return `This chat doesnt use encryption!`;
+
+      if (!chatMetaData.cryptoKey)
+        return `UseCrypto is true, but crypto key not set. Can't encrypt!`;
+
+      return CryptoJS.AES.encrypt(full_ai_message, chatMetaData.cryptoKey)?.toString();
+    } catch (e: any) {
+      return `There was an error encrypting my response!!`;
+    }
+  }
 }
