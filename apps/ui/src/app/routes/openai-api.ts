@@ -1,17 +1,7 @@
-import {
-  Component,
-  computed,
-  effect,
-  ElementRef,
-  inject,
-  OnDestroy,
-  OnInit,
-  signal,
-  ViewChild,
-} from '@angular/core';
+import { Component, computed, effect, ElementRef, inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   ChatMetadataService,
   ChatRequestDto,
@@ -28,7 +18,7 @@ import {
   ResponseInputTextDto,
   ResponseOutputMessageDtoContentInner,
   ResponseOutputRefusalDto,
-  ResponseOutputTextDto,
+  ResponseOutputTextDto
 } from '../client';
 import { ChatService } from './openai-api/chat.service';
 import { OpenAiModelSelectorComponent } from './openai-api/model-selector.component';
@@ -47,7 +37,6 @@ import { take } from 'rxjs';
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    RouterLink,
     ChatSidebarComponent,
     ChatMessagesComponent,
     OpenAiChatInputComponent,
@@ -85,18 +74,6 @@ import { take } from 'rxjs';
         <span class="text-xs text-text-muted tracking-wide font-medium">OpenAI Extender</span>
 
         <!-- Provider tabs -->
-        <div class="flex items-center gap-1 ml-1">
-          <a
-            routerLink="/chat-lm-studio"
-            class="px-2.5 py-1 text-[11px] rounded-md font-medium border border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors"
-            >LM Studio</a
-          >
-          <a
-            routerLink="/chat-openai"
-            class="px-2.5 py-1 text-[11px] rounded-md font-medium border border-accent text-accent bg-accent/10 transition-colors"
-            >OpenAI</a
-          >
-        </div>
 
         <div class="relative ml-auto">
           <app-openai-model-selector
@@ -107,24 +84,6 @@ import { take } from 'rxjs';
             (modelSelected)="selectModel($event)"
           />
         </div>
-
-        <button
-          type="button"
-          (click)="newChat()"
-          class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs border border-border-default rounded-lg text-text-secondary hover:border-accent hover:text-accent transition-colors"
-          title="New chat"
-        >
-          <svg
-            class="w-3.5 h-3.5"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
-          <span class="hidden sm:inline">New</span>
-        </button>
 
         <!-- User / Info panel toggle -->
         <button
@@ -236,13 +195,14 @@ import { take } from 'rxjs';
                           Responses API
                         </button>
                         <button
+                          disabled
                           type="button"
                           (click)="newChatEndpointPreference.set('COMPLETION')"
                           class="flex-1 px-3 py-1.5 text-xs rounded-md border transition-colors font-medium"
                           [class]="
                             newChatEndpointPreference() === 'COMPLETION'
                               ? 'border-accent text-accent bg-accent/10'
-                              : 'border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary'
+                              : 'border-border-default disabled:opacity-70 text-text-secondary hover:border-border-strong hover:text-text-primary'
                           "
                         >
                           Chat Completions
@@ -359,7 +319,7 @@ import { take } from 'rxjs';
 
         @if (showInfoPanel()) {
           <div
-            class="w-72 shrink-0 border-l border-border-default bg-surface-raised flex flex-col overflow-hidden"
+            class="w-72 shrink-0 border-l border-border-default bg-surface-raised md:relative fixed md:h-auto h-full top-0 right-0 flex flex-col overflow-hidden"
           >
             <div
               class="flex items-center justify-between px-3 py-2 border-b border-border-default shrink-0"
@@ -577,9 +537,6 @@ export class OpenAiApi implements OnDestroy, OnInit {
     this.chatsApi.getChatEntries(chatId).subscribe((res) => {
       const messages: any[] = [];
       for (const entry of res) {
-
-
-
         if (typeof entry.request.input === 'string')
           messages.push({
             role: 'user',
@@ -588,7 +545,10 @@ export class OpenAiApi implements OnDestroy, OnInit {
           });
         else if (typeof entry.request.input === 'object' && Array.isArray(entry.request.input)) {
           for (const inputEntry of entry.request.input) {
-            if (inputEntry.type === 'message' || !inputEntry.type && (inputEntry as any).role !== 'developer') {
+            if (
+              inputEntry.type === 'message' ||
+              (!inputEntry.type && (inputEntry as any).role !== 'developer')
+            ) {
               messages.push({
                 role: 'user',
                 text: this.fromContentToText(inputEntry.content),

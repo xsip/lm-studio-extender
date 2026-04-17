@@ -2,10 +2,11 @@ import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService, MeDto, ModelDto, OpenAIService } from '../../client';
 import { LMStudioService } from '../../client';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'app-info',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink, RouterLinkActive],
   template: `
     <div class="flex flex-col h-full overflow-y-auto p-4 gap-4 text-xs">
       <!-- ── Header ── -->
@@ -48,6 +49,37 @@ import { LMStudioService } from '../../client';
             </svg>
           }
         </button>
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="text-text-primary font-semibold text-sm">Documentation: </span>
+        <div class="flex items-center gap-1 ml-1">
+          <a
+            routerLink="/"
+            routerLinkActive="border-accent text-accent bg-accent/10"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="px-2.5 py-1 text-[11px] rounded-md font-medium border border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors"
+            >View Readme</a
+          >
+        </div>
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="text-text-primary font-semibold text-sm">Client: </span>
+        <div class="flex items-center gap-1 ml-1">
+          <a
+            routerLink="/chat-lm-studio"
+            routerLinkActive="border-accent text-accent bg-accent/10"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="px-2.5 py-1 text-[11px] rounded-md font-medium border border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors"
+            >LM Studio</a
+          >
+          <a
+            routerLink="/chat-openai"
+            routerLinkActive="border-accent text-accent bg-accent/10"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="px-2.5 py-1 text-[11px] rounded-md font-medium border border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors"
+            >OpenAI</a
+          >
+        </div>
       </div>
       <!-- ── Header ── -->
       <div class="flex items-center justify-between">
@@ -376,7 +408,7 @@ export class InfoComponent implements OnInit {
   private loadModels(): void {
     this.modelsLoading.set(true);
     this.modelsError.set(false);
-    if(this.uiType() === 'LMSTUDIO') {
+    if (this.uiType() === 'LMSTUDIO') {
       this.lmStudioService.getModels().subscribe({
         next: (res) => {
           this.models.set(res.models ?? []);
@@ -390,13 +422,15 @@ export class InfoComponent implements OnInit {
     } else {
       this.openaiService.getModelsOpenAi().subscribe({
         next: (res) => {
-          this.models.set((res ?? []).map((m) => {
-            return {
-              key: m.id,
-              publisher: m.owned_by,
-              type: 'llm'
-            } as ModelDto;
-          }));
+          this.models.set(
+            (res ?? []).map((m) => {
+              return {
+                key: m.id,
+                publisher: m.owned_by,
+                type: 'llm',
+              } as ModelDto;
+            }),
+          );
           this.modelsLoading.set(false);
         },
         error: () => {
@@ -405,7 +439,6 @@ export class InfoComponent implements OnInit {
         },
       });
     }
-
   }
 
   toggleDarkMode(): void {

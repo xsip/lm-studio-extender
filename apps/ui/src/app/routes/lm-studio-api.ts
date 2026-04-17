@@ -69,20 +69,6 @@ import { LmStudioEvent } from '../lmstudio-stream.service';
         <div class="w-1.5 h-1.5 rounded-full bg-success-muted animate-pulse ml-1"></div>
         <span class="text-xs text-text-muted tracking-wide font-medium">LM Studio Extender</span>
 
-        <!-- Provider tabs -->
-        <div class="flex items-center gap-1 ml-1">
-          <a
-            routerLink="/chat-lm-studio"
-            class="px-2.5 py-1 text-[11px] rounded-md font-medium border border-accent text-accent bg-accent/10 transition-colors"
-            >LM Studio</a
-          >
-          <a
-            routerLink="/chat-openai"
-            class="px-2.5 py-1 text-[11px] rounded-md font-medium border border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors"
-            >OpenAI</a
-          >
-        </div>
-
         <div class="relative ml-auto">
           <app-model-selector
             [models]="models()"
@@ -92,24 +78,6 @@ import { LmStudioEvent } from '../lmstudio-stream.service';
             (modelSelected)="selectModel($event)"
           />
         </div>
-
-        <button
-          type="button"
-          (click)="newChat()"
-          class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs border border-border-default rounded-lg text-text-secondary hover:border-accent hover:text-accent transition-colors"
-          title="New chat"
-        >
-          <svg
-            class="w-3.5 h-3.5"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
-          <span class="hidden sm:inline">New</span>
-        </button>
 
         <!--<button
           type="button"

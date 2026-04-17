@@ -2,12 +2,13 @@ import { Routes } from '@angular/router';
 import { LmStudioApi } from './routes/lm-studio-api';
 import { OpenAiApi } from './routes/openai-api';
 import { Login } from './routes/login';
+import { ReadmeComponent } from './routes/readme';
 
 export const routes: Routes = [
   {
     path: '',
+    component: ReadmeComponent,
     pathMatch: 'full',
-    redirectTo: 'chat-openai',
   },
   {
     path: 'chat-lm-studio',
