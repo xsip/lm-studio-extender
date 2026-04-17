@@ -292,6 +292,7 @@ import ClientEnum = CreateChatMetadataDto.ClientEnum;
                 class="w-full bg-surface-base border border-border-default focus:border-accent focus:ring-1 focus:ring-accent rounded-md px-2.5 py-1.5 text-xs text-text-primary placeholder-text-muted focus:outline-none transition-colors"
               />
             </div>
+            @if(client() === 'OPENAI') {
             <div class="flex items-center justify-between mb-4">
               <div>
                 <div class="text-xs font-medium text-text-primary">Encryption</div>
@@ -365,6 +366,7 @@ import ClientEnum = CreateChatMetadataDto.ClientEnum;
                   </button>
                 </div>
               </div>
+            }
             }
 
             <!-- Actions -->
