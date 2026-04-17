@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, OnInit, output } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ChatMessage } from './chat.service';
 import { MarkdownPipe, StripMarkdownPipe } from './markdown.pipe';
@@ -11,7 +11,7 @@ import { CreateChatMetadataDto } from '../../client';
     @if (messages().length === 0 && !streaming()) {
       @if (client() === 'OPENAI') {
         <div class="flex-1 flex items-center justify-center text-xs text-text-muted tracking-wide">
-          No messages yet
+          <ng-content></ng-content>
         </div>
       } @else {
         <div class="flex-1 flex items-center justify-center text-xs text-text-muted tracking-wide">
@@ -286,11 +286,17 @@ import { CreateChatMetadataDto } from '../../client';
     }
   `,
 })
-export class ChatMessagesComponent {
+export class ChatMessagesComponent implements OnInit {
   readonly messages = input.required<ChatMessage[]>();
   readonly streaming = input.required<boolean>();
   readonly showResend = input.required<boolean>();
   readonly client = input.required<ClientEnum>();
   readonly toggleCollapsed = output<number>();
   readonly resend = output<void>();
+  ngOnInit() {
+    setTimeout(() => {
+      console.log(this.messages());
+
+    },2000)
+  }
 }

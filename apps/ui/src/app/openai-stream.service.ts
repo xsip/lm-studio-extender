@@ -3,6 +3,7 @@ import { Observable, ReplaySubject } from 'rxjs';
 import { Router } from '@angular/router';
 import {
   ChatStreamOpenAiRequest,
+  CreateChatMetadataDto,
   ResponseAudioDeltaEventDto,
   ResponseAudioDoneEventDto,
   ResponseAudioTranscriptDeltaEventDto,
@@ -319,10 +320,30 @@ export class OpenAiStreamService {
   // Public API
   // ---------------------------------------------------------------------------
 
-  async chat(body: ChatStreamOpenAiRequest, chatId?: string): Promise<void> {
+  async chat(
+    body: ChatStreamOpenAiRequest,
+    chatId?: string,
+    newChatOptions?: {
+      name?: string;
+      useCrypto?: boolean;
+      cryptoKey?: string;
+      openAiEndpointPreference?: CreateChatMetadataDto.OpenAiEndpointPreferenceEnum;
+    },
+  ): Promise<void> {
     try {
       const token = localStorage.getItem('jwt_token');
-      const url = `api/openai/chat-stream${chatId ? `?internalChatId=${chatId}` : ''}`;
+      const params = new URLSearchParams();
+      if (chatId) params.set('internalChatId', chatId);
+      if (!chatId && newChatOptions) {
+        if (newChatOptions.name) params.set('chatName', newChatOptions.name);
+        if (newChatOptions.useCrypto != null)
+          params.set('useCrypto', String(newChatOptions.useCrypto));
+        if (newChatOptions.cryptoKey) params.set('cryptoKey', newChatOptions.cryptoKey);
+        if (newChatOptions.openAiEndpointPreference)
+          params.set('openAiEndpointPreference', newChatOptions.openAiEndpointPreference);
+      }
+      const queryString = params.toString();
+      const url = `api/openai/chat-stream${queryString ? `?${queryString}` : ''}`;
 
       const response = await fetch(url, {
         method: 'POST',

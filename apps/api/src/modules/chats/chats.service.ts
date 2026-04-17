@@ -125,18 +125,16 @@ export class ChatsService {
     return entries.map((e) => {
       return {
         ...e,
-        request: {
-          input:
-            chatMeta.client === ChatClient.OPENAI
-              ? this.decryptOpenAiRequest(
-                  e.request as ResponseCreateParamsStreamingDto,
-                  chatMeta,
-                )
-              : this.decryptLmStudioRequest(
-                  e.request as ChatRequestDto,
-                  chatMeta,
-                ),
-        },
+        request:
+          chatMeta.client === ChatClient.OPENAI
+            ? this.decryptOpenAiRequest(
+                e.request as ResponseCreateParamsStreamingDto,
+                chatMeta,
+              )
+            : this.decryptLmStudioRequest(
+                e.request as ChatRequestDto,
+                chatMeta,
+              ),
       };
     }) as unknown as ChatEntryDto[];
   }
@@ -187,7 +185,7 @@ export class ChatsService {
         if (e.type === 'message')
           return {
             ...e,
-            content: this.decrypt(e.content, chatMetadata.cryptoKey!)
+            content: this.decrypt(e.content, chatMetadata.cryptoKey!),
           };
         else if (e.type == 'image')
           return {
@@ -228,18 +226,11 @@ export class ChatsService {
       .exec();
   }
 
-
   decrypt(input: string, key: string) {
     try {
-
-
-    const res = CryptoJS.AES.decrypt(
-      input,
-      key,
-    )?.toString(CryptoJS.enc.Utf8);
-    if(!res || res === ' ')
-      return input;
-    return res;
+      const res = CryptoJS.AES.decrypt(input, key)?.toString(CryptoJS.enc.Utf8);
+      if (!res || res === ' ') return input;
+      return res;
     } catch (e: any) {
       console.log(e);
       return input;

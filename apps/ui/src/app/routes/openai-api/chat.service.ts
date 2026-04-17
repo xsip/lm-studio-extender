@@ -15,6 +15,7 @@ import {
 } from '../../openai-stream.service';
 import {
   ChatMetadataService,
+  CreateChatMetadataDto,
   EasyInputMessageDto,
   McpCallDto,
   McpListToolsDto,
@@ -116,6 +117,12 @@ export class ChatService {
     appendedFiles: AppendedFile[] | undefined,
     encryptionKey: string | undefined,
     onChatListRefresh: () => void,
+    newChatOptions?: {
+      name?: string;
+      useCrypto?: boolean;
+      cryptoKey?: string;
+      openAiEndpointPreference?: CreateChatMetadataDto.OpenAiEndpointPreferenceEnum;
+    },
   ): void {
     if (this.form.invalid || this.streaming()) return;
     let input = this.form.getRawValue().input!.trim();
@@ -369,6 +376,7 @@ export class ChatService {
         store: true,
       },
       this.currentChatId() ?? undefined,
+      this.currentChatId() ? undefined : newChatOptions,
     );
   }
 
