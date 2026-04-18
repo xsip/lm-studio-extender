@@ -182,7 +182,7 @@ export class OpenAiService {
         userId,
         {
           client: ChatClient.OPENAI,
-          name: newChatConfig?.chatName ?? '',
+          name: newChatConfig?.chatName ?? chatId,
           cryptoKey: newChatConfig?.cryptoKey,
           useCrypto: newChatConfig?.useCrypto,
           usedModel: dto.model!,
