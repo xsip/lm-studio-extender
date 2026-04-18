@@ -10,7 +10,7 @@ import { Types } from 'mongoose';
 import * as CryptoJS from 'crypto-js';
 
 @Injectable()
-export class TokenUsageTool {
+export class ApiTools {
   constructor(
     private readonly tokenLimitService: TokenLimitService,
     private readonly chatMetaDataService: ChatMetadataService,

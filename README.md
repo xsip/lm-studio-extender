@@ -117,7 +117,7 @@ apps/
 │       ├── app.module.ts         # Root module — MCP, Mongo, guards
 │       ├── main.ts               # Bootstrap, CORS, Swagger, body-parser
 │       ├── tools/
-│       │   └── token-usage.tool.ts  # MCP tools (greeting, token-usage, decrypt)
+│       │   └── api.tools.ts  # MCP tools (greeting, token-usage, decrypt)
 │       └── modules/
 │           ├── auth/             # JWT auth, guards, user schema
 │           ├── chats/            # Chat message persistence

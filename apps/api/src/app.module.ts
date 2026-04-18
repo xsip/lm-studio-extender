@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { McpModule, McpTransportType } from '@rekog/mcp-nest';
-import { TokenUsageTool } from './tools/token-usage.tool';
+import { ApiTools } from './tools/api.tools';
 import { LmStudioModule } from './modules/lm-studio/lmstudio.module';
 import { ChatsModule } from './modules/chats/chats.module';
 import { ChatMetadataModule } from './modules/chat-metadata/chat-metadata.module';
@@ -46,7 +46,7 @@ import { OpenaiModule } from './modules/openai/openai.module';
   controllers: [],
   providers: [
     AppService,
-    TokenUsageTool,
+    ApiTools,
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
   ],
