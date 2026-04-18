@@ -15,20 +15,10 @@ export const authInterceptor: HttpInterceptorFn = (
 ): Observable<HttpEvent<unknown>> => {
   const router = inject(Router);
 
-  if(router.routerState.snapshot.url.includes('/readme')) {
-    return next(req);
-  }
-
-  // Don't intercept auth endpoints
-  if (req.url.includes('/auth/') && !req.url.includes('/auth/me')) {
-    return next(req);
-  }
-
   const token = localStorage.getItem('jwt_token');
 
   if (!token) {
-    router.navigate(['/login']);
-    return throwError(() => new Error('No token'));
+    return next(req);
   }
 
   const cloned = req.clone({

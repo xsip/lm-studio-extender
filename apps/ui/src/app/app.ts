@@ -19,8 +19,9 @@ export class App implements OnInit {
   activatedRoute = inject(ActivatedRoute);
   router = inject(Router);
   ngOnInit() {
-    const currentRoute = this.activatedRoute.snapshot.url.map(segment => segment.path).join('/');
-    if (currentRoute.includes('login')) return;
+    const currentRoute = this.activatedRoute.snapshot.url.map((segment) => segment.path).join('/');
+    if (currentRoute.includes('login') || currentRoute.includes('readme') || currentRoute === '')
+      return;
 
     const token = localStorage.getItem('jwt_token');
     if (!token || this.isTokenExpired(token)) {
