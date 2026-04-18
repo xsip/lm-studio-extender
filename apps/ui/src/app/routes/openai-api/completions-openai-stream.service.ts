@@ -6,6 +6,7 @@ import {
   ChatStreamOpenAiRequest,
   CreateChatMetadataDto,
 } from '../../client';
+import { OpenAiChatEnd } from './openai-stream.service';
 
 export type OpenAiEvent = ChatCompletionChunkDto;
 
@@ -163,44 +164,8 @@ export class OpenAiStreamService {
   private dispatch(event: OpenAiEvent): void {
     this._events$.next(event);
 
-
-    switch (event.) {
-      case 'created_chat':
-        this._chatCreated$.next((event as OpenAiStreamCreatedChatEvent).result);
-        this._chatCreated$.complete();
-        break;
-
-      case 'response.output_text.delta':
-        this._messageDelta$.next((event as ResponseOutputTextDeltaEvent).delta);
-        break;
-
-      case 'response.reasoning_text.delta':
-        this._reasoningDelta$.next((event as ResponseReasoningTextDeltaEvent).delta);
-        break;
-
-      case 'response.completed': {
-        const completed = event as ResponseCompletedEvent;
-        this._chatEnd$.next({
-          responseId: completed.response.id,
-          model: completed.response.model,
-          usage: completed.response.usage,
-        });
-        this._chatEnd$.complete();
-        break;
-      }
-
-      case 'response.failed': {
-        const failed = event as ResponseFailedEvent;
-        console.error('[OpenAiStreamService] Response failed:', failed.response.error);
-        break;
-      }
-
-      case 'error':
-        console.error(
-          '[OpenAiStreamService] Stream error:',
-          (event as OpenAiStreamErrorEvent).message ??
-            (event as OpenAiStreamErrorEvent).error?.message,
-        );
+    switch (event.object) {
+      case 'chat.completion.chunk':
         break;
     }
   }
