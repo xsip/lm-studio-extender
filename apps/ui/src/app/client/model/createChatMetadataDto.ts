@@ -31,6 +31,7 @@ export interface CreateChatMetadataDto {
     useCrypto?: boolean;
     cryptoKey?: string;
     openAiEndpointPreference?: CreateChatMetadataDto.OpenAiEndpointPreferenceEnum;
+    lastMessageSentAt?: string;
 }
 export namespace CreateChatMetadataDto {
     export const ClientEnum = {

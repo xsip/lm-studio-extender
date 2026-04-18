@@ -332,6 +332,7 @@ The final response must be a direct answer to the decrypted message, not a repet
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders();
 
+    dto.reasoning_effort = 'high';
     const stream: Stream<OpenAI.ChatCompletionChunk> =
       (await this.openAi.chat.completions.create({
         ...dto,

@@ -18,6 +18,7 @@ index.ts
 model/acknowledgedSafetyCheckDto.ts
 model/actionDto.ts
 model/alwaysDto.ts
+model/annotationDto.ts
 model/applyPatchCallDto.ts
 model/applyPatchCallDtoOperation.ts
 model/applyPatchCallOutputDto.ts
@@ -29,8 +30,10 @@ model/chatCompletionAllowedToolsDto.ts
 model/chatCompletionAssistantMessageParamDto.ts
 model/chatCompletionAssistantMessageParamDtoContentInner.ts
 model/chatCompletionAssistantMessageParamDtoToolCallsInner.ts
+model/chatCompletionAudioDto.ts
 model/chatCompletionAudioParamDto.ts
 model/chatCompletionAudioParamDtoVoice.ts
+model/chatCompletionChunkDto.ts
 model/chatCompletionContentPartImageDto.ts
 model/chatCompletionContentPartInputAudioDto.ts
 model/chatCompletionContentPartRefusalDto.ts
@@ -46,16 +49,19 @@ model/chatCompletionCreateParamsStreamingDto.ts
 model/chatCompletionCustomToolDto.ts
 model/chatCompletionDeveloperMessageParamDto.ts
 model/chatCompletionDeveloperMessageParamDtoContentInner.ts
+model/chatCompletionDto.ts
 model/chatCompletionFunctionCallOptionDto.ts
 model/chatCompletionFunctionMessageParamDto.ts
 model/chatCompletionFunctionToolDto.ts
 model/chatCompletionMessageCustomToolCallDto.ts
+model/chatCompletionMessageDto.ts
 model/chatCompletionMessageFunctionToolCallDto.ts
 model/chatCompletionNamedToolChoiceCustomDto.ts
 model/chatCompletionNamedToolChoiceDto.ts
 model/chatCompletionPredictionContentDto.ts
 model/chatCompletionStreamOptionsDto.ts
 model/chatCompletionSystemMessageParamDto.ts
+model/chatCompletionTokenLogprobDto.ts
 model/chatCompletionToolMessageParamDto.ts
 model/chatCompletionUserMessageParamDto.ts
 model/chatCompletionUserMessageParamDtoContentInner.ts
@@ -69,6 +75,7 @@ model/chatResponseDto.ts
 model/chatResponseDtoOutputInner.ts
 model/chatStatsDto.ts
 model/chatStreamOpenAiRequest.ts
+model/choiceDto.ts
 model/clickDto.ts
 model/codeInterpreterDto.ts
 model/codeInterpreterDtoContainer.ts
@@ -76,6 +83,8 @@ model/codeInterpreterToolAutoDto.ts
 model/codeInterpreterToolAutoDtoNetworkPolicy.ts
 model/comparisonFilterDto.ts
 model/comparisonFilterDtoValueInner.ts
+model/completionTokensDetailsDto.ts
+model/completionUsageDto.ts
 model/completionsStreamOpenAiRequest.ts
 model/compoundFilterDto.ts
 model/computerCallOutputDto.ts
@@ -151,6 +160,7 @@ model/localShellDto.ts
 model/localSkillDto.ts
 model/loginDto.ts
 model/logprobDto.ts
+model/logprobsDto.ts
 model/logsDto.ts
 model/mcpApprovalRequestDto.ts
 model/mcpApprovalResponseDto.ts
@@ -182,6 +192,7 @@ model/partDto.ts
 model/pathDto.ts
 model/pendingSafetyCheckDto.ts
 model/pluginIntegrationDto.ts
+model/promptTokensDetailsDto.ts
 model/providerInfoDto.ts
 model/quantizationDto.ts
 model/rankingOptionsDto.ts
