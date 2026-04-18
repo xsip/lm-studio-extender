@@ -46,7 +46,7 @@ export interface ChatMessage {
 }
 
 @Injectable()
-export class ChatService {
+export class ChatCompletionsService {
   private readonly streamService = inject(OpenAiStreamService);
   private readonly location = inject(Location);
   private readonly router = inject(Router);

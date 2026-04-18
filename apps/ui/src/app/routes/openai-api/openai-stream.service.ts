@@ -57,7 +57,7 @@ import {
   ResponseWebSearchCallCompletedEventDto,
   ResponseWebSearchCallInProgressEventDto,
   ResponseWebSearchCallSearchingEventDto,
-} from './client';
+} from '../../client';
 
 // ---------------------------------------------------------------------------
 // OpenAI Responses API SSE event interfaces
