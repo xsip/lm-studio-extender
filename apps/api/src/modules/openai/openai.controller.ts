@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
-  ApiBody,
+  ApiBody, ApiCreatedResponse,
   ApiExtraModels,
   ApiOkResponse,
   ApiOperation,
@@ -94,7 +94,11 @@ import { ChatCompletionCreateParamsStreamingDto } from './dto/completions-dtos/C
 import {
   ChatCompletionCreateParamsNonStreamingDto
 } from './dto/completions-dtos/ChatCompletionCreateParamsNonStreamingDto';
-import { OpenAiEndpointPreference } from '../chat-metadata/chat-metadata.schema';
+import {
+  ChatMetadataDto,
+  OpenAiEndpointPreference,
+} from '../chat-metadata/chat-metadata.schema';
+import { ChatCompletionDto } from './dto/completions-dtos/ChatCompletionDto';
 
 @ApiTags('OpenAI')
 @ApiBearerAuth()
@@ -415,6 +419,124 @@ export class OpenaiController {
     }
 
     return this.openAiService.chatStreamCompletions(
+      userId,
+      dto,
+      res,
+      token,
+      internalChatId,
+      '',
+      internalChatId,
+    );
+    // ───────────────────────────────────────────────────────────────────────
+  }
+
+  @ApiExtraModels(
+    ChatCompletionCreateParamsNonStreamingDto,
+    ChatCompletionCreateParamsStreamingDto,
+  )
+  @Post('completions')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Stream a chat response via SSE',
+    description:
+      'Returns the LM Studio response as Server-Sent Events. ' +
+      'Each exchange is persisted in MongoDB under the given `internalChatId`. ' +
+      'If `internalChatId` is supplied, the latest `response_id` for that session ' +
+      'is fetched from the DB and set as `previous_response_id` on the request ' +
+      'so LM Studio maintains conversation context. ' +
+      'If `internalChatId` is omitted a new session is created and its generated ' +
+      'ID is returned via a `created_chat` SSE event before the stream closes.',
+    operationId: 'completionsOpenAi',
+  })
+  @ApiQuery({
+    name: 'internalChatId',
+    required: false,
+    description:
+      'MD5 hex string identifying an existing chat session. ' +
+      'Omit to start a new session.',
+    example: 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4',
+  })
+  @ApiQuery({
+    name: 'useCrypto',
+    required: false,
+    type: 'boolean',
+    description: 'Use crypto for new chat',
+  })
+  @ApiQuery({
+    name: 'chatName',
+    type: 'string',
+    required: false,
+    description: 'Name for new chat',
+  })
+  @ApiQuery({
+    name: 'cryptoKey',
+    type: 'string',
+    required: false,
+    description: 'Key for new chat encryption',
+  })
+  @ApiQuery({
+    name: 'openAiEndpointPreference',
+    type: 'string',
+    enum: OpenAiEndpointPreference,
+    default: OpenAiEndpointPreference.RESPONSES,
+    required: false,
+    description: 'openAiEndpointPreference for new chat',
+  })
+  @ApiBody({
+    schema: {
+      oneOf: [
+        {
+          $ref: getSchemaPath(ChatCompletionCreateParamsNonStreamingDto),
+        },
+        {
+          $ref: getSchemaPath(ChatCompletionCreateParamsStreamingDto),
+        },
+      ],
+    },
+  })
+  @ApiOkResponse({ type: ChatCompletionDto })
+  async completions(
+    @CurrentUser() user: User,
+    @CurrentToken() token: string,
+    @Body()
+    dto:
+      | ChatCompletionCreateParamsNonStreamingDto
+      | ChatCompletionCreateParamsStreamingDto,
+    @Res({ passthrough: true }) res: Response,
+    @Query('internalChatId') internalChatId?: string,
+    @Query('chatName') chatName?: string,
+    @Query('useCrypto') useCrypto?: boolean,
+    @Query('cryptoKey') cryptoKey?: string,
+    @Query('openAiEndpointPreference')
+    openAiEndpointPreference?: OpenAiEndpointPreference,
+  ): Promise<ChatCompletionDto> {
+    const userId = (user as any)._id as Types.ObjectId;
+
+    // ── Token window reset ──────────────────────────────────────────────────
+    if (
+      !user.tokenCountResetDate ||
+      dayjs(user.tokenCountResetDate).isBefore(dayjs())
+    ) {
+      const updatedUser = await this.tokenLimitService.resetTokenLimit(userId);
+      user.tokenCountResetDate = updatedUser.tokenCountResetDate;
+      user.usedTokens = 0;
+    }
+    // ───────────────────────────────────────────────────────────────────────
+
+    // ── Rate-limit enforcement ──────────────────────────────────────────────
+    const limit = await this.tokenLimitService.getTokensPerIntervall(
+      user.subscription,
+    );
+
+    if (user.usedTokens && user.usedTokens >= limit) {
+      if (dayjs().isBefore(dayjs(user.tokenCountResetDate))) {
+        throw new ForbiddenException(
+          `Rate limit reached. Resets at ${dayjs(user.tokenCountResetDate).toString()}`,
+        );
+      }
+    }
+
+    return this.openAiService.chatCompletions(
       userId,
       dto,
       res,

@@ -870,6 +870,102 @@
         ]
       }
     },
+    "/openai/completions": {
+      "post": {
+        "description": "Returns the LM Studio response as Server-Sent Events. Each exchange is persisted in MongoDB under the given `internalChatId`. If `internalChatId` is supplied, the latest `response_id` for that session is fetched from the DB and set as `previous_response_id` on the request so LM Studio maintains conversation context. If `internalChatId` is omitted a new session is created and its generated ID is returned via a `created_chat` SSE event before the stream closes.",
+        "operationId": "completionsOpenAi",
+        "parameters": [
+          {
+            "name": "internalChatId",
+            "required": false,
+            "in": "query",
+            "description": "MD5 hex string identifying an existing chat session. Omit to start a new session.",
+            "schema": {
+              "example": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4",
+              "type": "string"
+            }
+          },
+          {
+            "name": "chatName",
+            "required": false,
+            "in": "query",
+            "description": "Name for new chat",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "useCrypto",
+            "required": false,
+            "in": "query",
+            "description": "Use crypto for new chat",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "cryptoKey",
+            "required": false,
+            "in": "query",
+            "description": "Key for new chat encryption",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "openAiEndpointPreference",
+            "required": false,
+            "in": "query",
+            "description": "openAiEndpointPreference for new chat",
+            "schema": {
+              "enum": [
+                "RESPONSES",
+                "COMPLETION"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/ChatCompletionCreateParamsNonStreamingDto"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ChatCompletionCreateParamsStreamingDto"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatCompletionDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Stream a chat response via SSE",
+        "tags": [
+          "OpenAI"
+        ]
+      }
+    },
     "/auth/me": {
       "get": {
         "operationId": "getMe",
@@ -11202,6 +11298,344 @@
           "messages",
           "model",
           "stream"
+        ]
+      },
+      "ChatCompletionTokenLogprobDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "The token."
+          },
+          "bytes": {
+            "description": "A list of integers representing the UTF-8 bytes representation of the token.\n  Useful in instances where characters are represented by multiple tokens and\n  their byte representations must be combined to generate the correct text\n  representation. Can be `null` if there is no bytes representation for the token.",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "logprob": {
+            "type": "number",
+            "description": "The log probability of this token, if it is within the top 20 most likely\n  tokens. Otherwise, the value `-9999.0` is used to signify that the token is very\n  unlikely."
+          },
+          "top_logprobs": {
+            "description": "List of the most likely tokens and their log probability, at this token\n  position. In rare cases, there may be fewer than the number of requested\n  `top_logprobs` returned.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TopLogprobDto"
+            }
+          }
+        },
+        "required": [
+          "token",
+          "bytes",
+          "logprob",
+          "top_logprobs"
+        ]
+      },
+      "LogprobsDto": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "description": "A list of message content tokens with log probability information.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatCompletionTokenLogprobDto"
+            }
+          },
+          "refusal": {
+            "description": "A list of message refusal tokens with log probability information.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatCompletionTokenLogprobDto"
+            }
+          }
+        },
+        "required": [
+          "content",
+          "refusal"
+        ]
+      },
+      "ChatCompletionAudioDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for this audio response."
+          },
+          "data": {
+            "type": "string",
+            "description": "Base64 encoded audio bytes generated by the model, in the format specified in\n  the request."
+          },
+          "expires_at": {
+            "type": "number",
+            "description": "The Unix timestamp (in seconds) for when this audio response will no longer be\n  accessible on the server for use in multi-turn conversations."
+          },
+          "transcript": {
+            "type": "string",
+            "description": "Transcript of the audio generated by the model."
+          }
+        },
+        "required": [
+          "id",
+          "data",
+          "expires_at",
+          "transcript"
+        ]
+      },
+      "AnnotationDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The type of the URL citation. Always `url_citation`.",
+            "enum": [
+              "url_citation"
+            ]
+          },
+          "url_citation": {
+            "description": "A URL citation when using web search.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/URLCitationDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "url_citation"
+        ]
+      },
+      "ChatCompletionMessageDto": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "The contents of the message."
+          },
+          "refusal": {
+            "type": "string",
+            "description": "The refusal message generated by the model."
+          },
+          "role": {
+            "type": "string",
+            "description": "The role of the author of this message.",
+            "enum": [
+              "assistant"
+            ]
+          },
+          "annotations": {
+            "description": "Annotations for the message, when applicable, as when using the\n  [web search tool](https://platform.openai.com/docs/guides/tools-web-search?api-mode=chat).",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnnotationDto"
+            }
+          },
+          "audio": {
+            "description": "If the audio output modality is requested, this object contains data about the\n  audio response from the model.\n  [Learn more](https://platform.openai.com/docs/guides/audio).",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ChatCompletionAudioDto"
+              }
+            ]
+          },
+          "function_call": {
+            "$ref": "#/components/schemas/FunctionCallDto"
+          },
+          "tool_calls": {
+            "description": "The tool calls generated by the model, such as function calls.",
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ChatCompletionMessageFunctionToolCallDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ChatCompletionMessageCustomToolCallDto"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "content",
+          "refusal",
+          "role"
+        ]
+      },
+      "ChoiceDto": {
+        "type": "object",
+        "properties": {
+          "finish_reason": {
+            "type": "string",
+            "description": "The reason the model stopped generating tokens. This will be `stop` if the model\n  hit a natural stop point or a provided stop sequence, `length` if the maximum\n  number of tokens specified in the request was reached, `content_filter` if\n  content was omitted due to a flag from our content filters, `tool_calls` if the\n  model called a tool, or `function_call` (deprecated) if the model called a\n  function.",
+            "enum": [
+              "stop",
+              "length",
+              "tool_calls",
+              "content_filter",
+              "function_call"
+            ]
+          },
+          "index": {
+            "type": "number",
+            "description": "The index of the choice in the list of choices."
+          },
+          "logprobs": {
+            "description": "Log probability information for the choice.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LogprobsDto"
+              }
+            ]
+          },
+          "message": {
+            "description": "A chat completion message generated by the model.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ChatCompletionMessageDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "finish_reason",
+          "index",
+          "logprobs",
+          "message"
+        ]
+      },
+      "CompletionTokensDetailsDto": {
+        "type": "object",
+        "properties": {
+          "accepted_prediction_tokens": {
+            "type": "number",
+            "description": "When using Predicted Outputs, the number of tokens in the prediction that\n  appeared in the completion."
+          },
+          "audio_tokens": {
+            "type": "number",
+            "description": "Audio input tokens generated by the model."
+          },
+          "reasoning_tokens": {
+            "type": "number",
+            "description": "Tokens generated by the model for reasoning."
+          },
+          "rejected_prediction_tokens": {
+            "type": "number",
+            "description": "When using Predicted Outputs, the number of tokens in the prediction that did\n  not appear in the completion. However, like reasoning tokens, these tokens are\n  still counted in the total completion tokens for purposes of billing, output,\n  and context window limits."
+          }
+        }
+      },
+      "PromptTokensDetailsDto": {
+        "type": "object",
+        "properties": {
+          "audio_tokens": {
+            "type": "number",
+            "description": "Audio input tokens present in the prompt."
+          },
+          "cached_tokens": {
+            "type": "number",
+            "description": "Cached tokens present in the prompt."
+          }
+        }
+      },
+      "CompletionUsageDto": {
+        "type": "object",
+        "properties": {
+          "completion_tokens": {
+            "type": "number",
+            "description": "Number of tokens in the generated completion."
+          },
+          "prompt_tokens": {
+            "type": "number",
+            "description": "Number of tokens in the prompt."
+          },
+          "total_tokens": {
+            "type": "number",
+            "description": "Total number of tokens used in the request (prompt + completion)."
+          },
+          "completion_tokens_details": {
+            "description": "Breakdown of tokens used in a completion.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CompletionTokensDetailsDto"
+              }
+            ]
+          },
+          "prompt_tokens_details": {
+            "description": "Breakdown of tokens used in the prompt.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PromptTokensDetailsDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "completion_tokens",
+          "prompt_tokens",
+          "total_tokens"
+        ]
+      },
+      "ChatCompletionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "A unique identifier for the chat completion."
+          },
+          "choices": {
+            "description": "A list of chat completion choices. Can be more than one if `n` is greater\n  than 1.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChoiceDto"
+            }
+          },
+          "created": {
+            "type": "number",
+            "description": "The Unix timestamp (in seconds) of when the chat completion was created."
+          },
+          "model": {
+            "type": "string",
+            "description": "The model used for the chat completion."
+          },
+          "object": {
+            "type": "string",
+            "description": "The object type, which is always `chat.completion`.",
+            "enum": [
+              "chat.completion"
+            ]
+          },
+          "service_tier": {
+            "type": "string",
+            "description": "Specifies the processing type used for serving the request.\n  \n  - If set to 'auto', then the request will be processed with the service tier\n    configured in the Project settings. Unless otherwise configured, the Project\n    will use 'default'.\n  - If set to 'default', then the request will be processed with the standard\n    pricing and performance for the selected model.\n  - If set to '[flex](https://platform.openai.com/docs/guides/flex-processing)' or\n    '[priority](https://openai.com/api-priority-processing/)', then the request\n    will be processed with the corresponding service tier.\n  - When not set, the default behavior is 'auto'.\n  \n  When the `service_tier` parameter is set, the response body will include the\n  `service_tier` value based on the processing mode actually used to serve the\n  request. This response value may be different from the value set in the\n  parameter.",
+            "enum": [
+              "auto",
+              "default",
+              "flex",
+              "scale",
+              "priority"
+            ]
+          },
+          "system_fingerprint": {
+            "type": "string"
+          },
+          "usage": {
+            "description": "Usage statistics for the completion request.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CompletionUsageDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "choices",
+          "created",
+          "model",
+          "object"
         ]
       },
       "MeDto": {

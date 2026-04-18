@@ -62,6 +62,7 @@ import { McpCallDto } from './dto/get-response-dtos';
 import * as CryptoJS from 'crypto-js';
 import { ChatCompletionCreateParamsStreamingDto } from './dto/completions-dtos/ChatCompletionCreateParamsStreamingDto';
 import { ChatCompletionCreateParamsNonStreamingDto } from './dto/completions-dtos/ChatCompletionCreateParamsNonStreamingDto';
+import { ChatCompletionDto } from './dto/completions-dtos/ChatCompletionDto';
 
 interface ChatEndEvent {
   type: 'chat.end';
@@ -351,6 +352,26 @@ The final response must be a direct answer to the decrypted message, not a repet
 
     res.write('data: [DONE]\n\n');
     res.end();
+  }
+
+  async chatCompletions(
+    userId: Types.ObjectId,
+    dto:
+      | ChatCompletionCreateParamsStreamingDto
+      | ChatCompletionCreateParamsNonStreamingDto,
+    res: Response,
+    token: string,
+    internalChatId?: string,
+    name?: string,
+    chatMetaId?: string,
+  ): Promise<ChatCompletionDto> {
+    const stream: OpenAI.ChatCompletion =
+      (await this.openAi.chat.completions.create({
+        ...dto,
+        stream: false,
+        store: true,
+      } as any)) as any as OpenAI.ChatCompletion;
+    return stream as ChatCompletionDto;
   }
 
   // ---------------------------------------------------------------------------
