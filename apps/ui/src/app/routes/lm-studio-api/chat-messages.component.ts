@@ -24,7 +24,7 @@ import { CreateChatMetadataDto } from '../../client';
       @if (msg.role === 'user') {
         <div class="flex flex-col items-end gap-1">
           <div
-            class="max-w-[75%] bg-surface-overlay text-text-primary rounded-2xl rounded-br-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap border border-border-subtle"
+            class="max-w-[75%] break-words bg-surface-overlay text-text-primary rounded-2xl rounded-br-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap border border-border-subtle"
           >
             {{ msg.text }}
           </div>
