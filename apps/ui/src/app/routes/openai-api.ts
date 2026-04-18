@@ -398,7 +398,9 @@ export class OpenAiApi implements OnDestroy, OnInit {
     effect(() => {
       const cap = this.modelReasoningCap();
       if (!cap && this.reasoning()) this.reasoning.set(undefined);
-      if (!this.chatService.hasChatOpen()) this.reasoning.set((cap?.default as any) ?? undefined);
+      if (!this.chatService.hasChatOpen()) this.reasoning.set(
+        (cap?.allowed_options?.find((e) => e.startsWith(cap?.default)) as any) ?? undefined,
+      );
     });
   }
 
