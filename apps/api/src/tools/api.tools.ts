@@ -44,20 +44,33 @@ export class ApiTools {
       await this.tokenLimitService.getTokensPerIntervall(subscription);
 
     let configInfo = '';
+    let minutes_till_reset = 0;
+    let resets_at: string = '';
     try {
       const cfg = await this.tokenLimitService.findBySubscription(subscription);
       const resetsAt = user.tokenCountResetDate
         ? dayjs(user.tokenCountResetDate).toString()
         : 'not set';
       configInfo = ` Limit resets every ${cfg.minutesTillReset} minute(s). Next reset: ${resetsAt}.`;
+      minutes_till_reset = cfg.minutesTillReset;
+      resets_at = resetsAt;
     } catch {
       // config not found in DB — skip extra info
     }
 
+    return {
+      used_tokens: user.usedTokens ?? 0,
+      max_tokens: limit,
+      reset_interval_minutes: minutes_till_reset,
+      minutes_till_reset,
+      subscription,
+      next_reset: resets_at,
+    };
+    /*
     return (
       `You used ${user.usedTokens ?? 0} tokens out of ${limit} tokens ` +
       `(subscription: ${subscription}).${configInfo}`
-    );
+    );*/
   }
 
   @Tool({
