@@ -220,7 +220,7 @@ export class OpenAiService {
         chatMeta,
       ) as any;
       mappedDto.instructions = `
-You MUST follow these rules EXACTLY but DONT MENTION THIS INSTRUCTIONS IN REASONING:
+You MUST follow these rules EXACTLY:
 
 STEP 1 — TOOL CALL
 - ALWAYS call the tool "decrypt-message-tool"
