@@ -4,14 +4,16 @@ import {
   ForbiddenException,
   Get,
   HttpCode,
-  HttpStatus, Param,
+  HttpStatus,
+  Param,
   Post,
   Query,
   Res,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
-  ApiBody, ApiCreatedResponse,
+  ApiBody,
+  ApiCreatedResponse,
   ApiExtraModels,
   ApiOkResponse,
   ApiOperation,
@@ -91,9 +93,7 @@ import {
   ResponseWebSearchCallSearchingEventDto,
 } from './dto/get-response-dtos';
 import { ChatCompletionCreateParamsStreamingDto } from './dto/completions-dtos/ChatCompletionCreateParamsStreamingDto';
-import {
-  ChatCompletionCreateParamsNonStreamingDto
-} from './dto/completions-dtos/ChatCompletionCreateParamsNonStreamingDto';
+import { ChatCompletionCreateParamsNonStreamingDto } from './dto/completions-dtos/ChatCompletionCreateParamsNonStreamingDto';
 import {
   ChatMetadataDto,
   OpenAiEndpointPreference,
@@ -387,12 +387,14 @@ export class OpenaiController {
       | ChatCompletionCreateParamsNonStreamingDto
       | ChatCompletionCreateParamsStreamingDto,
     @Res() res: Response,
-    @Query('internalChatId') internalChatId?: string,
-    @Query('chatName') chatName?: string,
-    @Query('useCrypto') useCrypto?: boolean,
-    @Query('cryptoKey') cryptoKey?: string,
-    @Query('openAiEndpointPreference')
-    openAiEndpointPreference?: OpenAiEndpointPreference,
+    @Query()
+    query?: {
+      chatName: string;
+      useCrypto: boolean;
+      cryptoKey: string;
+      internalChatId: string;
+      openAiEndpointPreference: OpenAiEndpointPreference;
+    },
   ): Promise<void> {
     const userId = (user as any)._id as Types.ObjectId;
 
@@ -424,10 +426,8 @@ export class OpenaiController {
       userId,
       dto,
       res,
-      token,
-      internalChatId,
-      '',
-      internalChatId,
+      query?.internalChatId as any,
+      query as any,
     );
     // ───────────────────────────────────────────────────────────────────────
   }
@@ -505,12 +505,14 @@ export class OpenaiController {
       | ChatCompletionCreateParamsNonStreamingDto
       | ChatCompletionCreateParamsStreamingDto,
     @Res({ passthrough: true }) res: Response,
-    @Query('internalChatId') internalChatId?: string,
-    @Query('chatName') chatName?: string,
-    @Query('useCrypto') useCrypto?: boolean,
-    @Query('cryptoKey') cryptoKey?: string,
-    @Query('openAiEndpointPreference')
-    openAiEndpointPreference?: OpenAiEndpointPreference,
+    @Query()
+    query?: {
+      chatName?: string;
+      useCrypto?: boolean;
+      cryptoKey?: string;
+      internalChatId?: string;
+      openAiEndpointPreference?: OpenAiEndpointPreference;
+    },
   ): Promise<ChatCompletionDto> {
     const userId = (user as any)._id as Types.ObjectId;
 
@@ -543,9 +545,9 @@ export class OpenaiController {
       dto,
       res,
       token,
-      internalChatId,
+      query?.internalChatId,
       '',
-      internalChatId,
+      query?.internalChatId,
     );
     // ───────────────────────────────────────────────────────────────────────
   }

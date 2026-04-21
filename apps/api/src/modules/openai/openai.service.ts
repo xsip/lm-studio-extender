@@ -63,6 +63,8 @@ import * as CryptoJS from 'crypto-js';
 import { ChatCompletionCreateParamsStreamingDto } from './dto/completions-dtos/ChatCompletionCreateParamsStreamingDto';
 import { ChatCompletionCreateParamsNonStreamingDto } from './dto/completions-dtos/ChatCompletionCreateParamsNonStreamingDto';
 import { ChatCompletionDto } from './dto/completions-dtos/ChatCompletionDto';
+import { ChatCompletionCustomToolDto } from './dto/completions-dtos/ChatCompletionCustomToolDto';
+import { ChatCompletionFunctionToolDto } from './dto/completions-dtos/ChatCompletionFunctionToolDto';
 
 interface ChatEndEvent {
   type: 'chat.end';
@@ -324,13 +326,73 @@ The final response must be a direct answer to the decrypted message, not a repet
     res: Response,
     token: string,
     internalChatId?: string,
-    name?: string,
-    chatMetaId?: string,
+    newChatConfig?: {
+      openAiEndpointPreference?: OpenAiEndpointPreference;
+      useCrypto?: boolean;
+      cryptoKey?: string;
+      chatName?: string;
+    },
   ): Promise<void> {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders();
+
+    const mappedDto:
+      | ChatCompletionCreateParamsStreamingDto
+      | ChatCompletionCreateParamsNonStreamingDto = {
+      ...dto,
+      stream: true,
+      tools: [
+        {
+          type: 'mcp',
+          server_label: 'my-toolbox',
+          server_url: this.selfMcpUrl,
+          headers: {
+            authorization: `Bearer ${token}`,
+            chatId: internalChatId,
+          },
+          allowed_tools: ['greeting-tool', 'get-token-usage-tool'],
+        } as any,
+      ],
+      store: true,
+    };
+
+    const isNewChat = !internalChatId;
+    const chatId = internalChatId ?? this.generateChatId();
+
+    let resolvedChatMetaId: string | undefined = internalChatId;
+    if (isNewChat && !resolvedChatMetaId) {
+      resolvedChatMetaId = await this.chatMetadataService.createAndReturnId(
+        userId,
+        {
+          client: ChatClient.OPENAI,
+          openAiEndpointPreference: newChatConfig?.openAiEndpointPreference,
+          name: newChatConfig?.chatName ?? chatId,
+          cryptoKey: newChatConfig?.cryptoKey,
+          useCrypto: newChatConfig?.useCrypto,
+          usedModel: dto.model!,
+          lastMessageSentAt: new Date(),
+          reasoningMode: dto.reasoning_effort ?? 'off',
+          tools: (mappedDto.tools?.filter(
+            (i) => typeof i === 'object' && (i as any).type === 'mcp',
+          ) ?? []) as any,
+        },
+      );
+    } else if (!isNewChat && resolvedChatMetaId) {
+      await this.chatMetadataService.update(userId, resolvedChatMetaId, {
+        lastMessageSentAt: new Date(),
+      });
+    }
+    if (!isNewChat) {
+      const previousResponseId = await this.chatsService.getLatestResponseId(
+        userId,
+        resolvedChatMetaId!,
+      );
+      if (previousResponseId) {
+        // mappedDto.previous_response_id = previousResponseId;
+      }
+    }
 
     dto.reasoning_effort = 'high';
     const stream: Stream<OpenAI.ChatCompletionChunk> =

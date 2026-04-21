@@ -779,12 +779,24 @@
         "operationId": "completionsStreamOpenAi",
         "parameters": [
           {
-            "name": "internalChatId",
+            "name": "openAiEndpointPreference",
             "required": false,
             "in": "query",
-            "description": "MD5 hex string identifying an existing chat session. Omit to start a new session.",
+            "description": "openAiEndpointPreference for new chat",
             "schema": {
-              "example": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4",
+              "enum": [
+                "RESPONSES",
+                "COMPLETION"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "cryptoKey",
+            "required": false,
+            "in": "query",
+            "description": "Key for new chat encryption",
+            "schema": {
               "type": "string"
             }
           },
@@ -807,25 +819,12 @@
             }
           },
           {
-            "name": "cryptoKey",
+            "name": "internalChatId",
             "required": false,
             "in": "query",
-            "description": "Key for new chat encryption",
+            "description": "MD5 hex string identifying an existing chat session. Omit to start a new session.",
             "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "openAiEndpointPreference",
-            "required": false,
-            "in": "query",
-            "description": "openAiEndpointPreference for new chat",
-            "schema": {
-              "enum": [
-                "RESPONSES",
-                "COMPLETION"
-              ],
-              "type": "string"
+              "example": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4"
             }
           }
         ],
@@ -876,12 +875,24 @@
         "operationId": "completionsOpenAi",
         "parameters": [
           {
-            "name": "internalChatId",
+            "name": "openAiEndpointPreference",
             "required": false,
             "in": "query",
-            "description": "MD5 hex string identifying an existing chat session. Omit to start a new session.",
+            "description": "openAiEndpointPreference for new chat",
             "schema": {
-              "example": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4",
+              "enum": [
+                "RESPONSES",
+                "COMPLETION"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "cryptoKey",
+            "required": false,
+            "in": "query",
+            "description": "Key for new chat encryption",
+            "schema": {
               "type": "string"
             }
           },
@@ -904,25 +915,12 @@
             }
           },
           {
-            "name": "cryptoKey",
+            "name": "internalChatId",
             "required": false,
             "in": "query",
-            "description": "Key for new chat encryption",
+            "description": "MD5 hex string identifying an existing chat session. Omit to start a new session.",
             "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "openAiEndpointPreference",
-            "required": false,
-            "in": "query",
-            "description": "openAiEndpointPreference for new chat",
-            "schema": {
-              "enum": [
-                "RESPONSES",
-                "COMPLETION"
-              ],
-              "type": "string"
+              "example": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4"
             }
           }
         ],
