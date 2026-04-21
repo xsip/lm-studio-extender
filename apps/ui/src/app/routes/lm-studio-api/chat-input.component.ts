@@ -19,13 +19,13 @@ export type { ReasoningOption, ModelReasoningCapability } from '../../shared/com
   selector: 'app-chat-input',
   imports: [CommonModule, ReactiveFormsModule, SendButtonComponent, ResetButtonComponent, ReasoningDropdownComponent],
   template: `
-    <div class="shrink-0 border-t border-border-default px-4 py-3 bg-surface-raised">
+    <div class="shrink-0 border-t border-border-default px-4 py-4 bg-surface-raised" style="box-shadow: 0 -4px 16px rgba(0,0,0,0.06);">
       <form [formGroup]="form()" (ngSubmit)="submitted.emit()" class="flex flex-col gap-2">
         <textarea
           formControlName="input"
           rows="3"
           placeholder="Enter your prompt..."
-          class="w-full bg-surface-base border border-border-default rounded-lg px-4 py-3 text-sm text-text-primary placeholder-text-muted resize-none focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+          class="w-full bg-surface-base border border-border-default rounded-xl px-4 py-3 text-sm text-text-primary placeholder-text-muted resize-none focus:outline-none focus:border-accent transition-colors" style="box-shadow: var(--shadow-inset); min-height: 80px;"
           (keydown)="onKeydown($event)"
         ></textarea>
 

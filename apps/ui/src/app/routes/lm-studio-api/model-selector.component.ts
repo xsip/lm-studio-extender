@@ -15,7 +15,7 @@ export type { ModelReasoningCapability } from '../../shared/components/reasoning
       <button
         type="button"
         (click)="!hasChatOpen() && dropdownOpen.set(!dropdownOpen())"
-        class="flex items-center gap-2 px-3 py-1.5 text-xs border rounded-lg transition-colors max-w-[260px]"
+        class="flex items-center gap-2 px-3 py-1.5 text-xs border rounded-lg transition-colors max-w-[260px] shadow-depth-sm"
         [class]="
           hasChatOpen()
             ? 'border-border-default text-text-secondary cursor-not-allowed opacity-75'

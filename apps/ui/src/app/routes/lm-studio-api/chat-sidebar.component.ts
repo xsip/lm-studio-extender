@@ -14,9 +14,9 @@ import ClientEnum = CreateChatMetadataDto.ClientEnum;
   selector: 'app-chat-sidebar',
   imports: [CommonModule, DatePipe, FormsModule, ChatSettingsDialogComponent, SpinnerComponent],
   template: `
-    <div class="flex flex-col w-56 border-r border-border-default shrink-0 h-full bg-surface-raised">
-      <div class="flex items-center justify-between px-3 py-2.5 border-b border-border-default shrink-0">
-        <span class="text-xs text-text-muted uppercase tracking-widest font-medium">History</span>
+    <div class="flex flex-col w-60 border-r border-border-default shrink-0 h-full bg-surface-raised" style="box-shadow: var(--shadow-md);">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-border-default shrink-0">
+        <span class="text-[10px] text-text-muted uppercase tracking-[0.12em] font-semibold" style="letter-spacing:0.12em;">History</span>
         @if (chatsLoading()) {
           <app-spinner />
         }
@@ -29,7 +29,7 @@ import ClientEnum = CreateChatMetadataDto.ClientEnum;
           class="w-full text-left px-3 py-2.5 text-xs transition-colors border-l-2 group"
           [class]="
             !currentChatId()
-              ? 'bg-surface-overlay border-accent text-text-primary'
+              ? 'bg-accent-subtle border-accent text-text-primary'
               : 'border-transparent text-text-secondary hover:bg-surface-overlay hover:text-text-primary'
           "
         >
@@ -67,7 +67,7 @@ import ClientEnum = CreateChatMetadataDto.ClientEnum;
               class="w-full text-left px-3 py-2.5 text-xs transition-colors border-l-2 group"
               [class]="
                 currentChatId() === chat._id
-                  ? 'bg-surface-overlay border-accent text-text-primary'
+                  ? 'bg-accent-subtle border-accent text-text-primary'
                   : 'border-transparent text-text-secondary hover:bg-surface-overlay hover:text-text-primary'
               "
             >
@@ -99,7 +99,7 @@ import ClientEnum = CreateChatMetadataDto.ClientEnum;
         (contextmenu)="$event.preventDefault(); closeCtxMenu()"
       ></div>
       <div
-        class="fixed z-50 w-52 bg-surface-raised border border-border-default rounded-lg shadow-2xl shadow-black/30 overflow-hidden py-1"
+        class="fixed z-50 w-52 bg-surface-raised border border-border-default rounded-xl overflow-hidden py-1" style="box-shadow: var(--shadow-xl);"
         [style.left.px]="menu.x"
         [style.top.px]="menu.y"
       >

@@ -56,12 +56,13 @@ export class ButtonComponent {
       md: 'px-4 py-2 text-sm',
     };
 
+    const shadowStyle = 'shadow-depth-sm';
     const variants: Record<string, string> = {
-      primary:   'bg-accent hover:bg-accent-hover border-transparent text-white disabled:bg-surface-sunken disabled:text-text-muted',
+      primary:   `bg-accent hover:bg-accent-hover border-transparent text-white disabled:bg-surface-sunken disabled:text-text-muted ${shadowStyle}`,
       secondary: active
-        ? 'border-accent text-accent bg-accent/10 hover:bg-accent/20'
-        : 'border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary disabled:opacity-50',
-      danger: 'border-red-500/50 text-red-400 hover:border-red-500 hover:bg-red-950/30 disabled:opacity-50',
+        ? 'border-accent text-accent bg-accent-subtle hover:bg-accent/15'
+        : `border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary disabled:opacity-50 ${shadowStyle}`,
+      danger: `border-red-500/50 text-red-400 hover:border-red-500 hover:bg-red-950/30 disabled:opacity-50 ${shadowStyle}`,
       ghost:  'border-transparent text-text-muted hover:text-text-primary hover:bg-surface-overlay disabled:opacity-50',
     };
 

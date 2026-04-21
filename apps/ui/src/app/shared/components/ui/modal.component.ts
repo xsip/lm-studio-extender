@@ -24,7 +24,7 @@ import { Component, output } from '@angular/core';
     >
       <!-- card — stop propagation so clicks inside don't close the modal -->
       <div
-        class="relative w-80 bg-surface-raised border border-border-default rounded-xl shadow-2xl shadow-black/50 p-5"
+        class="relative w-80 bg-surface-raised border border-border-default rounded-xl shadow-depth-xl shadow-black/50 p-5"
         (click)="$event.stopPropagation()"
       >
         <!-- header row -->

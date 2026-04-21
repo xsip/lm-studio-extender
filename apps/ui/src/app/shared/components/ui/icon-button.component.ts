@@ -42,7 +42,7 @@ export class IconButtonComponent {
   classes(): string {
     const s = this.size() === 'sm' ? 'w-6 h-6' : 'w-8 h-8';
     return this.active()
-      ? `${s} border-accent text-accent bg-accent/10`
-      : `${s} border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary`;
+      ? `${s} border-accent text-accent bg-accent-subtle shadow-depth-sm`
+      : `${s} border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary shadow-depth-sm`;
   }
 }

@@ -51,6 +51,7 @@ import { ButtonComponent } from '../shared/components/ui/button.component';
       <!-- ── Top bar ── -->
       <div
         class="flex items-center gap-3 border-b border-border-default px-3 py-2.5 shrink-0 bg-surface-raised"
+        style="box-shadow: var(--shadow-sm);"
       >
         <ui-button
           variant="secondary"
@@ -65,8 +66,10 @@ import { ButtonComponent } from '../shared/components/ui/button.component';
           <span class="hidden sm:inline">Chats</span>
         </ui-button>
 
-        <div class="w-1.5 h-1.5 rounded-full bg-success-muted animate-pulse ml-1"></div>
-        <span class="text-xs text-text-muted tracking-wide font-medium hidden md:block">LM Studio Extender</span>
+        <div class="flex items-center gap-1.5 ml-1">
+          <div class="w-1.5 h-1.5 rounded-full bg-success-muted animate-pulse" style="box-shadow: 0 0 6px var(--color-success-muted);"></div>
+          <span class="text-xs text-text-muted tracking-wide font-medium hidden md:block">LM Studio Extender</span>
+        </div>
 
         <div class="relative ml-auto">
           <app-model-selector
@@ -106,7 +109,7 @@ import { ButtonComponent } from '../shared/components/ui/button.component';
       </div>
 
       <!-- ── Body ── -->
-      <div class="flex flex-1 overflow-hidden relative min-h-0 bg-surface-base">
+      <div class="flex flex-1 overflow-hidden relative min-h-0" style="background: var(--color-surface-base);">
         @if (showChatsSidebar()) {
           <app-chat-sidebar
             #chatSidebar

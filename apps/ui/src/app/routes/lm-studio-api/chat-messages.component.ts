@@ -24,7 +24,7 @@ import { CreateChatMetadataDto } from '../../client';
       @if (msg.role === 'user') {
         <div class="flex flex-col items-end gap-1">
           <div
-            class="max-w-[75%] break-words bg-surface-overlay text-text-primary rounded-2xl rounded-br-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap border border-border-subtle"
+            class="max-w-[75%] break-words text-text-primary rounded-2xl rounded-br-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap" style="background: var(--color-accent-subtle); border: 1px solid var(--color-accent-glow); box-shadow: var(--shadow-sm);"
           >
             {{ msg.text }}
           </div>
@@ -35,7 +35,7 @@ import { CreateChatMetadataDto } from '../../client';
       } @else if (msg.role === 'error') {
         <div class="flex flex-col items-start gap-1">
           <div
-            class="max-w-[80%] bg-error-bg border border-error-border text-error-text rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap flex items-start gap-2"
+            class="max-w-[80%] text-error-text rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap flex items-start gap-2" style="background: var(--color-error-bg); border: 1px solid var(--color-error-border); box-shadow: var(--shadow-sm);"
           >
             <span class="shrink-0 mt-0.5 text-error-muted">&#9888;</span>
             <span>{{ msg.text }}</span>
@@ -77,8 +77,8 @@ import { CreateChatMetadataDto } from '../../client';
               msg.toolFailed
                 ? 'bg-error-bg border border-error-border text-error-text hover:bg-error-bg'
                 : msg.streaming
-                  ? 'bg-tool-bg border border-tool-border text-tool-text hover:bg-tool-bg'
-                  : 'bg-tool-bg border border-tool-border text-tool-text hover:bg-tool-bg'
+                  ? 'bg-secondary-accent-subtle border border-secondary-accent/30 text-secondary-accent-text hover:bg-secondary-accent-subtle'
+                  : 'bg-secondary-accent-subtle border border-secondary-accent/25 text-secondary-accent-text hover:bg-secondary-accent-subtle'
             "
           >
             @if (msg.streaming) {
@@ -240,7 +240,7 @@ import { CreateChatMetadataDto } from '../../client';
           </button>
           @if (!msg.collapsed) {
             <div
-              class="w-full border border-reasoning-border/50 rounded-xl rounded-tl-sm bg-surface-raised px-3 py-2 text-xs text-reasoning-text leading-relaxed break-words"
+              class="w-full rounded-xl rounded-tl-sm px-3 py-2 text-xs text-reasoning-text leading-relaxed break-words" style="background: var(--color-reasoning-bg); border: 1px solid var(--color-reasoning-border); box-shadow: var(--shadow-sm);"
             >
               @if (msg.streaming) {
                 <span class="whitespace-pre-wrap break-words"
@@ -265,7 +265,7 @@ import { CreateChatMetadataDto } from '../../client';
         <!-- ai message -->
         <div class="flex flex-col items-start gap-1">
           <div
-            class="max-w-[80%] bg-surface-raised border border-border-default text-text-primary rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm leading-relaxed"
+            class="max-w-[80%] text-text-primary rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm leading-relaxed" style="background: var(--color-surface-raised); border: 1px solid var(--color-border-default); box-shadow: var(--shadow-md);"
           >
             @if (msg.streaming) {
               <span class="whitespace-pre-wrap break-words"
