@@ -9,7 +9,6 @@ import {
   OpenAiStreamApiInfoEvent,
   ResponseOutputItemAddedEvent,
   ResponseOutputItemDoneEvent,
-  ResponseOutputTextDeltaEvent,
   ResponseReasoningTextDeltaEvent,
   McpItemTracking,
 } from './openai-stream.service';
@@ -27,29 +26,25 @@ import {
   ResponseOutputItemDoneEventDto,
   ResponseReasoningItemDto,
 } from '../../client';
-import { AppendedFile } from './chat-input.component';
+import { AppendedFile } from '../../shared/utils/file.utils';
+import {
+  ChatMessage,
+  lastIndexWhere,
+  patchLast,
+  patchByItemId,
+  finalizeStreamingMessages,
+  safeParseJson,
+} from '../../shared/utils/chat-message.utils';
 import * as CryptoJS from 'crypto-js';
 
-export interface ChatMessage {
-  role: 'user' | 'ai' | 'error' | 'info' | 'tool_call' | 'reasoning' | 'mcp_list_tools';
-  text: string;
-  date?: Date;
-  stats?: string;
-  streaming?: boolean;
-  toolName?: string;
-  toolArguments?: object;
-  toolOutput?: string;
-  toolFailed?: boolean;
-  providerLabel?: string;
-  collapsed?: boolean;
-  itemId?: string; // track by OpenAI item id
-}
+// Re-export ChatMessage so existing consumers importing from this file keep working.
+export type { ChatMessage };
 
 @Injectable()
 export class ChatService {
-  private readonly streamService = inject(OpenAiStreamService);
-  private readonly location = inject(Location);
-  private readonly router = inject(Router);
+  private readonly streamService   = inject(OpenAiStreamService);
+  private readonly location        = inject(Location);
+  private readonly router          = inject(Router);
   private readonly chatMetaService = inject(ChatMetadataService);
   readonly fb = inject(FormBuilder);
 
@@ -57,8 +52,8 @@ export class ChatService {
     input: ['', [Validators.required, Validators.minLength(1)]],
   });
 
-  readonly streaming = signal(false);
-  readonly chatMessages = signal<ChatMessage[]>([]);
+  readonly streaming     = signal(false);
+  readonly chatMessages  = signal<ChatMessage[]>([]);
   readonly currentChatId = signal<string | null>(null);
 
   private readonly lastUserInput = signal<string>('');
@@ -84,31 +79,17 @@ export class ChatService {
     });
   }
 
+  /** @deprecated Use shared lastIndexWhere util directly. Kept for backwards compatibility. */
   lastIndexWhere(msgs: ChatMessage[], pred: (m: ChatMessage) => boolean): number {
-    for (let i = msgs.length - 1; i >= 0; i--) {
-      if (pred(msgs[i])) return i;
-    }
-    return -1;
+    return lastIndexWhere(msgs, pred);
   }
 
   patchLast(pred: (m: ChatMessage) => boolean, patch: Partial<ChatMessage>): void {
-    this.chatMessages.update((msgs) => {
-      const idx = this.lastIndexWhere(msgs, pred);
-      if (idx === -1) return msgs;
-      const copy = [...msgs];
-      copy[idx] = { ...copy[idx], ...patch };
-      return copy;
-    });
+    this.chatMessages.update((msgs) => patchLast(msgs, pred, patch));
   }
 
   patchByItemId(itemId: string, patch: Partial<ChatMessage>): void {
-    this.chatMessages.update((msgs) => {
-      const idx = this.lastIndexWhere(msgs, (m) => m.itemId === itemId);
-      if (idx === -1) return msgs;
-      const copy = [...msgs];
-      copy[idx] = { ...copy[idx], ...patch };
-      return copy;
-    });
+    this.chatMessages.update((msgs) => patchByItemId(msgs, itemId, patch));
   }
 
   submit(
@@ -197,25 +178,21 @@ export class ChatService {
             if (item.type === ResponseReasoningItemDto.TypeEnum.Reasoning && item.id) {
               this.patchByItemId(item.id, { streaming: false, collapsed: true });
             } else if (item.type === 'message') {
-              // stats will be applied by response.completed
               this.patchByItemId(item.id, { streaming: false });
             } else if (item.type === McpCallDto.TypeEnum.McpCall) {
               const tracking = this.mcpTracking.get(item.id);
               if (item.status === 'completed' && 'output' in item) {
-                // Extract output from item.output if present
                 let outputText: string = item.output ?? '';
                 try {
                   const parsed = JSON.parse(outputText);
                   if (Array.isArray(parsed) && parsed[0]?.text != null) outputText = parsed[0].text;
                   else if (typeof parsed === 'object' && parsed !== null)
                     outputText = JSON.stringify(parsed, null, 2);
-                } catch {
-                  /* leave as-is */
-                }
+                } catch { /* leave as-is */ }
                 this.patchByItemId(item.id, {
                   toolOutput: outputText || undefined,
                   toolName: tracking?.toolName ?? item.name ?? '…',
-                  toolArguments: item.arguments ? this.safeParseJson(item.arguments) : undefined,
+                  toolArguments: item.arguments ? safeParseJson(item.arguments) : undefined,
                   providerLabel: tracking?.serverLabel ?? item.server_label,
                   streaming: false,
                   collapsed: true,
@@ -236,16 +213,15 @@ export class ChatService {
           // ── MCP tool call in progress — extract tool name / args ──────────
           case 'response.mcp_call.in_progress': {
             const e = event as any;
-            // item details come through in in_progress for some servers
             if (e.item) {
               const item = e.item;
               const tracking = this.mcpTracking.get(e.item_id ?? item.id);
               if (tracking) {
-                tracking.toolName = item.name ?? tracking.toolName;
+                tracking.toolName    = item.name ?? tracking.toolName;
                 tracking.serverLabel = item.server_label ?? tracking.serverLabel;
               }
               this.patchByItemId(e.item_id ?? item.id, {
-                toolName: item.name ?? undefined,
+                toolName:      item.name ?? undefined,
                 providerLabel: item.server_label ?? undefined,
               });
             }
@@ -256,7 +232,7 @@ export class ChatService {
           case 'response.reasoning_text.delta': {
             const e = event as ResponseReasoningTextDeltaEvent;
             this.chatMessages.update((msgs) => {
-              const idx = this.lastIndexWhere(msgs, (m) => m.itemId === e.item_id);
+              const idx = lastIndexWhere(msgs, (m) => m.itemId === e.item_id);
               if (idx === -1) return msgs;
               const copy = [...msgs];
               copy[idx] = { ...copy[idx], text: copy[idx].text + e.delta };
@@ -264,9 +240,6 @@ export class ChatService {
             });
             break;
           }
-
-          // ── Text output delta (handled via messageDelta$ for efficiency) ──
-          // response.output_text.delta is dispatched through messageDelta$
 
           // ── Stream errors ─────────────────────────────────────────────────
           case 'error': {
@@ -308,14 +281,14 @@ export class ChatService {
         }
       },
       complete: () => this.streaming.set(false),
-      error: () => this.streaming.set(false),
+      error:    () => this.streaming.set(false),
     });
 
     // Text deltas arrive through the dedicated subject
     this.streamService.messageDelta$.subscribe((chunk) => {
       this.chatMessages.update((msgs) => {
         const copy = [...msgs];
-        const idx = this.lastIndexWhere(copy, (m) => m.role === 'ai' && !!m.streaming);
+        const idx = lastIndexWhere(copy, (m) => m.role === 'ai' && !!m.streaming);
         if (idx !== -1) copy[idx] = { ...copy[idx], text: copy[idx].text + chunk };
         return copy;
       });
@@ -326,15 +299,7 @@ export class ChatService {
       const stats = u
         ? `${u.input_tokens} in · ${u.output_tokens} out${u.output_tokens_details?.reasoning_tokens ? ` · ${u.output_tokens_details.reasoning_tokens} reasoning` : ''}`
         : undefined;
-      this.chatMessages.update((msgs) =>
-        msgs.map((m) => {
-          if (m.role === 'ai' && m.streaming) return { ...m, streaming: false, stats };
-          if ((m.role === 'tool_call' || m.role === 'reasoning') && m.streaming) {
-            return { ...m, streaming: false, collapsed: true };
-          }
-          return m;
-        }),
-      );
+      this.chatMessages.update((msgs) => finalizeStreamingMessages(msgs, stats));
       onChatListRefresh();
     });
 
@@ -353,12 +318,6 @@ export class ChatService {
             role: 'user',
             content: [
               ...(appendedFiles ?? []),
-              /*{
-                type: 'input_file',
-                filename: 'base64emoji.png',
-                file_data:
-                  'data:image/png;base64,iVBORw0KGgoAAA',
-              },*/
               {
                 type: 'input_text',
                 text: input,
@@ -402,15 +361,5 @@ export class ChatService {
 
   destroy(): void {
     this.sub?.unsubscribe();
-  }
-
-  private safeParseJson(value: unknown): object | undefined {
-    if (typeof value === 'object' && value !== null) return value as object;
-    if (typeof value !== 'string') return undefined;
-    try {
-      return JSON.parse(value);
-    } catch {
-      return undefined;
-    }
   }
 }

@@ -1,17 +1,15 @@
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Component, computed, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ModelDto } from '../../client';
+import { SpinnerComponent } from '../../shared/components/spinner.component';
 
-// The generated ModelCapabilitiesDto doesn't yet include the reasoning field —
-// extend it locally until the OpenAPI client is regenerated.
-export interface ModelReasoningCapability {
-  allowed_options: Array<string>;
-  default: string;
-}
+// Re-export so existing consumers importing ModelReasoningCapability from this
+// file continue to work without changes.
+export type { ModelReasoningCapability } from '../../shared/components/reasoning-dropdown.component';
 
 @Component({
   selector: 'app-model-selector',
-  imports: [CommonModule],
+  imports: [CommonModule, SpinnerComponent],
   template: `
     <div class="group/model-btn relative">
       <button
@@ -27,7 +25,7 @@ export interface ModelReasoningCapability {
         "
       >
         @if (modelsLoading()) {
-          <span class="w-3 h-3 rounded-full border-2 border-border-default border-t-text-secondary animate-spin shrink-0"></span>
+          <app-spinner />
         } @else {
           <svg class="w-3 h-3 shrink-0 opacity-50" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1 1 .03 2.798-1.414 2.798H4.213c-1.444 0-2.414-1.798-1.414-2.798L4.6 15.3" />
@@ -96,10 +94,10 @@ export interface ModelReasoningCapability {
   `,
 })
 export class ModelSelectorComponent {
-  readonly models = input.required<ModelDto[]>();
+  readonly models        = input.required<ModelDto[]>();
   readonly modelsLoading = input.required<boolean>();
   readonly selectedModel = input.required<ModelDto | null>();
-  readonly hasChatOpen = input.required<boolean>();
+  readonly hasChatOpen   = input.required<boolean>();
 
   readonly modelSelected = output<ModelDto>();
 

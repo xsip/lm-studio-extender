@@ -1,10 +1,11 @@
 import { Component, computed, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ModelOpenAiDto } from '../../client';
+import { SpinnerComponent } from '../../shared/components/spinner.component';
 
 @Component({
   selector: 'app-openai-model-selector',
-  imports: [CommonModule],
+  imports: [CommonModule, SpinnerComponent],
   template: `
     <div class="group/model-btn relative">
       <button
@@ -20,9 +21,7 @@ import { ModelOpenAiDto } from '../../client';
         "
       >
         @if (modelsLoading()) {
-          <span
-            class="w-3 h-3 rounded-full border-2 border-border-default border-t-text-secondary animate-spin shrink-0"
-          ></span>
+          <app-spinner />
         } @else {
           <svg
             class="w-3 h-3 shrink-0 opacity-50"
@@ -103,13 +102,13 @@ import { ModelOpenAiDto } from '../../client';
   `,
 })
 export class OpenAiModelSelectorComponent {
-  readonly models = input.required<ModelOpenAiDto[]>();
+  readonly models        = input.required<ModelOpenAiDto[]>();
   readonly modelsLoading = input.required<boolean>();
   readonly selectedModel = input.required<ModelOpenAiDto | null>();
-  readonly hasChatOpen = input.required<boolean>();
+  readonly hasChatOpen   = input.required<boolean>();
 
   readonly modelSelected = output<ModelOpenAiDto>();
-  readonly dropdownOpen = signal(false);
+  readonly dropdownOpen  = signal(false);
 
   readonly modelLabel = computed(() => this.selectedModel()?.id ?? 'Select model…');
 

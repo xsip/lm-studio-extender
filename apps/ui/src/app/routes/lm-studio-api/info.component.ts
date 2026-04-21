@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService, MeDto, ModelDto, OpenAIService } from '../../client';
 import { LMStudioService } from '../../client';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { readStoredTheme, applyTheme } from '../../shared/utils/theme.utils';
 
 @Component({
   selector: 'app-info',
@@ -354,25 +355,16 @@ export class InfoComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly lmStudioService = inject(LMStudioService);
   private readonly openaiService = inject(OpenAIService);
-  readonly isDark = signal(this.readStoredTheme());
+  readonly isDark = signal(readStoredTheme());
   readonly user = signal<MeDto | null>(null);
   readonly userLoading = signal(false);
   readonly userError = signal(false);
-  private static readonly THEME_STORAGE_KEY = 'theme';
+
   readonly models = signal<ModelDto[]>([]);
   readonly modelsLoading = signal(false);
   readonly modelsError = signal(false);
 
   readonly loading = () => this.userLoading() || this.modelsLoading();
-
-  private readStoredTheme(): boolean {
-    try {
-      const stored = localStorage.getItem(InfoComponent.THEME_STORAGE_KEY);
-      return stored ? stored === 'dark' : true; // default dark
-    } catch {
-      return true;
-    }
-  }
 
   tokenPercent(): number {
     const u = this.user();
@@ -444,11 +436,6 @@ export class InfoComponent implements OnInit {
   toggleDarkMode(): void {
     const next = !this.isDark();
     this.isDark.set(next);
-    document.documentElement.classList.toggle('dark', next);
-    try {
-      localStorage.setItem(InfoComponent.THEME_STORAGE_KEY, next ? 'dark' : 'light');
-    } catch {
-      /* ignore */
-    }
+    applyTheme(next);
   }
 }

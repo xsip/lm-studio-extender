@@ -1,19 +1,19 @@
-import { Component, computed, ElementRef, input, output, signal, ViewChild } from '@angular/core';
+import { Component, ElementRef, input, output, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ChatRequestDto, ReasoningDto } from '../../client';
-import { ModelReasoningCapability } from '../lm-studio-api/model-selector.component';
-import { ALL_REASONING_OPTIONS, ReasoningOption } from '../lm-studio-api/chat-input.component';
+import { ModelReasoningCapability } from '../../shared/components/reasoning-dropdown.component';
+import { SendButtonComponent } from '../../shared/components/send-button.component';
+import { ResetButtonComponent } from '../../shared/components/reset-button.component';
+import { ReasoningDropdownComponent } from '../../shared/components/reasoning-dropdown.component';
+import { AppendedFile, fileSizeLabel, mergeFiles, readFilesAsDataUrls } from '../../shared/utils/file.utils';
 
-export interface AppendedFile {
-  type: 'input_file';
-  filename: string;
-  file_data: string; // data:<mime>;base64,<data>
-}
+// Re-export AppendedFile so existing consumers importing from this file keep working.
+export type { AppendedFile };
 
 @Component({
   selector: 'app-openai-chat-input',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, SendButtonComponent, ResetButtonComponent, ReasoningDropdownComponent],
   template: `
     <div class="shrink-0 border-t border-border-default px-4 py-3 bg-surface-raised">
       <form [formGroup]="form()" (ngSubmit)="submitted.emit()" class="flex flex-col gap-2">
@@ -28,81 +28,14 @@ export interface AppendedFile {
         <!-- ── Action row ── -->
         <div class="flex items-center gap-2 flex-wrap">
           <!-- Send -->
-          <button
-            type="submit"
-            [disabled]="form().invalid || streaming()"
-            class="px-5 py-1.5 text-xs font-semibold bg-accent hover:bg-accent-hover disabled:bg-surface-sunken disabled:text-text-muted disabled:cursor-not-allowed text-white rounded-lg transition-colors"
-          >
-            {{ streaming() ? 'Streaming...' : 'Send' }}
-          </button>
+          <app-send-button [disabled]="form().invalid || streaming()" [streaming]="streaming()" />
 
           <!-- Reasoning dropdown -->
-          @if (reasoningOptions().length > 0) {
-            <div class="relative">
-              <button
-                type="button"
-                (click)="reasoningDropdownOpen.set(!reasoningDropdownOpen())"
-                class="flex items-center gap-1.5 px-3 py-1.5 text-xs border rounded-lg transition-colors select-none"
-                [class]="
-                  reasoning()
-                    ? 'border-reasoning-border text-reasoning-text bg-reasoning-bg hover:border-reasoning-muted'
-                    : 'border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary'
-                "
-                title="Reasoning effort"
-              >
-                <span class="font-mono text-[11px] shrink-0">{{
-                  currentReasoningOption()?.icon ?? '◈'
-                }}</span>
-                <span class="tracking-widest uppercase">{{ reasoningLabel() }}</span>
-                <svg
-                  class="w-3 h-3 opacity-50 transition-transform"
-                  [class.rotate-180]="reasoningDropdownOpen()"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                  viewBox="0 0 24 24"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-
-              @if (reasoningDropdownOpen()) {
-                <div class="fixed inset-0 z-10" (click)="reasoningDropdownOpen.set(false)"></div>
-                <div
-                  class="absolute bottom-full mb-1.5 left-0 z-20 min-w-[150px] bg-surface-raised border border-border-default rounded-lg shadow-2xl shadow-black/60 overflow-hidden py-1"
-                >
-                  <div
-                    class="px-3 py-1.5 text-[10px] text-text-muted uppercase tracking-widest border-b border-border-default"
-                  >
-                    Reasoning
-                  </div>
-                  @for (opt of reasoningOptions(); track opt.value) {
-                    <button
-                      type="button"
-                      (click)="selectReasoning(opt.value)"
-                      class="w-full flex items-center gap-2.5 px-3 py-2 text-xs transition-colors"
-                      [class]="
-                        reasoning() === opt.value
-                          ? 'bg-reasoning-bg text-reasoning-text font-medium'
-                          : 'text-text-secondary hover:bg-surface-overlay hover:text-text-primary'
-                      "
-                    >
-                      <span class="font-mono text-[11px] w-3 text-center shrink-0">{{
-                        opt.icon
-                      }}</span>
-                      <span class="tracking-wide">{{ opt.label }}</span>
-                      @if (modelReasoningCap()?.default === opt.value) {
-                        <span class="ml-1 text-[10px] text-text-muted italic">default</span>
-                      }
-                      @if (reasoning() === opt.value) {
-                        <span class="ml-auto text-reasoning-text">✓</span>
-                      }
-                    </button>
-                  }
-                </div>
-              }
-            </div>
-          }
+          <app-reasoning-dropdown
+            [reasoning]="reasoning()"
+            [modelReasoningCap]="modelReasoningCap()"
+            (reasoningChanged)="reasoningChanged.emit($event)"
+          />
 
           <!-- Upload file button -->
           <button
@@ -150,13 +83,7 @@ export interface AppendedFile {
 
           <!-- Reset stream -->
           @if (streaming()) {
-            <button
-              type="button"
-              (click)="reset.emit()"
-              class="px-4 py-1.5 text-xs tracking-widest uppercase border border-border-default hover:border-red-500 hover:text-red-400 text-text-muted rounded-lg transition-colors"
-            >
-              Reset
-            </button>
+            <app-reset-button (clicked)="reset.emit()" />
           }
 
           @if (form().get('input')?.invalid && form().get('input')?.touched) {
@@ -193,9 +120,7 @@ export interface AppendedFile {
                   />
                 </svg>
                 <span class="truncate text-text-primary flex-1 max-w-xs">{{ file.filename }}</span>
-                <span class="text-text-muted shrink-0 text-[10px]">{{
-                  fileSizeLabel(file.file_data)
-                }}</span>
+                <span class="text-text-muted shrink-0 text-[10px]">{{ fileSizeLabel(file.file_data) }}</span>
                 <button
                   type="button"
                   (click)="removeFile(i)"
@@ -223,38 +148,18 @@ export interface AppendedFile {
 export class OpenAiChatInputComponent {
   @ViewChild('fileInput') private fileInputRef!: ElementRef<HTMLInputElement>;
 
-  readonly form = input.required<FormGroup>();
-  readonly streaming = input.required<boolean>();
-  readonly reasoning = input.required<
-    ChatRequestDto.ReasoningEnum | ReasoningDto.EffortEnum | undefined
-  >();
+  readonly form             = input.required<FormGroup>();
+  readonly streaming        = input.required<boolean>();
+  readonly reasoning        = input.required<ChatRequestDto.ReasoningEnum | ReasoningDto.EffortEnum | undefined>();
   readonly modelReasoningCap = input.required<ModelReasoningCapability | null>();
 
-  readonly submitted = output<void>();
-  readonly reset = output<void>();
-  readonly reasoningChanged = output<ChatRequestDto.ReasoningEnum>();
+  readonly submitted           = output<void>();
+  readonly reset               = output<void>();
+  readonly reasoningChanged     = output<ChatRequestDto.ReasoningEnum>();
   /** Emits the current file list every time it changes (add / remove / clear). */
   readonly appendedFilesChanged = output<AppendedFile[]>();
 
-  readonly reasoningDropdownOpen = signal(false);
   readonly appendedFiles = signal<AppendedFile[]>([]);
-
-  readonly reasoningOptions = computed<ReasoningOption[]>(() => {
-    const allowed = this.modelReasoningCap()?.allowed_options;
-    if (!allowed?.length) return [];
-    return ALL_REASONING_OPTIONS.filter((o) => allowed.includes(o.value));
-  });
-
-  readonly currentReasoningOption = computed(() => {
-    const current = this.reasoning();
-    return this.reasoningOptions().find((o) => o.value === current) ?? null;
-  });
-
-  readonly reasoningLabel = computed(() => {
-    const opt = this.currentReasoningOption();
-    if (!opt) return null;
-    return `Reasoning: ${opt.label.toUpperCase()}`;
-  });
 
   onKeydown(event: KeyboardEvent): void {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -263,37 +168,14 @@ export class OpenAiChatInputComponent {
     }
   }
 
-  selectReasoning(value: ChatRequestDto.ReasoningEnum): void {
-    this.reasoningChanged.emit(value);
-    this.reasoningDropdownOpen.set(false);
-  }
-
   onFilesSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const files = input.files;
     if (!files?.length) return;
 
-    const readers: Promise<AppendedFile>[] = Array.from(files).map(
-      (file) =>
-        new Promise<AppendedFile>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () =>
-            resolve({
-              type: 'input_file',
-              filename: file.name,
-              file_data: reader.result as string,
-            });
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        }),
-    );
-
-    Promise.all(readers).then((newFiles) => {
+    readFilesAsDataUrls(files).then((newFiles) => {
       this.appendedFiles.update((existing) => {
-        // Deduplicate by filename — last write wins
-        const map = new Map(existing.map((f) => [f.filename, f]));
-        newFiles.forEach((f) => map.set(f.filename, f));
-        const merged = Array.from(map.values());
+        const merged = mergeFiles(existing, newFiles);
         this.appendedFilesChanged.emit(merged);
         return merged;
       });
@@ -316,12 +198,8 @@ export class OpenAiChatInputComponent {
     this.appendedFilesChanged.emit([]);
   }
 
+  /** Delegates to shared utility — kept as method so templates can call it. */
   fileSizeLabel(dataUrl: string): string {
-    // base64 payload starts after the comma
-    const base64 = dataUrl.split(',')[1] ?? '';
-    const bytes = Math.round((base64.length * 3) / 4);
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    return fileSizeLabel(dataUrl);
   }
 }

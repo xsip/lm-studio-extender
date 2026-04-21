@@ -10,27 +10,21 @@ import {
   PromptProcessingProgressEvent,
 } from '../../lmstudio-stream.service';
 import { ChatRequestDto, ChatMetadataService } from '../../client';
+import {
+  ChatMessage,
+  lastIndexWhere,
+  patchLast,
+  finalizeStreamingMessages,
+} from '../../shared/utils/chat-message.utils';
 
-export interface ChatMessage {
-  role: 'user' | 'ai' | 'error' | 'info' | 'tool_call' | 'reasoning' | 'prompt_processing';
-  text: string;
-  date?: Date;
-  stats?: string;
-  streaming?: boolean;
-  toolName?: string;
-  toolArguments?: object;
-  toolOutput?: string;
-  toolFailed?: boolean;
-  providerLabel?: string;
-  collapsed?: boolean;
-  progress?: number; // 0–1, used by prompt_processing
-}
+// Re-export ChatMessage so existing consumers importing from this file keep working.
+export type { ChatMessage };
 
 @Injectable()
 export class ChatService {
-  private readonly streamService = inject(LmStudioStreamService);
-  private readonly location = inject(Location);
-  private readonly router = inject(Router);
+  private readonly streamService  = inject(LmStudioStreamService);
+  private readonly location       = inject(Location);
+  private readonly router         = inject(Router);
   private readonly chatMetaService = inject(ChatMetadataService);
 
   readonly fb = inject(FormBuilder);
@@ -39,9 +33,9 @@ export class ChatService {
     input: ['', [Validators.required, Validators.minLength(1)]],
   });
 
-  readonly streaming = signal(false);
-  readonly chatMessages = signal<ChatMessage[]>([]);
-  readonly currentChatId = signal<string | null>(null);
+  readonly streaming      = signal(false);
+  readonly chatMessages   = signal<ChatMessage[]>([]);
+  readonly currentChatId  = signal<string | null>(null);
 
   private readonly lastUserInput = signal<string>('');
   private sub?: Subscription;
@@ -50,7 +44,6 @@ export class ChatService {
     const msgs = this.chatMessages();
     const last = msgs[msgs.length - 1];
     if (!last || last.role !== 'info') return false;
-    const hasChatEnd = this.streamService.events$.pipe !== undefined;
     return !!this.lastUserInput();
   });
 
@@ -64,21 +57,13 @@ export class ChatService {
     });
   }
 
+  /** @deprecated Use shared lastIndexWhere util directly. Kept for backwards compatibility. */
   lastIndexWhere(msgs: ChatMessage[], pred: (m: ChatMessage) => boolean): number {
-    for (let i = msgs.length - 1; i >= 0; i--) {
-      if (pred(msgs[i])) return i;
-    }
-    return -1;
+    return lastIndexWhere(msgs, pred);
   }
 
   patchLast(pred: (m: ChatMessage) => boolean, patch: Partial<ChatMessage>): void {
-    this.chatMessages.update((msgs) => {
-      const idx = this.lastIndexWhere(msgs, pred);
-      if (idx === -1) return msgs;
-      const copy = [...msgs];
-      copy[idx] = { ...copy[idx], ...patch };
-      return copy;
-    });
+    this.chatMessages.update((msgs) => patchLast(msgs, pred, patch));
   }
 
   submit(
@@ -131,7 +116,7 @@ export class ChatService {
 
           case 'reasoning.delta':
             this.chatMessages.update((msgs) => {
-              const idx = this.lastIndexWhere(msgs, (m) => m.role === 'reasoning' && !!m.streaming);
+              const idx = lastIndexWhere(msgs, (m) => m.role === 'reasoning' && !!m.streaming);
               if (idx === -1) return msgs;
               const copy = [...msgs];
               copy[idx] = { ...copy[idx], text: copy[idx].text + event.content };
@@ -222,13 +207,13 @@ export class ChatService {
         }
       },
       complete: () => this.streaming.set(false),
-      error: () => this.streaming.set(false),
+      error:    () => this.streaming.set(false),
     });
 
     this.streamService.messageDelta$.subscribe((chunk) => {
       this.chatMessages.update((msgs) => {
         const copy = [...msgs];
-        const idx = this.lastIndexWhere(copy, (m) => m.role === 'ai' && !!m.streaming);
+        const idx = lastIndexWhere(copy, (m) => m.role === 'ai' && !!m.streaming);
         if (idx !== -1) copy[idx] = { ...copy[idx], text: copy[idx].text + chunk };
         return copy;
       });
@@ -236,15 +221,7 @@ export class ChatService {
 
     this.streamService.chatEnd$.subscribe((result) => {
       const stats = `${result.stats.input_tokens} in · ${result.stats.total_output_tokens} out · ${result.stats.tokens_per_second.toFixed(1)} tok/s`;
-      this.chatMessages.update((msgs) =>
-        msgs.map((m) => {
-          if (m.role === 'ai' && m.streaming) return { ...m, streaming: false, stats };
-          if ((m.role === 'tool_call' || m.role === 'reasoning') && m.streaming) {
-            return { ...m, streaming: false, collapsed: true };
-          }
-          return m;
-        }),
-      );
+      this.chatMessages.update((msgs) => finalizeStreamingMessages(msgs, stats));
       onChatListRefresh();
     });
 
