@@ -7,20 +7,21 @@ import { SendButtonComponent } from '../../shared/components/send-button.compone
 import { ResetButtonComponent } from '../../shared/components/reset-button.component';
 import { ReasoningDropdownComponent } from '../../shared/components/reasoning-dropdown.component';
 import { AppendedFile, fileSizeLabel, mergeFiles, readFilesAsDataUrls } from '../../shared/utils/file.utils';
+import { TranslateModule } from '@ngx-translate/core';
 
 // Re-export AppendedFile so existing consumers importing from this file keep working.
 export type { AppendedFile };
 
 @Component({
   selector: 'app-openai-chat-input',
-  imports: [CommonModule, ReactiveFormsModule, SendButtonComponent, ResetButtonComponent, ReasoningDropdownComponent],
+  imports: [CommonModule, ReactiveFormsModule, TranslateModule, SendButtonComponent, ResetButtonComponent, ReasoningDropdownComponent],
   template: `
     <div class="shrink-0 border-t border-border-default px-4 py-3 bg-surface-raised">
       <form [formGroup]="form()" (ngSubmit)="submitted.emit()" class="flex flex-col gap-2">
         <textarea
           formControlName="input"
           rows="3"
-          placeholder="Enter your prompt..."
+          [placeholder]="'chatInput.placeholder' | translate"
           class="w-full bg-surface-base border border-border-default rounded-lg px-4 py-3 text-sm text-text-primary placeholder-text-muted resize-none focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
           (keydown)="onKeydown($event)"
         ></textarea>
@@ -48,7 +49,7 @@ export type { AppendedFile };
                 ? 'border-accent text-accent bg-accent/10 hover:bg-accent/20'
                 : 'border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary'
             "
-            title="Attach files"
+            [title]="'chatInput.attach' | translate"
           >
             <svg
               class="w-3.5 h-3.5 shrink-0"
@@ -67,7 +68,7 @@ export type { AppendedFile };
               @if (appendedFiles().length > 0) {
                 {{ appendedFiles().length }} file{{ appendedFiles().length === 1 ? '' : 's' }}
               } @else {
-                Attach
+                {{ 'chatInput.attach' | translate }}
               }
             </span>
           </button>
@@ -87,19 +88,19 @@ export type { AppendedFile };
           }
 
           @if (form().get('input')?.invalid && form().get('input')?.touched) {
-            <p class="text-xs text-red-400">Prompt is required.</p>
+<p class="text-xs text-red-400">{{ 'chatInput.promptRequired' | translate }}</p>
           }
 
           <span class="ml-auto text-[10px] text-text-muted hidden sm:block"
-            >Enter to send · Shift+Enter for newline</span
+>{{ 'chatInput.hint' | translate }}</span
           >
         </div>
 
         <!-- ── Attached files list ── -->
         @if (appendedFiles().length > 0) {
           <div class="flex flex-col gap-1 pt-1">
-            <div class="text-[10px] text-text-muted uppercase tracking-widest mb-0.5">
-              Attached files
+<div class="text-[10px] text-text-muted uppercase tracking-widest mb-0.5">
+              {{ 'chatInput.attachedFiles' | translate }}
             </div>
             @for (file of appendedFiles(); track file.filename; let i = $index) {
               <div
@@ -125,7 +126,7 @@ export type { AppendedFile };
                   type="button"
                   (click)="removeFile(i)"
                   class="ml-1 shrink-0 flex items-center justify-center w-4 h-4 rounded text-text-muted hover:text-red-400 hover:bg-red-400/10 transition-colors opacity-0 group-hover:opacity-100"
-                  title="Remove"
+                  [title]="'common.remove' | translate"
                 >
                   <svg
                     class="w-3 h-3"

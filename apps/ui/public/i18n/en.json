@@ -1,0 +1,132 @@
+{
+  "login": {
+    "appName": "LM Studio Extender",
+    "title": "Sign in",
+    "subtitle": "Enter your credentials to continue.",
+    "username": "Username",
+    "usernamePlaceholder": "username",
+    "usernameRequired": "Username is required.",
+    "password": "Password",
+    "passwordRequired": "Password is required.",
+    "show": "show",
+    "hide": "hide",
+    "submit": "Sign in",
+    "signingIn": "Signing in...",
+    "unexpectedResponse": "Unexpected response from server.",
+    "loginFailed": "Login failed. Check your credentials."
+  },
+  "sidebar": {
+    "history": "History",
+    "newChat": "New Chat",
+    "newChatSubtitle": "Setup new Chat",
+    "noChats": "No chats yet",
+    "chatNamePlaceholder": "Chat name…",
+    "rename": "Rename",
+    "settings": "Settings",
+    "deleteChat": "Delete chat",
+    "deleteConfirm": "Delete this chat?",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "encrypted": "Encrypted"
+  },
+  "chatSettings": {
+    "title": "Chat Settings",
+    "chatNameLabel": "Chat Name",
+    "chatNamePlaceholder": "Chat name…",
+    "encryption": "Encryption",
+    "encryptionHint": "Encrypt messages with a key",
+    "encryptionKey": "Encryption Key",
+    "encryptionKeyPlaceholder": "Enter encryption key…",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "chatInput": {
+    "placeholder": "Enter your prompt...",
+    "promptRequired": "Prompt is required.",
+    "hint": "Enter to send · Shift+Enter for newline",
+    "attach": "Attach",
+    "attachedFiles": "Attached files"
+  },
+  "sendButton": {
+    "send": "Send",
+    "streaming": "Streaming..."
+  },
+  "resetButton": {
+    "reset": "Reset"
+  },
+  "reasoning": {
+    "label": "Reasoning",
+    "effort": "Reasoning: {{level}}",
+    "default": "default"
+  },
+  "modelSelector": {
+    "label": "Model",
+    "selectModel": "Select model…",
+    "noModels": "No models available",
+    "cannotSwitch": "Cannot switch model mid-chat",
+    "toolUse": "Tool use capable"
+  },
+  "messages": {
+    "noMessages": "No messages yet",
+    "resend": "↺ Resend",
+    "toolArguments": "Arguments",
+    "toolOutput": "Output",
+    "toolError": "Error",
+    "toolWaiting": "Waiting for result…",
+    "processingPrompt": "Processing prompt",
+    "promptProcessed": "Prompt processed",
+    "reasoning": "Reasoning",
+    "via": "via"
+  },
+  "eventLog": {
+    "title": "Event Log",
+    "events": "{{count}} events",
+    "noEvents": "No events"
+  },
+  "info": {
+    "theme": "Theme",
+    "documentation": "Documentation",
+    "viewReadme": "View Readme",
+    "client": "Client",
+    "lmStudio": "LM Studio",
+    "openAI": "OpenAI",
+    "info": "Info",
+    "refresh": "Refresh",
+    "user": "User",
+    "username": "Username",
+    "role": "Role",
+    "subscription": "Subscription",
+    "status": "Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "tokenUsage": "Token Usage",
+    "used": "Used",
+    "percentUsed": "{{percent}}% used",
+    "resets": "Resets",
+    "availableModels": "Available Models",
+    "failedLoadUser": "Failed to load user data.",
+    "failedLoadModels": "Failed to load models.",
+    "noModelsLoaded": "No models loaded in LM Studio."
+  },
+  "common": {
+    "close": "Close",
+    "remove": "Remove"
+  },
+  "darkMode": {
+    "switchToLight": "Switch to light mode",
+    "switchToDark": "Switch to dark mode",
+    "toggle": "Toggle theme"
+  },
+  "toolbar": {
+    "toggleChats": "Toggle chat history",
+    "chats": "Chats",
+    "userInfo": "User info",
+    "newChatOptions": "New Chat Options",
+    "optionalName": "Optional name…",
+    "endpoint": "Endpoint",
+    "responsesApi": "Responses API",
+    "chatCompletions": "Chat Completions",
+    "endpointResponsesDesc": "/responses endpoint — supports reasoning & file inputs.",
+    "endpointCompletionsDesc": "/chat/completions endpoint — standard chat interface."
+  }
+}

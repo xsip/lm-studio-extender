@@ -1,12 +1,13 @@
 import { Component, input, OnInit, output } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 import { ChatMessage } from './chat.service';
 import { MarkdownPipe, StripMarkdownPipe } from './markdown.pipe';
 import ClientEnum = CreateChatMetadataDto.ClientEnum;
 import { CreateChatMetadataDto } from '../../client';
 @Component({
   selector: 'app-chat-messages',
-  imports: [CommonModule, DatePipe, MarkdownPipe, StripMarkdownPipe],
+  imports: [CommonModule, DatePipe, TranslateModule, MarkdownPipe, StripMarkdownPipe],
   template: `
     @if (messages().length === 0 && !streaming()) {
       @if (client() === 'OPENAI') {
@@ -15,7 +16,7 @@ import { CreateChatMetadataDto } from '../../client';
         </div>
       } @else {
         <div class="flex-1 flex items-center justify-center text-xs text-text-muted tracking-wide">
-          No messages yet
+          {{ 'messages.noMessages' | translate }}
         </div>
       }
     }
@@ -62,7 +63,7 @@ import { CreateChatMetadataDto } from '../../client';
                 (click)="resend.emit()"
                 class="px-3 py-1 text-xs font-medium border border-accent/40 hover:border-accent hover:text-accent text-accent/70 rounded-lg transition-colors"
               >
-                ↺ Resend
+                {{ 'messages.resend' | translate }}
               </button>
             }
           </div>
@@ -92,7 +93,7 @@ import { CreateChatMetadataDto } from '../../client';
             }
             <span class="font-semibold truncate">{{ msg.toolName ?? '…' }}</span>
             @if (msg.providerLabel) {
-              <span class="text-text-muted shrink-0 text-[10px]">via {{ msg.providerLabel }}</span>
+<span class="text-text-muted shrink-0 text-[10px]">{{ 'messages.via' | translate }} {{ msg.providerLabel }}</span>
             }
             <span class="ml-auto opacity-50 group-hover:opacity-80 transition-opacity shrink-0">
               {{ msg.collapsed ? '▶' : '▼' }}
@@ -105,7 +106,7 @@ import { CreateChatMetadataDto } from '../../client';
               @if (msg.toolArguments) {
                 <div class="px-3 py-2 border-b border-tool-border/30">
                   <span class="text-tool-muted uppercase tracking-widest text-[10px] font-semibold"
-                    >Arguments</span
+  >{{ 'messages.toolArguments' | translate }}</span
                   >
                   <pre
                     class="mt-1 text-tool-text whitespace-pre-wrap break-all leading-relaxed font-mono"
@@ -119,7 +120,7 @@ import { CreateChatMetadataDto } from '../../client';
                     class="uppercase tracking-widest text-[10px]"
                     [class]="msg.toolFailed ? 'text-red-700' : 'text-emerald-700'"
                   >
-                    {{ msg.toolFailed ? 'Error' : 'Output' }}
+                    {{ (msg.toolFailed ? 'messages.toolError' : 'messages.toolOutput') | translate }}
                   </span>
                   <pre
                     class="mt-1 whitespace-pre-wrap break-all leading-relaxed"
@@ -128,7 +129,7 @@ import { CreateChatMetadataDto } from '../../client';
                   >
                 </div>
               } @else if (msg.streaming) {
-                <div class="px-3 py-2 text-tool-muted italic">Waiting for result…</div>
+<div class="px-3 py-2 text-tool-muted italic">{{ 'messages.toolWaiting' | translate }}</div>
               }
             </div>
           }
@@ -193,7 +194,7 @@ import { CreateChatMetadataDto } from '../../client';
               </svg>
             }
             <span class="font-semibold">
-              {{ msg.streaming ? 'Processing prompt' : 'Prompt processed' }}
+              {{ (msg.streaming ? 'messages.processingPrompt' : 'messages.promptProcessed') | translate }}
             </span>
             @if (msg.streaming && (msg.progress ?? 0) > 0) {
               <span class="text-amber-500/80 tabular-nums"
@@ -226,7 +227,7 @@ import { CreateChatMetadataDto } from '../../client';
             } @else {
               <span class="text-reasoning-muted shrink-0">◈</span>
             }
-            <span class="font-semibold">Reasoning</span>
+<span class="font-semibold">{{ 'messages.reasoning' | translate }}</span>
             @if (msg.collapsed) {
               <span class="text-reasoning-muted/60 truncate flex-1 text-left"
                 >{{ msg.text | stripMarkdown | slice: 0 : 60 }}…</span

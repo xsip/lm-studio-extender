@@ -1,6 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { TranslateModule } from '@ngx-translate/core';
 import { ChatRequestDto, ReasoningDto } from '../../client';
 import { SendButtonComponent } from '../../shared/components/send-button.component';
 import { ResetButtonComponent } from '../../shared/components/reset-button.component';
@@ -11,20 +12,19 @@ import {
   ReasoningOption,
 } from '../../shared/components/reasoning-dropdown.component';
 
-// Re-export so existing consumers that import from this file continue to work.
 export { ALL_REASONING_OPTIONS } from '../../shared/components/reasoning-dropdown.component';
 export type { ReasoningOption, ModelReasoningCapability } from '../../shared/components/reasoning-dropdown.component';
 
 @Component({
   selector: 'app-chat-input',
-  imports: [CommonModule, ReactiveFormsModule, SendButtonComponent, ResetButtonComponent, ReasoningDropdownComponent],
+  imports: [CommonModule, ReactiveFormsModule, TranslateModule, SendButtonComponent, ResetButtonComponent, ReasoningDropdownComponent],
   template: `
     <div class="shrink-0 border-t border-border-default px-4 py-4 bg-surface-raised" style="box-shadow: 0 -4px 16px rgba(0,0,0,0.06);">
       <form [formGroup]="form()" (ngSubmit)="submitted.emit()" class="flex flex-col gap-2">
         <textarea
           formControlName="input"
           rows="3"
-          placeholder="Enter your prompt..."
+          [placeholder]="'chatInput.placeholder' | translate"
           class="w-full bg-surface-base border border-border-default rounded-xl px-4 py-3 text-sm text-text-primary placeholder-text-muted resize-none focus:outline-none focus:border-accent transition-colors" style="box-shadow: var(--shadow-inset); min-height: 80px;"
           (keydown)="onKeydown($event)"
         ></textarea>
@@ -43,10 +43,10 @@ export type { ReasoningOption, ModelReasoningCapability } from '../../shared/com
           }
 
           @if (form().get('input')?.invalid && form().get('input')?.touched) {
-            <p class="text-xs text-red-400">Prompt is required.</p>
+            <p class="text-xs text-red-400">{{ 'chatInput.promptRequired' | translate }}</p>
           }
 
-          <span class="ml-auto text-[10px] text-text-muted hidden sm:block">Enter to send · Shift+Enter for newline</span>
+          <span class="ml-auto text-[10px] text-text-muted hidden sm:block">{{ 'chatInput.hint' | translate }}</span>
         </div>
       </form>
     </div>

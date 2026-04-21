@@ -1,16 +1,13 @@
 import { Component, output } from '@angular/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { ButtonComponent } from './ui/button.component';
 
-/**
- * Stream reset button. Thin wrapper over ButtonComponent.
- * Kept for backwards compatibility with existing imports.
- */
 @Component({
   selector: 'app-reset-button',
   standalone: true,
-  imports: [ButtonComponent],
+  imports: [ButtonComponent, TranslateModule],
   template: `
-    <ui-button variant="danger" (clicked)="clicked.emit()">Reset</ui-button>
+    <ui-button variant="danger" (clicked)="clicked.emit()">{{ 'resetButton.reset' | translate }}</ui-button>
   `,
 })
 export class ResetButtonComponent {

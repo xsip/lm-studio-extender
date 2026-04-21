@@ -1,4 +1,5 @@
 import { Component, inject, input, OnInit, signal } from '@angular/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { CommonModule } from '@angular/common';
 import { AuthService, LMStudioService, MeDto, ModelDto, OpenAIService } from '../../client';
 import { RouterLink, RouterLinkActive } from '@angular/router';
@@ -13,6 +14,7 @@ import { ButtonComponent } from '../../shared/components/ui/button.component';
     CommonModule,
     RouterLink,
     RouterLinkActive,
+    TranslateModule,
     SpinnerComponent,
     DarkModeToggleComponent,
     BadgeComponent,
@@ -22,45 +24,45 @@ import { ButtonComponent } from '../../shared/components/ui/button.component';
     <div class="flex flex-col h-full overflow-y-auto p-4 gap-4 text-xs">
       <!-- ── Theme ── -->
       <div class="flex items-center justify-between">
-        <span class="text-text-primary font-semibold text-sm">Theme</span>
+        <span class="text-text-primary font-semibold text-sm">{{ 'info.theme' | translate }}</span>
         <ui-dark-mode-toggle />
       </div>
 
       <!-- ── Navigation links ── -->
       <div class="flex items-center justify-between">
-        <span class="text-text-primary font-semibold text-sm">Documentation</span>
+        <span class="text-text-primary font-semibold text-sm">{{ 'info.documentation' | translate }}</span>
         <a
           routerLink="/"
           routerLinkActive="border-accent text-accent bg-accent/10"
           [routerLinkActiveOptions]="{ exact: true }"
           class="px-2.5 py-1 text-[11px] rounded-md font-medium border border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors"
-          >View Readme</a
+          >{{ 'info.viewReadme' | translate }}</a
         >
       </div>
 
       <div class="flex items-center justify-between">
-        <span class="text-text-primary font-semibold text-sm">Client</span>
+        <span class="text-text-primary font-semibold text-sm">{{ 'info.client' | translate }}</span>
         <div class="flex items-center gap-1 ml-1">
           <a
             routerLink="/chat-lm-studio"
             routerLinkActive="border-accent text-accent bg-accent/10"
             [routerLinkActiveOptions]="{ exact: false }"
             class="px-2.5 py-1 text-[11px] rounded-md font-medium border border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors"
-            >LM Studio</a
+            >{{ 'info.lmStudio' | translate }}</a
           >
           <a
             routerLink="/chat-openai"
             routerLinkActive="border-accent text-accent bg-accent/10"
             [routerLinkActiveOptions]="{ exact: false }"
             class="px-2.5 py-1 text-[11px] rounded-md font-medium border border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors"
-            >OpenAI</a
+            >{{ 'info.openAI' | translate }}</a
           >
         </div>
       </div>
 
       <!-- ── Refresh ── -->
       <div class="flex items-center justify-between">
-        <span class="text-text-primary font-semibold text-sm">Info</span>
+        <span class="text-text-primary font-semibold text-sm">{{ 'info.info' | translate }}</span>
         <ui-button variant="secondary" size="xs" [disabled]="loading()" (clicked)="refresh()">
           <svg
             class="w-3 h-3 transition-transform"
@@ -76,7 +78,7 @@ import { ButtonComponent } from '../../shared/components/ui/button.component';
               d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
             />
           </svg>
-          <span>Refresh</span>
+          <span>{{ 'info.refresh' | translate }}</span>
         </ui-button>
       </div>
 
@@ -101,39 +103,39 @@ import { ButtonComponent } from '../../shared/components/ui/button.component';
           <span
             class="font-medium text-text-secondary tracking-wide uppercase"
             style="font-size:10px"
-            >User</span
+            >{{ 'info.user' | translate }}</span
           >
         </div>
 
         @if (userLoading()) {
           <div class="px-3 py-4 flex justify-center"><app-spinner size="md" /></div>
         } @else if (userError()) {
-          <p class="px-3 py-3 text-red-400">Failed to load user data.</p>
+          <p class="px-3 py-3 text-red-400">{{ 'info.failedLoadUser' | translate }}</p>
         } @else if (user()) {
           <div class="divide-y divide-border-subtle">
             <div class="flex justify-between items-center px-3 py-2">
-              <span class="text-text-muted">Username</span>
+              <span class="text-text-muted">{{ 'info.username' | translate }}</span>
               <span class="font-medium text-text-primary font-mono">{{ user()!.username }}</span>
             </div>
             <div class="flex justify-between items-center px-3 py-2">
-              <span class="text-text-muted">Role</span>
+              <span class="text-text-muted">{{ 'info.role' | translate }}</span>
               <ui-badge [variant]="user()!.role === 'admin' ? 'warn' : 'default'">{{
                 user()!.role
               }}</ui-badge>
             </div>
             <div class="flex justify-between items-center px-3 py-2">
-              <span class="text-text-muted">Subscription</span>
+              <span class="text-text-muted">{{ 'info.subscription' | translate }}</span>
               <ui-badge variant="accent">{{ user()!.subscription }}</ui-badge>
             </div>
             <div class="flex justify-between items-center px-3 py-2">
-              <span class="text-text-muted">Status</span>
+              <span class="text-text-muted">{{ 'info.status' | translate }}</span>
               <span class="flex items-center gap-1.5">
                 <span
                   class="w-1.5 h-1.5 rounded-full"
                   [class]="user()!.isActivated ? 'bg-success-muted' : 'bg-red-400'"
                 ></span>
                 <span [class]="user()!.isActivated ? 'text-success-muted' : 'text-red-400'">
-                  {{ user()!.isActivated ? 'Active' : 'Inactive' }}
+                  {{ (user()!.isActivated ? 'info.active' : 'info.inactive') | translate }}
                 </span>
               </span>
             </div>
@@ -162,7 +164,7 @@ import { ButtonComponent } from '../../shared/components/ui/button.component';
           <span
             class="font-medium text-text-secondary tracking-wide uppercase"
             style="font-size:10px"
-            >Token Usage</span
+            >{{ 'info.tokenUsage' | translate }}</span
           >
         </div>
 
@@ -171,7 +173,7 @@ import { ButtonComponent } from '../../shared/components/ui/button.component';
         } @else if (user()) {
           <div class="px-3 pt-3 pb-2 flex flex-col gap-2">
             <div class="flex justify-between text-[10px] mb-0.5">
-              <span class="text-text-muted">Used</span>
+              <span class="text-text-muted">{{ 'info.used' | translate }}</span>
               <span class="font-mono text-text-secondary"
                 >{{ user()!.usedTokens | number }} / {{ user()!.tokenLimit | number }}</span
               >
@@ -190,9 +192,9 @@ import { ButtonComponent } from '../../shared/components/ui/button.component';
               ></div>
             </div>
             <div class="flex justify-between text-[10px] text-text-muted mt-0.5">
-              <span>{{ tokenPercent() | number: '1.0-1' }}% used</span>
+              <span>{{ 'info.percentUsed' | translate: { percent: (tokenPercent() | number: '1.0-1') } }}</span>
               @if (user()!.tokenCountResetDate) {
-                <span>Resets {{ user()!.tokenCountResetDate | date: 'short' }}</span>
+                <span>{{ 'info.resets' | translate }} {{ user()!.tokenCountResetDate | date: 'short' }}</span>
               }
             </div>
           </div>
@@ -220,7 +222,7 @@ import { ButtonComponent } from '../../shared/components/ui/button.component';
           <span
             class="font-medium text-text-secondary tracking-wide uppercase"
             style="font-size:10px"
-            >Available Models</span
+            >{{ 'info.availableModels' | translate }}</span
           >
           @if (!modelsLoading() && models().length > 0) {
             <span
@@ -233,9 +235,9 @@ import { ButtonComponent } from '../../shared/components/ui/button.component';
         @if (modelsLoading()) {
           <div class="px-3 py-4 flex justify-center"><app-spinner size="md" /></div>
         } @else if (modelsError()) {
-          <p class="px-3 py-3 text-red-400">Failed to load models.</p>
+          <p class="px-3 py-3 text-red-400">{{ 'info.failedLoadModels' | translate }}</p>
         } @else if (models().length === 0) {
-          <p class="px-3 py-3 text-text-muted">No models loaded in LM Studio.</p>
+          <p class="px-3 py-3 text-text-muted">{{ 'info.noModelsLoaded' | translate }}</p>
         } @else {
           <div class="divide-y divide-border-subtle">
             @for (model of models(); track model.key) {

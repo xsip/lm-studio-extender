@@ -5,6 +5,8 @@ import { routes } from './app.routes';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { authInterceptor } from './auth.interceptor';
 import { BASE_PATH } from './client';
+import { provideTranslateService } from '@ngx-translate/core';
+import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -12,8 +14,16 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     {
       provide: BASE_PATH,
-      useValue: 'api'
+      useValue: 'api',
     },
-    provideHttpClient(withFetch(),withInterceptors([authInterceptor]))
-  ]
+    provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
+    provideTranslateService({
+      loader: provideTranslateHttpLoader({
+        prefix: '/i18n/',
+        suffix: '.json?hash=' + Date.now(),
+      }),
+      fallbackLang: 'en',
+      lang: 'en',
+    }),
+  ],
 };

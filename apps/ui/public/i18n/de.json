@@ -1,0 +1,132 @@
+{
+  "login": {
+    "appName": "LM Studio Extender",
+    "title": "Anmelden",
+    "subtitle": "Geben Sie Ihre Anmeldedaten ein, um fortzufahren.",
+    "username": "Benutzername",
+    "usernamePlaceholder": "Benutzername",
+    "usernameRequired": "Benutzername ist erforderlich.",
+    "password": "Passwort",
+    "passwordRequired": "Passwort ist erforderlich.",
+    "show": "anzeigen",
+    "hide": "verbergen",
+    "submit": "Anmelden",
+    "signingIn": "Anmelden...",
+    "unexpectedResponse": "Unerwartete Antwort vom Server.",
+    "loginFailed": "Anmeldung fehlgeschlagen. Überprüfen Sie Ihre Anmeldedaten."
+  },
+  "sidebar": {
+    "history": "Verlauf",
+    "newChat": "Neuer Chat",
+    "newChatSubtitle": "Neuen Chat einrichten",
+    "noChats": "Noch keine Chats",
+    "chatNamePlaceholder": "Chatname…",
+    "rename": "Umbenennen",
+    "settings": "Einstellungen",
+    "deleteChat": "Chat löschen",
+    "deleteConfirm": "Diesen Chat löschen?",
+    "delete": "Löschen",
+    "cancel": "Abbrechen",
+    "encrypted": "Verschlüsselt"
+  },
+  "chatSettings": {
+    "title": "Chat-Einstellungen",
+    "chatNameLabel": "Chatname",
+    "chatNamePlaceholder": "Chatname…",
+    "encryption": "Verschlüsselung",
+    "encryptionHint": "Nachrichten mit einem Schlüssel verschlüsseln",
+    "encryptionKey": "Verschlüsselungsschlüssel",
+    "encryptionKeyPlaceholder": "Verschlüsselungsschlüssel eingeben…",
+    "save": "Speichern",
+    "cancel": "Abbrechen"
+  },
+  "chatInput": {
+    "placeholder": "Prompt eingeben...",
+    "promptRequired": "Prompt ist erforderlich.",
+    "hint": "Enter zum Senden · Shift+Enter für neue Zeile",
+    "attach": "Anhängen",
+    "attachedFiles": "Angehängte Dateien"
+  },
+  "sendButton": {
+    "send": "Senden",
+    "streaming": "Streaming..."
+  },
+  "resetButton": {
+    "reset": "Zurücksetzen"
+  },
+  "reasoning": {
+    "label": "Denkmodus",
+    "effort": "Denkmodus: {{level}}",
+    "default": "Standard"
+  },
+  "modelSelector": {
+    "label": "Modell",
+    "selectModel": "Modell auswählen…",
+    "noModels": "Keine Modelle verfügbar",
+    "cannotSwitch": "Modell kann während eines Chats nicht gewechselt werden",
+    "toolUse": "Unterstützt Tool-Nutzung"
+  },
+  "messages": {
+    "noMessages": "Noch keine Nachrichten",
+    "resend": "↺ Erneut senden",
+    "toolArguments": "Argumente",
+    "toolOutput": "Ausgabe",
+    "toolError": "Fehler",
+    "toolWaiting": "Warte auf Ergebnis…",
+    "processingPrompt": "Prompt wird verarbeitet",
+    "promptProcessed": "Prompt verarbeitet",
+    "reasoning": "Denkprozess",
+    "via": "über"
+  },
+  "eventLog": {
+    "title": "Ereignisprotokoll",
+    "events": "{{count}} Ereignisse",
+    "noEvents": "Keine Ereignisse"
+  },
+  "info": {
+    "theme": "Design",
+    "documentation": "Dokumentation",
+    "viewReadme": "Readme anzeigen",
+    "client": "Client",
+    "lmStudio": "LM Studio",
+    "openAI": "OpenAI",
+    "info": "Info",
+    "refresh": "Aktualisieren",
+    "user": "Benutzer",
+    "username": "Benutzername",
+    "role": "Rolle",
+    "subscription": "Abonnement",
+    "status": "Status",
+    "active": "Aktiv",
+    "inactive": "Inaktiv",
+    "tokenUsage": "Token-Verbrauch",
+    "used": "Verwendet",
+    "percentUsed": "{{percent}}% verwendet",
+    "resets": "Zurückgesetzt",
+    "availableModels": "Verfügbare Modelle",
+    "failedLoadUser": "Benutzerdaten konnten nicht geladen werden.",
+    "failedLoadModels": "Modelle konnten nicht geladen werden.",
+    "noModelsLoaded": "Keine Modelle in LM Studio geladen."
+  },
+  "common": {
+    "close": "Schließen",
+    "remove": "Entfernen"
+  },
+  "darkMode": {
+    "switchToLight": "Zum hellen Modus wechseln",
+    "switchToDark": "Zum dunklen Modus wechseln",
+    "toggle": "Design umschalten"
+  },
+  "toolbar": {
+    "toggleChats": "Chatverlauf ein-/ausblenden",
+    "chats": "Chats",
+    "userInfo": "Benutzerinfo",
+    "newChatOptions": "Neuer-Chat-Optionen",
+    "optionalName": "Optionaler Name…",
+    "endpoint": "Endpunkt",
+    "responsesApi": "Responses-API",
+    "chatCompletions": "Chat-Completions",
+    "endpointResponsesDesc": "/responses-Endpunkt — unterstützt Reasoning & Datei-Eingaben.",
+    "endpointCompletionsDesc": "/chat/completions-Endpunkt — Standard-Chatoberfläche."
+  }
+}

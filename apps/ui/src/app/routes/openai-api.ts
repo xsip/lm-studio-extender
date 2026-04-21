@@ -35,6 +35,7 @@ import { ButtonComponent } from '../shared/components/ui/button.component';
 import { LabelComponent } from '../shared/components/ui/label.component';
 import { TextInputComponent } from '../shared/components/ui/text-input.component';
 import { ToggleComponent } from '../shared/components/ui/toggle.component';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-openai-api',
@@ -52,6 +53,7 @@ import { ToggleComponent } from '../shared/components/ui/toggle.component';
     LabelComponent,
     TextInputComponent,
     ToggleComponent,
+    TranslateModule,
   ],
   providers: [ChatService],
   template: `
@@ -67,16 +69,16 @@ import { ToggleComponent } from '../shared/components/ui/toggle.component';
           size="xs"
           [active]="showChatsSidebar()"
           (clicked)="showChatsSidebar.set(!showChatsSidebar())"
-          title="Toggle chat history"
+          [title]="'toolbar.toggleChats' | translate"
         >
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M3 12h18M3 18h18" />
           </svg>
-          <span class="hidden sm:inline">Chats</span>
+          <span class="hidden sm:inline">{{ 'toolbar.chats' | translate }}</span>
         </ui-button>
 
         <div class="w-1.5 h-1.5 rounded-full bg-success-muted animate-pulse ml-1"></div>
-        <span class="text-xs text-text-muted tracking-wide font-medium hidden md:block">OpenAI Extender</span>
+        <span class="text-xs text-text-muted tracking-wide font-medium hidden md:block">{{ 'login.appName' | translate }} Open AI</span>
 
         <!-- Provider tabs -->
 
@@ -93,7 +95,7 @@ import { ToggleComponent } from '../shared/components/ui/toggle.component';
         <!-- User / Info panel toggle -->
         <ui-icon-button
           [active]="showInfoPanel()"
-          title="User info"
+          [title]="'toolbar.userInfo' | translate"
           (clicked)="showInfoPanel.set(!showInfoPanel())"
         >
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -148,44 +150,42 @@ import { ToggleComponent } from '../shared/components/ui/toggle.component';
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                       </svg>
                       <span class="text-sm font-semibold text-text-primary tracking-wide"
-                        >New Chat Options</span
+                        >{{ 'toolbar.newChatOptions' | translate }}</span
                       >
                     </div>
 
                     <!-- Chat Name -->
                     <div>
-                      <ui-label class="mb-1.5">Chat Name</ui-label>
+                      <ui-label class="mb-1.5">{{ 'chatSettings.chatNameLabel' | translate }}</ui-label>
                       <ui-text-input
                         [(ngModel)]="newChatName"
-                        placeholder="Optional name…"
+                        [placeholder]="'toolbar.optionalName' | translate"
                       />
                     </div>
 
                     <!-- Endpoint Preference -->
                     <div>
-                      <ui-label class="mb-1.5">Endpoint</ui-label>
+                      <ui-label class="mb-1.5">{{ 'toolbar.endpoint' | translate }}</ui-label>
                       <div class="flex gap-2">
                         <ui-button
                           class="flex-1"
                           variant="secondary"
                           [active]="newChatEndpointPreference() === 'RESPONSES'"
                           (clicked)="newChatEndpointPreference.set('RESPONSES')"
-                        >Responses API</ui-button>
+                        >{{ 'toolbar.responsesApi' | translate }}</ui-button>
                         <ui-button
                           class="flex-1"
                           variant="secondary"
                           [disabled]="true"
                           [active]="newChatEndpointPreference() === 'COMPLETION'"
                           (clicked)="newChatEndpointPreference.set('COMPLETION')"
-                        >Chat Completions</ui-button>
+                        >{{ 'toolbar.chatCompletions' | translate }}</ui-button>
                       </div>
                       <p class="mt-1.5 text-[10px] text-text-muted">
                         @if (newChatEndpointPreference() === 'RESPONSES') {
-                          Uses the <span class="font-mono text-text-secondary">/responses</span> endpoint —
-                          supports reasoning &amp; file inputs.
+                          {{ 'toolbar.endpointResponsesDesc' | translate }}
                         } @else {
-                          Uses the <span class="font-mono text-text-secondary">/chat/completions</span>
-                          endpoint — standard chat interface.
+                          {{ 'toolbar.endpointCompletionsDesc' | translate }}
                         }
                       </p>
                     </div>
@@ -193,8 +193,8 @@ import { ToggleComponent } from '../shared/components/ui/toggle.component';
                     <!-- Encryption toggle -->
                     <div class="flex items-center justify-between">
                       <div>
-                        <ui-label>Encryption</ui-label>
-                        <span class="text-[10px] text-text-muted mt-0.5 block">Encrypt messages with a key</span>
+                        <ui-label>{{ 'chatSettings.encryption' | translate }}</ui-label>
+                        <span class="text-[10px] text-text-muted mt-0.5 block">{{ 'chatSettings.encryptionHint' | translate }}</span>
                       </div>
                       <ui-toggle
                         [(ngModel)]="newChatUseCryptoModel"
@@ -206,13 +206,13 @@ import { ToggleComponent } from '../shared/components/ui/toggle.component';
                     <!-- Crypto key input -->
                     @if (newChatUseCrypto()) {
                       <div>
-                        <ui-label class="mb-1.5">Encryption Key</ui-label>
+                        <ui-label class="mb-1.5">{{ 'chatSettings.encryptionKey' | translate }}</ui-label>
                         <ui-text-input
                           type="password"
                           [showToggle]="true"
                           [mono]="true"
                           [(ngModel)]="newChatCryptoKey"
-                          placeholder="Enter encryption key…"
+                          [placeholder]="'chatSettings.encryptionKeyPlaceholder' | translate"
                         />
                       </div>
                     }
@@ -242,8 +242,8 @@ import { ToggleComponent } from '../shared/components/ui/toggle.component';
             <div
               class="flex items-center justify-between px-3 py-2 border-b border-border-default shrink-0"
             >
-              <span class="text-xs font-semibold text-text-primary">Info</span>
-              <ui-icon-button size="sm" title="Close" (clicked)="showInfoPanel.set(false)">
+              <span class="text-xs font-semibold text-text-primary">{{ 'info.info' | translate }}</span>
+              <ui-icon-button size="sm" [title]="'common.close' | translate" (clicked)="showInfoPanel.set(false)">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>

@@ -2,12 +2,13 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 import { AuthService } from '../client';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, TranslateModule],
   template: `
     <div
       class="min-h-screen bg-surface-base text-text-primary  flex items-center justify-center p-6"
@@ -17,10 +18,10 @@ import { AuthService } from '../client';
         <div class="flex flex-col gap-2 border-b border-border-default pb-5">
           <div class="flex items-center gap-3">
             <div class="w-2 h-2 rounded-full bg-accent 400 animate-pulse"></div>
-            <span class="text-xs text-text-muted tracking-wide font-medium">LM Studio Extender</span>
+            <span class="text-xs text-text-muted tracking-wide font-medium">{{ 'login.appName' | translate }}</span>
           </div>
-          <h1 class="text-lg text-text-primary tracking-tight">Sign in</h1>
-          <p class="text-xs text-text-muted">Enter your credentials to continue.</p>
+          <h1 class="text-lg text-text-primary tracking-tight">{{ 'login.title' | translate }}</h1>
+          <p class="text-xs text-text-muted">{{ 'login.subtitle' | translate }}</p>
         </div>
 
         <!-- Error banner -->
@@ -37,23 +38,23 @@ import { AuthService } from '../client';
         <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4">
           <!-- Username -->
           <div class="flex flex-col gap-1.5">
-            <label class="text-xs text-text-muted uppercase tracking-widest">Username</label>
+            <label class="text-xs text-text-muted uppercase tracking-widest">{{ 'login.username' | translate }}</label>
             <input
               type="text"
               formControlName="username"
               autocomplete="username"
-              placeholder="username"
+              [placeholder]="'login.usernamePlaceholder' | translate"
               class="bg-surface-raised border border-border-default rounded-lg px-4 py-3 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
               [class.border-red-700]="isInvalid('username')"
             />
             @if (isInvalid('username')) {
-              <span class="text-xs text-error-text">Username is required.</span>
+              <span class="text-xs text-error-text">{{ 'login.usernameRequired' | translate }}</span>
             }
           </div>
 
           <!-- Password -->
           <div class="flex flex-col gap-1.5">
-            <label class="text-xs text-text-muted uppercase tracking-widest">Password</label>
+            <label class="text-xs text-text-muted uppercase tracking-widest">{{ 'login.password' | translate }}</label>
             <div class="relative">
               <input
                 [type]="showPassword() ? 'text' : 'password'"
@@ -69,11 +70,11 @@ import { AuthService } from '../client';
                 class="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-zinc-400 transition-colors text-xs"
                 tabindex="-1"
               >
-                {{ showPassword() ? 'hide' : 'show' }}
+                {{ (showPassword() ? 'login.hide' : 'login.show') | translate }}
               </button>
             </div>
             @if (isInvalid('password')) {
-              <span class="text-xs text-error-text">Password is required.</span>
+              <span class="text-xs text-error-text">{{ 'login.passwordRequired' | translate }}</span>
             }
           </div>
 
@@ -87,9 +88,9 @@ import { AuthService } from '../client';
               <span
                 class="w-3 h-3 rounded-full border-2 border-zinc-600 border-t-emerald-400 animate-spin"
               ></span>
-              <span>Signing in...</span>
+              <span>{{ 'login.signingIn' | translate }}</span>
             } @else {
-              <span>Sign in</span>
+              <span>{{ 'login.submit' | translate }}</span>
             }
           </button>
         </form>
@@ -132,13 +133,13 @@ export class Login {
           localStorage.setItem('jwt_token', token);
           this.router.navigate(['/chat-openai']);
         } else {
-          this.errorMessage.set('Unexpected response from server.');
+          this.errorMessage.set('login.unexpectedResponse');
         }
         this.loading.set(false);
       },
       error: (err) => {
         this.errorMessage.set(
-          err?.error?.message ?? err?.message ?? 'Login failed. Check your credentials.',
+          err?.error?.message ?? err?.message ?? 'login.loginFailed',
         );
         this.loading.set(false);
       },

@@ -1,4 +1,5 @@
 import { Component, output } from '@angular/core';
+import { TranslateModule } from '@ngx-translate/core';
 
 /**
  * Reusable modal shell — backdrop + centred card.
@@ -16,6 +17,7 @@ import { Component, output } from '@angular/core';
 @Component({
   selector: 'ui-modal',
   standalone: true,
+  imports: [TranslateModule],
   template: `
     <!-- backdrop -->
     <div
@@ -36,7 +38,7 @@ import { Component, output } from '@angular/core';
             type="button"
             (click)="closed.emit()"
             class="text-text-muted hover:text-text-primary transition-colors"
-            title="Close"
+            [title]="'common.close' | translate"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />

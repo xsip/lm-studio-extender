@@ -1,6 +1,7 @@
 import { Component, input, output, signal, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule } from '@ngx-translate/core';
 import { ModalComponent } from './ui/modal.component';
 import { ButtonComponent } from './ui/button.component';
 import { LabelComponent } from './ui/label.component';
@@ -23,27 +24,13 @@ export interface ChatSettingsSaveEvent {
   cryptoKey: string;
 }
 
-/**
- * Standalone Chat Settings modal dialog.
- * Extracted from ChatSidebarComponent.
- *
- * Usage:
- *   @if (settingsModal()) {
- *     <app-chat-settings-dialog
- *       [data]="settingsModal()!"
- *       [loading]="settingsLoading()"
- *       [showCrypto]="client() === 'OPENAI'"
- *       (saved)="onSaveSettings($event)"
- *       (closed)="closeSettings()"
- *     />
- *   }
- */
 @Component({
   selector: 'app-chat-settings-dialog',
   standalone: true,
   imports: [
     CommonModule,
     FormsModule,
+    TranslateModule,
     ModalComponent,
     ButtonComponent,
     LabelComponent,
@@ -53,7 +40,7 @@ export interface ChatSettingsSaveEvent {
   ],
   template: `
     <ui-modal (closed)="closed.emit()">
-      <span slot="header">Chat Settings</span>
+      <span slot="header">{{ 'chatSettings.title' | translate }}</span>
 
       <div
         class="text-[10px] text-text-muted uppercase tracking-widest mb-4 truncate border-b border-border-default pb-2"
@@ -68,10 +55,10 @@ export interface ChatSettingsSaveEvent {
       } @else {
         <!-- Chat name -->
         <div class="mb-4">
-          <ui-label class="mb-1.5">Chat Name</ui-label>
+          <ui-label class="mb-1.5">{{ 'chatSettings.chatNameLabel' | translate }}</ui-label>
           <ui-text-input
             [(ngModel)]="localName"
-            placeholder="Chat name…"
+            [placeholder]="'chatSettings.chatNamePlaceholder' | translate"
           />
         </div>
 
@@ -79,8 +66,8 @@ export interface ChatSettingsSaveEvent {
           <!-- Encryption toggle -->
           <div class="flex items-center justify-between mb-4">
             <div>
-              <ui-label>Encryption</ui-label>
-              <span class="text-[10px] text-text-muted mt-0.5 block">Encrypt messages with a key</span>
+              <ui-label>{{ 'chatSettings.encryption' | translate }}</ui-label>
+              <span class="text-[10px] text-text-muted mt-0.5 block">{{ 'chatSettings.encryptionHint' | translate }}</span>
             </div>
             <ui-toggle
               [(ngModel)]="localUseCrypto"
@@ -91,13 +78,13 @@ export interface ChatSettingsSaveEvent {
           <!-- Crypto key input -->
           @if (localUseCrypto) {
             <div class="mb-4">
-              <ui-label class="mb-1.5">Encryption Key</ui-label>
+              <ui-label class="mb-1.5">{{ 'chatSettings.encryptionKey' | translate }}</ui-label>
               <ui-text-input
                 type="password"
                 [showToggle]="true"
                 [mono]="true"
                 [(ngModel)]="localCryptoKey"
-                placeholder="Enter encryption key…"
+                [placeholder]="'chatSettings.encryptionKeyPlaceholder' | translate"
               />
             </div>
           }
@@ -105,8 +92,8 @@ export interface ChatSettingsSaveEvent {
 
         <!-- Actions -->
         <div class="flex gap-2 pt-1">
-          <ui-button variant="primary" class="flex-1" (clicked)="save()">Save</ui-button>
-          <ui-button variant="secondary" class="flex-1" (clicked)="closed.emit()">Cancel</ui-button>
+          <ui-button variant="primary" class="flex-1" (clicked)="save()">{{ 'chatSettings.save' | translate }}</ui-button>
+          <ui-button variant="secondary" class="flex-1" (clicked)="closed.emit()">{{ 'chatSettings.cancel' | translate }}</ui-button>
         </div>
       }
     </ui-modal>
@@ -120,7 +107,6 @@ export class ChatSettingsDialogComponent implements OnChanges {
   readonly saved  = output<ChatSettingsSaveEvent>();
   readonly closed = output<void>();
 
-  // Local form state — synced from data() on open/change
   localName      = '';
   localUseCrypto = false;
   localCryptoKey = '';

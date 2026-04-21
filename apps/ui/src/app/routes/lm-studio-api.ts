@@ -27,6 +27,7 @@ import { InfoComponent } from './lm-studio-api/info.component';
 import { LmStudioEvent } from '../lmstudio-stream.service';
 import { IconButtonComponent } from '../shared/components/ui/icon-button.component';
 import { ButtonComponent } from '../shared/components/ui/button.component';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-debug',
@@ -42,6 +43,7 @@ import { ButtonComponent } from '../shared/components/ui/button.component';
     InfoComponent,
     IconButtonComponent,
     ButtonComponent,
+    TranslateModule,
   ],
   providers: [ChatService],
   template: `
@@ -58,17 +60,17 @@ import { ButtonComponent } from '../shared/components/ui/button.component';
           size="xs"
           [active]="showChatsSidebar()"
           (clicked)="showChatsSidebar.set(!showChatsSidebar())"
-          title="Toggle chat history"
+          [title]="'toolbar.toggleChats' | translate"
         >
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M3 12h18M3 18h18" />
           </svg>
-          <span class="hidden sm:inline">Chats</span>
+          <span class="hidden sm:inline">{{ 'toolbar.chats' | translate }}</span>
         </ui-button>
 
         <div class="flex items-center gap-1.5 ml-1">
           <div class="w-1.5 h-1.5 rounded-full bg-success-muted animate-pulse" style="box-shadow: 0 0 6px var(--color-success-muted);"></div>
-          <span class="text-xs text-text-muted tracking-wide font-medium hidden md:block">LM Studio Extender</span>
+          <span class="text-xs text-text-muted tracking-wide font-medium hidden md:block">{{ 'login.appName' | translate }}</span>
         </div>
 
         <div class="relative ml-auto">
@@ -99,7 +101,7 @@ import { ButtonComponent } from '../shared/components/ui/button.component';
 
         <ui-icon-button
           [active]="showInfoPanel()"
-          title="User info"
+          [title]="'toolbar.userInfo' | translate"
           (clicked)="showInfoPanel.set(!showInfoPanel())"
         >
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -163,8 +165,8 @@ import { ButtonComponent } from '../shared/components/ui/button.component';
             <div
               class="flex items-center justify-between px-3 py-2 border-b border-border-default shrink-0"
             >
-              <span class="text-xs font-semibold text-text-primary">Info</span>
-              <ui-icon-button size="sm" title="Close" (clicked)="showInfoPanel.set(false)">
+              <span class="text-xs font-semibold text-text-primary">{{ 'info.info' | translate }}</span>
+              <ui-icon-button size="sm" [title]="'common.close' | translate" (clicked)="showInfoPanel.set(false)">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>

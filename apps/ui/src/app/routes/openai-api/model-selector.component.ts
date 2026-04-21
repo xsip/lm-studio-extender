@@ -1,11 +1,12 @@
 import { Component, computed, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 import { ModelOpenAiDto } from '../../client';
 import { SpinnerComponent } from '../../shared/components/spinner.component';
 
 @Component({
   selector: 'app-openai-model-selector',
-  imports: [CommonModule, SpinnerComponent],
+  imports: [CommonModule, TranslateModule, SpinnerComponent],
   template: `
     <div class="group/model-btn relative">
       <button
@@ -37,7 +38,7 @@ import { SpinnerComponent } from '../../shared/components/spinner.component';
             />
           </svg>
         }
-        <span class="truncate text-[11px] tracking-wide">{{ modelLabel() }}</span>
+        <span class="truncate text-[11px] tracking-wide">{{ selectedModel() ? modelLabel() : ('modelSelector.selectModel' | translate) }}</span>
         <svg
           class="w-3 h-3 opacity-40 shrink-0 transition-transform"
           [class.rotate-180]="dropdownOpen()"
@@ -58,10 +59,10 @@ import { SpinnerComponent } from '../../shared/components/spinner.component';
           <div
             class="px-3 py-1.5 text-[10px] text-text-muted uppercase tracking-widest border-b border-border-default"
           >
-            Model
+            {{ 'modelSelector.label' | translate }}
           </div>
           @if (models().length === 0 && !modelsLoading()) {
-            <div class="px-3 py-3 text-xs text-text-muted italic">No models available</div>
+<div class="px-3 py-3 text-xs text-text-muted italic">{{ 'modelSelector.noModels' | translate }}</div>
           }
           @for (m of models(); track m.id) {
             <button
@@ -95,7 +96,7 @@ import { SpinnerComponent } from '../../shared/components/spinner.component';
         <div
           class="pointer-events-none absolute top-full mt-1.5 left-1/2 -translate-x-1/2 z-30 hidden group-hover/model-btn:flex whitespace-nowrap px-2.5 py-1.5 text-[10px] text-text-secondary bg-surface-overlay border border-border-default rounded-lg shadow-lg"
         >
-          Cannot switch model mid-chat
+          {{ 'modelSelector.cannotSwitch' | translate }}
         </div>
       }
     </div>
@@ -110,7 +111,7 @@ export class OpenAiModelSelectorComponent {
   readonly modelSelected = output<ModelOpenAiDto>();
   readonly dropdownOpen  = signal(false);
 
-  readonly modelLabel = computed(() => this.selectedModel()?.id ?? 'Select model…');
+  readonly modelLabel = computed(() => this.selectedModel()?.id ?? null);
 
   onSelect(model: ModelOpenAiDto): void {
     this.modelSelected.emit(model);

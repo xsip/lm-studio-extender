@@ -1,15 +1,14 @@
 import { Component, computed, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 import { ModelDto } from '../../client';
 import { SpinnerComponent } from '../../shared/components/spinner.component';
 
-// Re-export so existing consumers importing ModelReasoningCapability from this
-// file continue to work without changes.
 export type { ModelReasoningCapability } from '../../shared/components/reasoning-dropdown.component';
 
 @Component({
   selector: 'app-model-selector',
-  imports: [CommonModule, SpinnerComponent],
+  imports: [CommonModule, TranslateModule, SpinnerComponent],
   template: `
     <div class="group/model-btn relative">
       <button
@@ -31,9 +30,9 @@ export type { ModelReasoningCapability } from '../../shared/components/reasoning
             <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1 1 .03 2.798-1.414 2.798H4.213c-1.444 0-2.414-1.798-1.414-2.798L4.6 15.3" />
           </svg>
         }
-        <span class="truncate  text-[11px] tracking-wide">{{ modelLabel() }}</span>
+        <span class="truncate  text-[11px] tracking-wide">{{ selectedModel() ? modelLabel() : ('modelSelector.selectModel' | translate) }}</span>
         @if (selectedModel()?.capabilities?.trained_for_tool_use) {
-          <svg class="w-3 h-3 shrink-0 text-amber-400 opacity-80" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" title="Tool use supported">
+          <svg class="w-3 h-3 shrink-0 text-amber-400 opacity-80" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" [attr.title]="'modelSelector.toolUse' | translate">
             <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l5.654-4.654m5.292-8.914a2.25 2.25 0 00-3.182 0l-1.83 1.83a2.25 2.25 0 000 3.182l.182.182m5.292-8.914l1.83-1.83a2.25 2.25 0 013.182 0l.182.182a2.25 2.25 0 010 3.182l-1.83 1.83" />
           </svg>
         }
@@ -49,9 +48,9 @@ export type { ModelReasoningCapability } from '../../shared/components/reasoning
       @if (dropdownOpen()) {
         <div class="fixed inset-0 z-10" (click)="dropdownOpen.set(false)"></div>
         <div class="absolute top-full mt-1.5 right-0 z-20 min-w-[280px] max-w-[360px] bg-surface-raised border border-border-default rounded-lg shadow-2xl shadow-black/70 overflow-hidden py-1">
-          <div class="px-3 py-1.5 text-[10px] text-text-muted uppercase tracking-widest border-b border-border-default">Model</div>
+          <div class="px-3 py-1.5 text-[10px] text-text-muted uppercase tracking-widest border-b border-border-default">{{ 'modelSelector.label' | translate }}</div>
           @if (models().length === 0 && !modelsLoading()) {
-            <div class="px-3 py-3 text-xs text-text-muted italic">No models available</div>
+            <div class="px-3 py-3 text-xs text-text-muted italic">{{ 'modelSelector.noModels' | translate }}</div>
           }
           @for (m of models(); track m.key) {
             <button
@@ -87,7 +86,7 @@ export type { ModelReasoningCapability } from '../../shared/components/reasoning
 
       @if (hasChatOpen()) {
         <div class="pointer-events-none absolute top-full mt-1.5 left-1/2 -translate-x-1/2 z-30 hidden group-hover/model-btn:flex whitespace-nowrap px-2.5 py-1.5 text-[10px] text-text-secondary bg-surface-overlay border border-border-default rounded-lg shadow-lg">
-          Cannot switch model mid-chat
+          {{ 'modelSelector.cannotSwitch' | translate }}
         </div>
       }
     </div>
@@ -104,7 +103,7 @@ export class ModelSelectorComponent {
   readonly dropdownOpen = signal(false);
 
   readonly modelLabel = computed(
-    () => this.selectedModel()?.display_name ?? this.selectedModel()?.key ?? 'Select model…',
+    () => this.selectedModel()?.display_name ?? this.selectedModel()?.key ?? null,
   );
 
   onSelect(model: ModelDto): void {

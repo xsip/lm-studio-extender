@@ -1,5 +1,6 @@
 import { Component, input, output } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 import { LmStudioEvent } from '../../lmstudio-stream.service';
 import { StreamErrorEvent, StreamError2Event } from '../../lmstudio-stream.service';
 
@@ -11,7 +12,7 @@ export interface EventEntry {
 
 @Component({
   selector: 'app-event-log',
-  imports: [CommonModule, DatePipe],
+  imports: [CommonModule, DatePipe, TranslateModule],
   template: `
     <!-- Backdrop -->
     <div
@@ -21,9 +22,9 @@ export interface EventEntry {
     <!-- Panel -->
     <div class="absolute right-0 top-0 bottom-0 z-20 flex flex-col w-80 border-l border-border-default bg-surface-raised shadow-2xl">
       <div class="flex items-center justify-between px-3 py-2.5 border-b border-border-default shrink-0">
-        <span class="text-xs text-text-muted uppercase tracking-widest">Event Log</span>
+<span class="text-xs text-text-muted uppercase tracking-widest">{{ 'eventLog.title' | translate }}</span>
         <div class="flex items-center gap-2">
-          <span class="text-xs text-text-muted">{{ events().length }} events</span>
+<span class="text-xs text-text-muted">{{ 'eventLog.events' | translate: { count: events().length } }}</span>
           <button
             type="button"
             (click)="closed.emit()"
@@ -39,7 +40,7 @@ export interface EventEntry {
       <div class="flex-1 overflow-y-auto px-2 py-2 flex flex-col gap-1 min-h-0">
         @if (events().length === 0) {
           <div class="flex items-center justify-center h-full text-xs text-zinc-800 uppercase tracking-widest">
-            No events
+            {{ 'eventLog.noEvents' | translate }}
           </div>
         }
         @for (entry of events(); track entry.id) {

@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-readme',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, TranslateModule],
   styles: [
     `
       :host {
@@ -126,7 +127,7 @@ import { RouterLink } from '@angular/router';
             <button
               (click)="toggleTheme()"
               class="w-8 h-8 rounded-lg flex items-center justify-center border border-border-default bg-surface-raised hover:bg-surface-overlay text-text-secondary hover:text-text-primary transition-colors"
-              title="Toggle theme"
+              [title]="'darkMode.toggle' | translate"
             >
               <!-- Sun shown in dark mode -->
               <svg

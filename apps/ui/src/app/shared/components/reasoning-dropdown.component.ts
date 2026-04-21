@@ -1,5 +1,6 @@
 import { Component, computed, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 import { ChatRequestDto } from '../../client';
 
 export interface ReasoningOption {
@@ -37,7 +38,7 @@ export const ALL_REASONING_OPTIONS: ReasoningOption[] = [
 @Component({
   selector: 'app-reasoning-dropdown',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslateModule],
   template: `
     @if (reasoningOptions().length > 0) {
       <div class="relative">
@@ -50,10 +51,10 @@ export const ALL_REASONING_OPTIONS: ReasoningOption[] = [
               ? 'border-reasoning-border text-reasoning-text bg-reasoning-bg hover:border-reasoning-muted'
               : 'border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary'
           "
-          title="Reasoning effort"
+          [title]="'reasoning.label' | translate"
         >
           <span class="font-mono text-[11px] shrink-0">{{ currentReasoningOption()?.icon ?? '◈' }}</span>
-          <span class="tracking-widest uppercase">{{ reasoningLabel() }}</span>
+          <span class="tracking-widest uppercase">{{ reasoningLabel() ? ('reasoning.label' | translate) + ': ' + reasoningLabel() : '' }}</span>
           <svg
             class="w-3 h-3 opacity-50 transition-transform"
             [class.rotate-180]="dropdownOpen()"
@@ -66,7 +67,7 @@ export const ALL_REASONING_OPTIONS: ReasoningOption[] = [
         @if (dropdownOpen()) {
           <div class="fixed inset-0 z-10" (click)="dropdownOpen.set(false)"></div>
           <div class="absolute bottom-full mb-1.5 left-0 z-20 min-w-[150px] bg-surface-raised border border-border-default rounded-lg shadow-2xl shadow-black/60 overflow-hidden py-1">
-            <div class="px-3 py-1.5 text-[10px] text-text-muted uppercase tracking-widest border-b border-border-default">Reasoning</div>
+<div class="px-3 py-1.5 text-[10px] text-text-muted uppercase tracking-widest border-b border-border-default">{{ 'reasoning.label' | translate }}</div>
             @for (opt of reasoningOptions(); track opt.value) {
               <button
                 type="button"
@@ -81,7 +82,7 @@ export const ALL_REASONING_OPTIONS: ReasoningOption[] = [
                 <span class="font-mono text-[11px] w-3 text-center shrink-0">{{ opt.icon }}</span>
                 <span class="tracking-wide">{{ opt.label }}</span>
                 @if (modelReasoningCap()?.default === opt.value) {
-                  <span class="ml-1 text-[10px] text-text-muted italic">default</span>
+                  <span class="ml-1 text-[10px] text-text-muted italic">{{ 'reasoning.default' | translate }}</span>
                 }
                 @if (reasoning() === opt.value) {
                   <span class="ml-auto text-reasoning-text">✓</span>
@@ -116,7 +117,7 @@ export class ReasoningDropdownComponent {
   readonly reasoningLabel = computed(() => {
     const opt = this.currentReasoningOption();
     if (!opt) return null;
-    return `Reasoning: ${opt.label.toUpperCase()}`;
+    return opt.label.toUpperCase();
   });
 
   selectReasoning(value: ChatRequestDto.ReasoningEnum): void {

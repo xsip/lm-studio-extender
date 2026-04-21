@@ -1,4 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { readStoredTheme, applyTheme } from '../../utils/theme.utils';
 
 /**
@@ -11,12 +12,13 @@ import { readStoredTheme, applyTheme } from '../../utils/theme.utils';
 @Component({
   selector: 'ui-dark-mode-toggle',
   standalone: true,
+  imports: [TranslateModule],
   template: `
     <button
       type="button"
       (click)="toggle()"
       class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
-      [title]="isDark() ? 'Switch to light mode' : 'Switch to dark mode'"
+      [title]="(isDark() ? 'darkMode.switchToLight' : 'darkMode.switchToDark') | translate"
     >
       @if (isDark()) {
         <!-- sun -->
