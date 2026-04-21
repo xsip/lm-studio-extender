@@ -113,6 +113,14 @@ export class ChatService {
     this.streaming.set(true);
     this.mcpTracking.clear();
 
+    for(const f of appendedFiles ?? []) {
+      this.chatMessages.update((msgs) => [
+        ...msgs,
+        { role: 'user', image: f.image_url, date: new Date() },
+      ]);
+
+    }
+
     this.chatMessages.update((msgs) => [...msgs, { role: 'user', text: input, date: new Date() }]);
 
     this.streamService.reset();
