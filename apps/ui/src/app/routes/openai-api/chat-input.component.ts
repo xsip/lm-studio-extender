@@ -121,7 +121,7 @@ export type { AppendedFile };
                   />
                 </svg>
                 <span class="truncate text-text-primary flex-1 max-w-xs">{{ file.filename }}</span>
-                <span class="text-text-muted shrink-0 text-[10px]">{{ fileSizeLabel(file.file_data) }}</span>
+                <span class="text-text-muted shrink-0 text-[10px]">{{ fileSizeLabel(file.image_url) }}</span>
                 <button
                   type="button"
                   (click)="removeFile(i)"

@@ -20,7 +20,7 @@ import {
   ResponseOutputRefusalDto,
   ResponseOutputTextDto
 } from '../client';
-import { ChatService } from './openai-api/chat.service';
+import { ChatMessage, ChatService } from './openai-api/chat.service';
 import { OpenAiModelSelectorComponent } from './openai-api/model-selector.component';
 
 // Re-use the shared sub-components from lm-studio-api — they are generic enough
@@ -71,14 +71,22 @@ import { TranslateModule } from '@ngx-translate/core';
           (clicked)="showChatsSidebar.set(!showChatsSidebar())"
           [title]="'toolbar.toggleChats' | translate"
         >
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <svg
+            class="w-3.5 h-3.5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M3 12h18M3 18h18" />
           </svg>
           <span class="hidden sm:inline">{{ 'toolbar.chats' | translate }}</span>
         </ui-button>
 
         <div class="w-1.5 h-1.5 rounded-full bg-success-muted animate-pulse ml-1"></div>
-        <span class="text-xs text-text-muted tracking-wide font-medium hidden md:block">{{ 'login.appName' | translate }} Open AI</span>
+        <span class="text-xs text-text-muted tracking-wide font-medium hidden md:block"
+          >{{ 'login.appName' | translate }} Open AI</span
+        >
 
         <!-- Provider tabs -->
 
@@ -98,8 +106,18 @@ import { TranslateModule } from '@ngx-translate/core';
           [title]="'toolbar.userInfo' | translate"
           (clicked)="showInfoPanel.set(!showInfoPanel())"
         >
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          <svg
+            class="w-3.5 h-3.5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            />
           </svg>
         </ui-icon-button>
       </div>
@@ -149,14 +167,16 @@ import { TranslateModule } from '@ngx-translate/core';
                       >
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                       </svg>
-                      <span class="text-sm font-semibold text-text-primary tracking-wide"
-                        >{{ 'toolbar.newChatOptions' | translate }}</span
-                      >
+                      <span class="text-sm font-semibold text-text-primary tracking-wide">{{
+                        'toolbar.newChatOptions' | translate
+                      }}</span>
                     </div>
 
                     <!-- Chat Name -->
                     <div>
-                      <ui-label class="mb-1.5">{{ 'chatSettings.chatNameLabel' | translate }}</ui-label>
+                      <ui-label class="mb-1.5">{{
+                        'chatSettings.chatNameLabel' | translate
+                      }}</ui-label>
                       <ui-text-input
                         [(ngModel)]="newChatName"
                         [placeholder]="'toolbar.optionalName' | translate"
@@ -172,14 +192,16 @@ import { TranslateModule } from '@ngx-translate/core';
                           variant="secondary"
                           [active]="newChatEndpointPreference() === 'RESPONSES'"
                           (clicked)="newChatEndpointPreference.set('RESPONSES')"
-                        >{{ 'toolbar.responsesApi' | translate }}</ui-button>
+                          >{{ 'toolbar.responsesApi' | translate }}</ui-button
+                        >
                         <ui-button
                           class="flex-1"
                           variant="secondary"
                           [disabled]="true"
                           [active]="newChatEndpointPreference() === 'COMPLETION'"
                           (clicked)="newChatEndpointPreference.set('COMPLETION')"
-                        >{{ 'toolbar.chatCompletions' | translate }}</ui-button>
+                          >{{ 'toolbar.chatCompletions' | translate }}</ui-button
+                        >
                       </div>
                       <p class="mt-1.5 text-[10px] text-text-muted">
                         @if (newChatEndpointPreference() === 'RESPONSES') {
@@ -194,7 +216,9 @@ import { TranslateModule } from '@ngx-translate/core';
                     <div class="flex items-center justify-between">
                       <div>
                         <ui-label>{{ 'chatSettings.encryption' | translate }}</ui-label>
-                        <span class="text-[10px] text-text-muted mt-0.5 block">{{ 'chatSettings.encryptionHint' | translate }}</span>
+                        <span class="text-[10px] text-text-muted mt-0.5 block">{{
+                          'chatSettings.encryptionHint' | translate
+                        }}</span>
                       </div>
                       <ui-toggle
                         [(ngModel)]="newChatUseCryptoModel"
@@ -206,7 +230,9 @@ import { TranslateModule } from '@ngx-translate/core';
                     <!-- Crypto key input -->
                     @if (newChatUseCrypto()) {
                       <div>
-                        <ui-label class="mb-1.5">{{ 'chatSettings.encryptionKey' | translate }}</ui-label>
+                        <ui-label class="mb-1.5">{{
+                          'chatSettings.encryptionKey' | translate
+                        }}</ui-label>
                         <ui-text-input
                           type="password"
                           [showToggle]="true"
@@ -242,9 +268,21 @@ import { TranslateModule } from '@ngx-translate/core';
             <div
               class="flex items-center justify-between px-3 py-2 border-b border-border-default shrink-0"
             >
-              <span class="text-xs font-semibold text-text-primary">{{ 'info.info' | translate }}</span>
-              <ui-icon-button size="sm" [title]="'common.close' | translate" (clicked)="showInfoPanel.set(false)">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <span class="text-xs font-semibold text-text-primary">{{
+                'info.info' | translate
+              }}</span>
+              <ui-icon-button
+                size="sm"
+                [title]="'common.close' | translate"
+                (clicked)="showInfoPanel.set(false)"
+              >
+                <svg
+                  class="w-3.5 h-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
                   <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </ui-icon-button>
@@ -306,9 +344,10 @@ export class OpenAiApi implements OnDestroy, OnInit {
     effect(() => {
       const cap = this.modelReasoningCap();
       if (!cap && this.reasoning()) this.reasoning.set(undefined);
-      if (!this.chatService.hasChatOpen()) this.reasoning.set(
-        (cap?.allowed_options?.find((e) => e.startsWith(cap?.default)) as any) ?? undefined,
-      );
+      if (!this.chatService.hasChatOpen())
+        this.reasoning.set(
+          (cap?.allowed_options?.find((e) => e.startsWith(cap?.default)) as any) ?? undefined,
+        );
     });
   }
 
@@ -339,8 +378,7 @@ export class OpenAiApi implements OnDestroy, OnInit {
       next: (meta) => {
         const reasoningValue = meta.reasoningMode as ReasoningDto.EffortEnum | undefined;
         const match = this.models()?.find((m) => m.id === meta.usedModel);
-        if(match)
-          this.selectModel(match);
+        if (match) this.selectModel(match);
         if (reasoningValue) {
           this.reasoning.set(reasoningValue);
         }
@@ -415,35 +453,79 @@ export class OpenAiApi implements OnDestroy, OnInit {
       | Array<MessageDtoContentInner>
       | Array<ResponseOutputMessageDtoContentInner>
       | Array<ContentDto>,
-  ) {
+    createdAt: string,
+  ): ChatMessage[] {
     if (typeof content === 'string') {
-      return content;
+      return [
+        {
+          role: 'user',
+          text: content,
+          date: new Date(createdAt),
+        },
+      ];
     }
     if (typeof content === 'object' && Array.isArray(content)) {
-      return content
-        .map((c) => {
-          if (typeof c === 'string') {
-            return c;
-          }
-          if (c.type === ResponseInputTextDto.TypeEnum.InputText) {
-            return c.text;
-          } else if (c.type === ResponseOutputRefusalDto.TypeEnum.Refusal) {
-            return c.refusal;
-          } else if (c.type === ContentDto.TypeEnum.ReasoningText) {
-            return c.text;
-          } else if (c.type === ResponseInputImageDto.TypeEnum.InputImage) {
-            return c.image_url;
-          } else if (c.type === ResponseOutputTextDto.TypeEnum.OutputText) {
-            return c.text;
-          } else if (c.type === ResponseInputFileDto.TypeEnum.InputFile) {
-            return c.file_data ?? c.file_url;
-          }
-          return JSON.stringify(c);
-        })
-        .join(`  \n`);
+      return content.map((c) => {
+        if (typeof c === 'string') {
+          return {
+            role: 'user',
+            text: c,
+            date: new Date(createdAt),
+          };
+        }
+        if (c.type === ResponseInputTextDto.TypeEnum.InputText) {
+          return {
+            role: 'user',
+            text: c.text,
+            date: new Date(createdAt),
+          };
+        } else if (c.type === ResponseOutputRefusalDto.TypeEnum.Refusal) {
+          return {
+            role: 'user',
+            text: c.refusal,
+            date: new Date(createdAt),
+          };
+        } else if (c.type === ContentDto.TypeEnum.ReasoningText) {
+          return {
+            role: 'user',
+            text: c.text,
+            date: new Date(createdAt),
+          };
+        } else if (c.type === ResponseInputImageDto.TypeEnum.InputImage) {
+          return {
+            role: 'user',
+            type: 'image',
+            image: c.image_url,
+            date: new Date(createdAt),
+          };
+        } else if (c.type === ResponseOutputTextDto.TypeEnum.OutputText) {
+          return {
+            role: 'user',
+            text: c.text,
+            date: new Date(createdAt),
+          };
+        } else if (c.type === ResponseInputFileDto.TypeEnum.InputFile) {
+          return {
+            role: 'user',
+            file: c.file_data ?? c.file_url,
+            date: new Date(createdAt),
+          };
+        }
+        return {
+          role: 'user',
+          text: JSON.stringify(c),
+          date: new Date(createdAt),
+        };
+      });
     }
 
-    return JSON.stringify(content);
+    return [
+      {
+        role: 'user',
+        text: JSON.stringify(content),
+        date: new Date(createdAt),
+      },
+    ];
   }
 
   private loadChatHistory(chatId: string): void {
@@ -462,11 +544,7 @@ export class OpenAiApi implements OnDestroy, OnInit {
               inputEntry.type === 'message' ||
               (!inputEntry.type && (inputEntry as any).role !== 'developer')
             ) {
-              messages.push({
-                role: 'user',
-                text: this.fromContentToText(inputEntry.content),
-                date: new Date(entry.createdAt),
-              });
+              messages.push(...this.fromContentToText(inputEntry.content, entry.createdAt));
             }
           }
         }

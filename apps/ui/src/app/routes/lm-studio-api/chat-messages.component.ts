@@ -23,20 +23,36 @@ import { CreateChatMetadataDto } from '../../client';
 
     @for (msg of messages(); track $index) {
       @if (msg.role === 'user') {
-        <div class="flex flex-col items-end gap-1">
-          <div
-            class="max-w-[75%] break-words text-text-primary rounded-2xl rounded-br-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap" style="background: var(--color-accent-subtle); border: 1px solid var(--color-accent-glow); box-shadow: var(--shadow-sm);"
-          >
-            {{ msg.text }}
+        @if (msg.image) {
+          <div class="flex flex-col items-end gap-1">
+            <div
+              class="max-w-[75%] break-words text-text-primary rounded-2xl rounded-br-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap"
+              style="background: var(--color-accent-subtle); border: 1px solid var(--color-accent-glow); box-shadow: var(--shadow-sm);"
+            >
+              <img [src]="msg.image" alt="Attached image"/>
+            </div>
+            @if (msg.date) {
+              <span class="text-xs text-text-muted">{{ msg.date | date: 'HH:mm' }}</span>
+            }
           </div>
-          @if (msg.date) {
-            <span class="text-xs text-text-muted">{{ msg.date | date: 'HH:mm' }}</span>
-          }
-        </div>
+        } @else if (msg.text) {
+          <div class="flex flex-col items-end gap-1">
+            <div
+              class="max-w-[75%] break-words text-text-primary rounded-2xl rounded-br-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap"
+              style="background: var(--color-accent-subtle); border: 1px solid var(--color-accent-glow); box-shadow: var(--shadow-sm);"
+            >
+              {{ msg.text }}
+            </div>
+            @if (msg.date) {
+              <span class="text-xs text-text-muted">{{ msg.date | date: 'HH:mm' }}</span>
+            }
+          </div>
+        }
       } @else if (msg.role === 'error') {
         <div class="flex flex-col items-start gap-1">
           <div
-            class="max-w-[80%] text-error-text rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap flex items-start gap-2" style="background: var(--color-error-bg); border: 1px solid var(--color-error-border); box-shadow: var(--shadow-sm);"
+            class="max-w-[80%] text-error-text rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap flex items-start gap-2"
+            style="background: var(--color-error-bg); border: 1px solid var(--color-error-border); box-shadow: var(--shadow-sm);"
           >
             <span class="shrink-0 mt-0.5 text-error-muted">&#9888;</span>
             <span>{{ msg.text }}</span>
@@ -93,7 +109,9 @@ import { CreateChatMetadataDto } from '../../client';
             }
             <span class="font-semibold truncate">{{ msg.toolName ?? '…' }}</span>
             @if (msg.providerLabel) {
-<span class="text-text-muted shrink-0 text-[10px]">{{ 'messages.via' | translate }} {{ msg.providerLabel }}</span>
+              <span class="text-text-muted shrink-0 text-[10px]"
+                >{{ 'messages.via' | translate }} {{ msg.providerLabel }}</span
+              >
             }
             <span class="ml-auto opacity-50 group-hover:opacity-80 transition-opacity shrink-0">
               {{ msg.collapsed ? '▶' : '▼' }}
@@ -105,8 +123,9 @@ import { CreateChatMetadataDto } from '../../client';
             >
               @if (msg.toolArguments) {
                 <div class="px-3 py-2 border-b border-tool-border/30">
-                  <span class="text-tool-muted uppercase tracking-widest text-[10px] font-semibold"
-  >{{ 'messages.toolArguments' | translate }}</span
+                  <span
+                    class="text-tool-muted uppercase tracking-widest text-[10px] font-semibold"
+                    >{{ 'messages.toolArguments' | translate }}</span
                   >
                   <pre
                     class="mt-1 text-tool-text whitespace-pre-wrap break-all leading-relaxed font-mono"
@@ -120,7 +139,9 @@ import { CreateChatMetadataDto } from '../../client';
                     class="uppercase tracking-widest text-[10px]"
                     [class]="msg.toolFailed ? 'text-red-700' : 'text-emerald-700'"
                   >
-                    {{ (msg.toolFailed ? 'messages.toolError' : 'messages.toolOutput') | translate }}
+                    {{
+                      (msg.toolFailed ? 'messages.toolError' : 'messages.toolOutput') | translate
+                    }}
                   </span>
                   <pre
                     class="mt-1 whitespace-pre-wrap break-all leading-relaxed"
@@ -129,7 +150,9 @@ import { CreateChatMetadataDto } from '../../client';
                   >
                 </div>
               } @else if (msg.streaming) {
-<div class="px-3 py-2 text-tool-muted italic">{{ 'messages.toolWaiting' | translate }}</div>
+                <div class="px-3 py-2 text-tool-muted italic">
+                  {{ 'messages.toolWaiting' | translate }}
+                </div>
               }
             </div>
           }
@@ -194,7 +217,10 @@ import { CreateChatMetadataDto } from '../../client';
               </svg>
             }
             <span class="font-semibold">
-              {{ (msg.streaming ? 'messages.processingPrompt' : 'messages.promptProcessed') | translate }}
+              {{
+                (msg.streaming ? 'messages.processingPrompt' : 'messages.promptProcessed')
+                  | translate
+              }}
             </span>
             @if (msg.streaming && (msg.progress ?? 0) > 0) {
               <span class="text-amber-500/80 tabular-nums"
@@ -227,7 +253,7 @@ import { CreateChatMetadataDto } from '../../client';
             } @else {
               <span class="text-reasoning-muted shrink-0">◈</span>
             }
-<span class="font-semibold">{{ 'messages.reasoning' | translate }}</span>
+            <span class="font-semibold">{{ 'messages.reasoning' | translate }}</span>
             @if (msg.collapsed) {
               <span class="text-reasoning-muted/60 truncate flex-1 text-left"
                 >{{ msg.text | stripMarkdown | slice: 0 : 60 }}…</span
@@ -241,7 +267,8 @@ import { CreateChatMetadataDto } from '../../client';
           </button>
           @if (!msg.collapsed) {
             <div
-              class="w-full rounded-xl rounded-tl-sm px-3 py-2 text-xs text-reasoning-text leading-relaxed break-words" style="background: var(--color-reasoning-bg); border: 1px solid var(--color-reasoning-border); box-shadow: var(--shadow-sm);"
+              class="w-full rounded-xl rounded-tl-sm px-3 py-2 text-xs text-reasoning-text leading-relaxed break-words"
+              style="background: var(--color-reasoning-bg); border: 1px solid var(--color-reasoning-border); box-shadow: var(--shadow-sm);"
             >
               @if (msg.streaming) {
                 <span class="whitespace-pre-wrap break-words"
@@ -266,7 +293,8 @@ import { CreateChatMetadataDto } from '../../client';
         <!-- ai message -->
         <div class="flex flex-col items-start gap-1">
           <div
-            class="max-w-[80%] text-text-primary rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm leading-relaxed" style="background: var(--color-surface-raised); border: 1px solid var(--color-border-default); box-shadow: var(--shadow-md);"
+            class="max-w-[80%] text-text-primary rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm leading-relaxed"
+            style="background: var(--color-surface-raised); border: 1px solid var(--color-border-default); box-shadow: var(--shadow-md);"
           >
             @if (msg.streaming) {
               <span class="whitespace-pre-wrap break-words"
@@ -297,7 +325,6 @@ export class ChatMessagesComponent implements OnInit {
   ngOnInit() {
     setTimeout(() => {
       console.log(this.messages());
-
-    },2000)
+    }, 2000);
   }
 }

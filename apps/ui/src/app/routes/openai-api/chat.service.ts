@@ -317,7 +317,7 @@ export class ChatService {
           {
             role: 'user',
             content: [
-              ...(appendedFiles ?? []),
+              ...(appendedFiles as any[] ?? []),
               {
                 type: 'input_text',
                 text: input,

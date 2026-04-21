@@ -15,9 +15,9 @@ export function fileSizeLabel(dataUrl: string): string {
 }
 
 export interface AppendedFile {
-  type: 'input_file';
+  type: 'input_image';
   filename: string;
-  file_data: string; // data:<mime>;base64,<data>
+  image_url: string; // data:<mime>;base64,<data>
 }
 
 /**
@@ -31,9 +31,9 @@ export function readFilesAsDataUrls(files: FileList): Promise<AppendedFile[]> {
         const reader = new FileReader();
         reader.onload = () =>
           resolve({
-            type: 'input_file',
+            type: 'input_image',
             filename: file.name,
-            file_data: reader.result as string,
+            image_url: reader.result as string,
           });
         reader.onerror = reject;
         reader.readAsDataURL(file);

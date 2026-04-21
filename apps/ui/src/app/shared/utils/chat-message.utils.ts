@@ -5,7 +5,9 @@
 
 export interface ChatMessage {
   role: 'user' | 'ai' | 'error' | 'info' | 'tool_call' | 'reasoning' | 'prompt_processing' | 'mcp_list_tools';
-  text: string;
+  text?: string;
+  image?: string;
+  file?: string;
   date?: Date;
   stats?: string;
   streaming?: boolean;
