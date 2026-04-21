@@ -430,6 +430,9 @@ export class OpenAiApi implements OnDestroy, OnInit {
     this.chatMetaService.getChatMetadata(chatId).subscribe({
       next: (meta) => {
         const reasoningValue = meta.reasoningMode as ReasoningDto.EffortEnum | undefined;
+        const match = this.models()?.find((m) => m.id === meta.usedModel);
+        if(match)
+          this.selectModel(match);
         if (reasoningValue) {
           this.reasoning.set(reasoningValue);
         }
