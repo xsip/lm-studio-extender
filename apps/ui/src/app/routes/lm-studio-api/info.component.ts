@@ -1,70 +1,45 @@
 import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AuthService, MeDto, ModelDto, OpenAIService } from '../../client';
-import { LMStudioService } from '../../client';
+import { AuthService, LMStudioService, MeDto, ModelDto, OpenAIService } from '../../client';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { readStoredTheme, applyTheme } from '../../shared/utils/theme.utils';
+import { SpinnerComponent } from '../../shared/components/spinner.component';
+import { DarkModeToggleComponent } from '../../shared/components/ui/dark-mode-toggle.component';
+import { BadgeComponent } from '../../shared/components/ui/badge.component';
+import { ButtonComponent } from '../../shared/components/ui/button.component';
 
 @Component({
   selector: 'app-info',
-  imports: [CommonModule, RouterLink, RouterLinkActive],
+  imports: [
+    CommonModule,
+    RouterLink,
+    RouterLinkActive,
+    SpinnerComponent,
+    DarkModeToggleComponent,
+    BadgeComponent,
+    ButtonComponent,
+  ],
   template: `
     <div class="flex flex-col h-full overflow-y-auto p-4 gap-4 text-xs">
-      <!-- ── Header ── -->
+      <!-- ── Theme ── -->
       <div class="flex items-center justify-between">
-        <span class="text-text-primary font-semibold text-sm">Theme: </span>
-        <!-- Dark mode toggle -->
-        <button
-          type="button"
-          (click)="toggleDarkMode()"
-          class="flex items-center justify-center w-8 h-8 rounded-lg border border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors"
-          [title]="isDark() ? 'Switch to light mode' : 'Switch to dark mode'"
+        <span class="text-text-primary font-semibold text-sm">Theme</span>
+        <ui-dark-mode-toggle />
+      </div>
+
+      <!-- ── Navigation links ── -->
+      <div class="flex items-center justify-between">
+        <span class="text-text-primary font-semibold text-sm">Documentation</span>
+        <a
+          routerLink="/"
+          routerLinkActive="border-accent text-accent bg-accent/10"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="px-2.5 py-1 text-[11px] rounded-md font-medium border border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors"
+          >View Readme</a
         >
-          @if (isDark()) {
-            <svg
-              class="w-3.5 h-3.5"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-            >
-              <circle cx="12" cy="12" r="5" />
-              <path
-                stroke-linecap="round"
-                d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
-              />
-            </svg>
-          } @else {
-            <svg
-              class="w-3.5 h-3.5"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"
-              />
-            </svg>
-          }
-        </button>
       </div>
+
       <div class="flex items-center justify-between">
-        <span class="text-text-primary font-semibold text-sm">Documentation: </span>
-        <div class="flex items-center gap-1 ml-1">
-          <a
-            routerLink="/"
-            routerLinkActive="border-accent text-accent bg-accent/10"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="px-2.5 py-1 text-[11px] rounded-md font-medium border border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors"
-            >View Readme</a
-          >
-        </div>
-      </div>
-      <div class="flex items-center justify-between">
-        <span class="text-text-primary font-semibold text-sm">Client: </span>
+        <span class="text-text-primary font-semibold text-sm">Client</span>
         <div class="flex items-center gap-1 ml-1">
           <a
             routerLink="/chat-lm-studio"
@@ -82,16 +57,11 @@ import { readStoredTheme, applyTheme } from '../../shared/utils/theme.utils';
           >
         </div>
       </div>
-      <!-- ── Header ── -->
+
+      <!-- ── Refresh ── -->
       <div class="flex items-center justify-between">
         <span class="text-text-primary font-semibold text-sm">Info</span>
-        <button
-          type="button"
-          (click)="refresh()"
-          class="flex items-center gap-1 px-2 py-1 rounded-md border border-border-default text-text-secondary hover:text-text-primary hover:border-border-strong transition-colors"
-          [disabled]="loading()"
-          title="Refresh"
-        >
+        <ui-button variant="secondary" size="xs" [disabled]="loading()" (clicked)="refresh()">
           <svg
             class="w-3 h-3 transition-transform"
             [class.animate-spin]="loading()"
@@ -107,7 +77,7 @@ import { readStoredTheme, applyTheme } from '../../shared/utils/theme.utils';
             />
           </svg>
           <span>Refresh</span>
-        </button>
+        </ui-button>
       </div>
 
       <!-- ── User card ── -->
@@ -136,21 +106,7 @@ import { readStoredTheme, applyTheme } from '../../shared/utils/theme.utils';
         </div>
 
         @if (userLoading()) {
-          <div class="px-3 py-4 flex justify-center">
-            <svg
-              class="w-4 h-4 animate-spin text-text-muted"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
-            </svg>
-          </div>
+          <div class="px-3 py-4 flex justify-center"><app-spinner size="md" /></div>
         } @else if (userError()) {
           <p class="px-3 py-3 text-red-400">Failed to load user data.</p>
         } @else if (user()) {
@@ -161,24 +117,13 @@ import { readStoredTheme, applyTheme } from '../../shared/utils/theme.utils';
             </div>
             <div class="flex justify-between items-center px-3 py-2">
               <span class="text-text-muted">Role</span>
-              <span
-                class="px-1.5 py-0.5 rounded-md text-[10px] font-medium"
-                [class]="
-                  user()!.role === 'admin'
-                    ? 'bg-amber-500/15 text-amber-400'
-                    : 'bg-surface-overlay text-text-secondary'
-                "
-              >
-                {{ user()!.role }}
-              </span>
+              <ui-badge [variant]="user()!.role === 'admin' ? 'warn' : 'default'">{{
+                user()!.role
+              }}</ui-badge>
             </div>
             <div class="flex justify-between items-center px-3 py-2">
               <span class="text-text-muted">Subscription</span>
-              <span
-                class="px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-accent/15 text-accent"
-              >
-                {{ user()!.subscription }}
-              </span>
+              <ui-badge variant="accent">{{ user()!.subscription }}</ui-badge>
             </div>
             <div class="flex justify-between items-center px-3 py-2">
               <span class="text-text-muted">Status</span>
@@ -186,8 +131,7 @@ import { readStoredTheme, applyTheme } from '../../shared/utils/theme.utils';
                 <span
                   class="w-1.5 h-1.5 rounded-full"
                   [class]="user()!.isActivated ? 'bg-success-muted' : 'bg-red-400'"
-                >
-                </span>
+                ></span>
                 <span [class]="user()!.isActivated ? 'text-success-muted' : 'text-red-400'">
                   {{ user()!.isActivated ? 'Active' : 'Inactive' }}
                 </span>
@@ -223,29 +167,14 @@ import { readStoredTheme, applyTheme } from '../../shared/utils/theme.utils';
         </div>
 
         @if (userLoading()) {
-          <div class="px-3 py-4 flex justify-center">
-            <svg
-              class="w-4 h-4 animate-spin text-text-muted"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
-            </svg>
-          </div>
+          <div class="px-3 py-4 flex justify-center"><app-spinner size="md" /></div>
         } @else if (user()) {
           <div class="px-3 pt-3 pb-2 flex flex-col gap-2">
-            <!-- Progress bar -->
             <div class="flex justify-between text-[10px] mb-0.5">
               <span class="text-text-muted">Used</span>
-              <span class="font-mono text-text-secondary">
-                {{ user()!.usedTokens | number }} / {{ user()!.tokenLimit | number }}
-              </span>
+              <span class="font-mono text-text-secondary"
+                >{{ user()!.usedTokens | number }} / {{ user()!.tokenLimit | number }}</span
+              >
             </div>
             <div class="h-1.5 rounded-full bg-surface-sunken overflow-hidden">
               <div
@@ -296,28 +225,13 @@ import { readStoredTheme, applyTheme } from '../../shared/utils/theme.utils';
           @if (!modelsLoading() && models().length > 0) {
             <span
               class="ml-auto px-1.5 py-0.5 rounded-full bg-surface-sunken text-text-muted text-[10px]"
+              >{{ models().length }}</span
             >
-              {{ models().length }}
-            </span>
           }
         </div>
 
         @if (modelsLoading()) {
-          <div class="px-3 py-4 flex justify-center">
-            <svg
-              class="w-4 h-4 animate-spin text-text-muted"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
-            </svg>
-          </div>
+          <div class="px-3 py-4 flex justify-center"><app-spinner size="md" /></div>
         } @else if (modelsError()) {
           <p class="px-3 py-3 text-red-400">Failed to load models.</p>
         } @else if (models().length === 0) {
@@ -330,14 +244,9 @@ import { readStoredTheme, applyTheme } from '../../shared/utils/theme.utils';
                   <span
                     class="font-medium text-text-primary truncate flex-1 font-mono"
                     style="font-size:11px"
+                    >{{ model.key }}</span
                   >
-                    {{ model.key }}
-                  </span>
-                  <span
-                    class="shrink-0 px-1.5 py-0.5 rounded-md text-[9px] font-medium bg-surface-overlay text-text-muted uppercase"
-                  >
-                    {{ model.type }}
-                  </span>
+                  <ui-badge>{{ model.type }}</ui-badge>
                 </div>
                 @if (model.publisher) {
                   <span class="text-text-muted" style="font-size:10px">{{ model.publisher }}</span>
@@ -355,11 +264,10 @@ export class InfoComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly lmStudioService = inject(LMStudioService);
   private readonly openaiService = inject(OpenAIService);
-  readonly isDark = signal(readStoredTheme());
+
   readonly user = signal<MeDto | null>(null);
   readonly userLoading = signal(false);
   readonly userError = signal(false);
-
   readonly models = signal<ModelDto[]>([]);
   readonly modelsLoading = signal(false);
   readonly modelsError = signal(false);
@@ -415,13 +323,7 @@ export class InfoComponent implements OnInit {
       this.openaiService.getModelsOpenAi().subscribe({
         next: (res) => {
           this.models.set(
-            (res ?? []).map((m) => {
-              return {
-                key: m.id,
-                publisher: m.owned_by,
-                type: 'llm',
-              } as ModelDto;
-            }),
+            (res ?? []).map((m) => ({ key: m.id, publisher: m.owned_by, type: 'llm' }) as ModelDto),
           );
           this.modelsLoading.set(false);
         },
@@ -431,11 +333,5 @@ export class InfoComponent implements OnInit {
         },
       });
     }
-  }
-
-  toggleDarkMode(): void {
-    const next = !this.isDark();
-    this.isDark.set(next);
-    applyTheme(next);
   }
 }

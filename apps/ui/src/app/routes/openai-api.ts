@@ -30,6 +30,11 @@ import { InfoComponent } from './lm-studio-api/info.component';
 import { ModelReasoningCapability } from './lm-studio-api/model-selector.component';
 import { AppendedFile, OpenAiChatInputComponent } from './openai-api/chat-input.component';
 import { take } from 'rxjs';
+import { IconButtonComponent } from '../shared/components/ui/icon-button.component';
+import { ButtonComponent } from '../shared/components/ui/button.component';
+import { LabelComponent } from '../shared/components/ui/label.component';
+import { TextInputComponent } from '../shared/components/ui/text-input.component';
+import { ToggleComponent } from '../shared/components/ui/toggle.component';
 
 @Component({
   selector: 'app-openai-api',
@@ -42,6 +47,11 @@ import { take } from 'rxjs';
     OpenAiChatInputComponent,
     OpenAiModelSelectorComponent,
     InfoComponent,
+    IconButtonComponent,
+    ButtonComponent,
+    LabelComponent,
+    TextInputComponent,
+    ToggleComponent,
   ],
   providers: [ChatService],
   template: `
@@ -52,26 +62,21 @@ import { take } from 'rxjs';
       <div
         class="flex items-center gap-3 border-b border-border-default px-3 py-2.5 shrink-0 bg-surface-raised"
       >
-        <button
-          type="button"
-          (click)="showChatsSidebar.set(!showChatsSidebar())"
-          class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs border border-border-default rounded-lg text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors"
+        <ui-button
+          variant="secondary"
+          size="xs"
+          [active]="showChatsSidebar()"
+          (clicked)="showChatsSidebar.set(!showChatsSidebar())"
           title="Toggle chat history"
         >
-          <svg
-            class="w-3.5 h-3.5"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M3 12h18M3 18h18" />
           </svg>
           <span class="hidden sm:inline">Chats</span>
-        </button>
+        </ui-button>
 
         <div class="w-1.5 h-1.5 rounded-full bg-success-muted animate-pulse ml-1"></div>
-        <span class="text-xs text-text-muted tracking-wide font-medium">OpenAI Extender</span>
+        <span class="text-xs text-text-muted tracking-wide font-medium hidden md:block">OpenAI Extender</span>
 
         <!-- Provider tabs -->
 
@@ -86,31 +91,15 @@ import { take } from 'rxjs';
         </div>
 
         <!-- User / Info panel toggle -->
-        <button
-          type="button"
-          (click)="showInfoPanel.set(!showInfoPanel())"
-          class="flex items-center justify-center w-8 h-8 rounded-lg border transition-colors"
-          [class]="
-            showInfoPanel()
-              ? 'border-accent text-accent bg-accent/10'
-              : 'border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary'
-          "
+        <ui-icon-button
+          [active]="showInfoPanel()"
           title="User info"
+          (clicked)="showInfoPanel.set(!showInfoPanel())"
         >
-          <svg
-            class="w-3.5 h-3.5"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-            />
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
-        </button>
+        </ui-icon-button>
       </div>
 
       <!-- ── Body ── -->
@@ -165,57 +154,37 @@ import { take } from 'rxjs';
 
                     <!-- Chat Name -->
                     <div>
-                      <label class="block text-xs font-medium text-text-primary mb-1.5"
-                        >Chat Name</label
-                      >
-                      <input
-                        type="text"
+                      <ui-label class="mb-1.5">Chat Name</ui-label>
+                      <ui-text-input
                         [(ngModel)]="newChatName"
                         placeholder="Optional name…"
-                        class="w-full bg-surface-base border border-border-default focus:border-accent focus:ring-1 focus:ring-accent rounded-md px-2.5 py-1.5 text-xs text-text-primary placeholder-text-muted focus:outline-none transition-colors"
                       />
                     </div>
 
                     <!-- Endpoint Preference -->
                     <div>
-                      <label class="block text-xs font-medium text-text-primary mb-1.5"
-                        >Endpoint</label
-                      >
+                      <ui-label class="mb-1.5">Endpoint</ui-label>
                       <div class="flex gap-2">
-                        <button
-                          type="button"
-                          (click)="newChatEndpointPreference.set('RESPONSES')"
-                          class="flex-1 px-3 py-1.5 text-xs rounded-md border transition-colors font-medium"
-                          [class]="
-                            newChatEndpointPreference() === 'RESPONSES'
-                              ? 'border-accent text-accent bg-accent/10'
-                              : 'border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary'
-                          "
-                        >
-                          Responses API
-                        </button>
-                        <button
-                          disabled
-                          type="button"
-                          (click)="newChatEndpointPreference.set('COMPLETION')"
-                          class="flex-1 px-3 py-1.5 text-xs rounded-md border transition-colors font-medium"
-                          [class]="
-                            newChatEndpointPreference() === 'COMPLETION'
-                              ? 'border-accent text-accent bg-accent/10'
-                              : 'border-border-default disabled:opacity-70 text-text-secondary hover:border-border-strong hover:text-text-primary'
-                          "
-                        >
-                          Chat Completions
-                        </button>
+                        <ui-button
+                          class="flex-1"
+                          variant="secondary"
+                          [active]="newChatEndpointPreference() === 'RESPONSES'"
+                          (clicked)="newChatEndpointPreference.set('RESPONSES')"
+                        >Responses API</ui-button>
+                        <ui-button
+                          class="flex-1"
+                          variant="secondary"
+                          [disabled]="true"
+                          [active]="newChatEndpointPreference() === 'COMPLETION'"
+                          (clicked)="newChatEndpointPreference.set('COMPLETION')"
+                        >Chat Completions</ui-button>
                       </div>
                       <p class="mt-1.5 text-[10px] text-text-muted">
                         @if (newChatEndpointPreference() === 'RESPONSES') {
-                          Uses the
-                          <span class="font-mono text-text-secondary">/responses</span> endpoint —
+                          Uses the <span class="font-mono text-text-secondary">/responses</span> endpoint —
                           supports reasoning &amp; file inputs.
                         } @else {
-                          Uses the
-                          <span class="font-mono text-text-secondary">/chat/completions</span>
+                          Uses the <span class="font-mono text-text-secondary">/chat/completions</span>
                           endpoint — standard chat interface.
                         }
                       </p>
@@ -224,78 +193,27 @@ import { take } from 'rxjs';
                     <!-- Encryption toggle -->
                     <div class="flex items-center justify-between">
                       <div>
-                        <div class="text-xs font-medium text-text-primary">Encryption</div>
-                        <div class="text-[10px] text-text-muted mt-0.5">
-                          Encrypt messages with a key
-                        </div>
+                        <ui-label>Encryption</ui-label>
+                        <span class="text-[10px] text-text-muted mt-0.5 block">Encrypt messages with a key</span>
                       </div>
-                      <button
-                        type="button"
-                        (click)="newChatUseCrypto.set(!newChatUseCrypto())"
-                        class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none"
-                        [class]="newChatUseCrypto() ? 'bg-amber-500' : 'bg-zinc-700'"
-                      >
-                        <span
-                          class="inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform"
-                          [class]="newChatUseCrypto() ? 'translate-x-4' : 'translate-x-1'"
-                        ></span>
-                      </button>
+                      <ui-toggle
+                        [(ngModel)]="newChatUseCryptoModel"
+                        activeColor="bg-amber-500"
+                        (checkedChange)="newChatUseCrypto.set($event)"
+                      />
                     </div>
 
                     <!-- Crypto key input -->
                     @if (newChatUseCrypto()) {
                       <div>
-                        <label class="block text-xs font-medium text-text-primary mb-1.5">
-                          Encryption Key
-                        </label>
-                        <div class="relative">
-                          <input
-                            [type]="showNewChatKey() ? 'text' : 'password'"
-                            [(ngModel)]="newChatCryptoKey"
-                            placeholder="Enter encryption key…"
-                            class="w-full bg-surface-base border border-border-default focus:border-accent focus:ring-1 focus:ring-accent rounded-md px-2.5 py-1.5 pr-8 text-xs text-text-primary placeholder-text-muted focus:outline-none transition-colors font-mono"
-                          />
-                          <button
-                            type="button"
-                            (click)="showNewChatKey.set(!showNewChatKey())"
-                            class="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary transition-colors"
-                          >
-                            @if (showNewChatKey()) {
-                              <svg
-                                class="w-3.5 h-3.5"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                  d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
-                                />
-                              </svg>
-                            } @else {
-                              <svg
-                                class="w-3.5 h-3.5"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                  d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
-                                />
-                                <path
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                />
-                              </svg>
-                            }
-                          </button>
-                        </div>
+                        <ui-label class="mb-1.5">Encryption Key</ui-label>
+                        <ui-text-input
+                          type="password"
+                          [showToggle]="true"
+                          [mono]="true"
+                          [(ngModel)]="newChatCryptoKey"
+                          placeholder="Enter encryption key…"
+                        />
                       </div>
                     }
                   </div>
@@ -325,22 +243,11 @@ import { take } from 'rxjs';
               class="flex items-center justify-between px-3 py-2 border-b border-border-default shrink-0"
             >
               <span class="text-xs font-semibold text-text-primary">Info</span>
-              <button
-                type="button"
-                (click)="showInfoPanel.set(false)"
-                class="flex items-center justify-center w-6 h-6 rounded-md text-text-muted hover:text-text-primary hover:bg-surface-overlay transition-colors"
-                title="Close"
-              >
-                <svg
-                  class="w-3.5 h-3.5"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                >
+              <ui-icon-button size="sm" title="Close" (clicked)="showInfoPanel.set(false)">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
-              </button>
+              </ui-icon-button>
             </div>
             <div class="flex-1 overflow-hidden">
               <app-info [uiType]="'OPENAI'" />
@@ -381,7 +288,8 @@ export class OpenAiApi implements OnDestroy, OnInit {
   readonly newChatUseCrypto = signal(false);
   newChatCryptoKey = '';
   newChatName = '';
-  readonly showNewChatKey = signal(false);
+  /** Two-way ngModel bridge for ui-toggle — kept in sync with newChatUseCrypto signal. */
+  newChatUseCryptoModel = false;
 
   readonly models = signal<ModelOpenAiDto[]>([]);
   readonly modelsLoading = signal(false);
@@ -640,9 +548,9 @@ export class OpenAiApi implements OnDestroy, OnInit {
     // Reset new-chat options to defaults
     this.newChatEndpointPreference.set('RESPONSES');
     this.newChatUseCrypto.set(false);
+    this.newChatUseCryptoModel = false;
     this.newChatCryptoKey = '';
     this.newChatName = '';
-    this.showNewChatKey.set(false);
   }
 
   // ── Messaging ─────────────────────────────────────────────────────────────

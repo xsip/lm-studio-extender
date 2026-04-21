@@ -12,8 +12,8 @@ import {
 } from '../../shared/components/reasoning-dropdown.component';
 
 // Re-export so existing consumers that import from this file continue to work.
-export { ALL_REASONING_OPTIONS };
-    export type { ReasoningOption, ModelReasoningCapability };
+export { ALL_REASONING_OPTIONS } from '../../shared/components/reasoning-dropdown.component';
+export type { ReasoningOption, ModelReasoningCapability } from '../../shared/components/reasoning-dropdown.component';
 
 @Component({
   selector: 'app-chat-input',

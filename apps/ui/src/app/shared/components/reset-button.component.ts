@@ -1,24 +1,16 @@
 import { Component, output } from '@angular/core';
+import { ButtonComponent } from './ui/button.component';
 
 /**
- * Reusable "Reset" button shown while a stream is in progress.
- *
- * Usage:
- *   @if (streaming()) {
- *     <app-reset-button (clicked)="onReset()" />
- *   }
+ * Stream reset button. Thin wrapper over ButtonComponent.
+ * Kept for backwards compatibility with existing imports.
  */
 @Component({
   selector: 'app-reset-button',
   standalone: true,
+  imports: [ButtonComponent],
   template: `
-    <button
-      type="button"
-      (click)="clicked.emit()"
-      class="px-4 py-1.5 text-xs tracking-widest uppercase border border-border-default hover:border-red-500 hover:text-red-400 text-text-muted rounded-lg transition-colors"
-    >
-      Reset
-    </button>
+    <ui-button variant="danger" (clicked)="clicked.emit()">Reset</ui-button>
   `,
 })
 export class ResetButtonComponent {

@@ -1,0 +1,48 @@
+import { Component, input, output } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+/**
+ * Square icon-only button used in toolbars, panel toggles, close buttons.
+ *
+ * Usage:
+ *   <ui-icon-button title="Close" (clicked)="close()">
+ *     <svg …></svg>
+ *   </ui-icon-button>
+ *
+ *   <ui-icon-button [active]="panelOpen()" title="Info" (clicked)="toggle()">
+ *     <svg …></svg>
+ *   </ui-icon-button>
+ */
+@Component({
+  selector: 'ui-icon-button',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
+    <button
+      [type]="type()"
+      [disabled]="disabled()"
+      [title]="title()"
+      (click)="clicked.emit()"
+      class="inline-flex items-center justify-center rounded-lg border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+      [class]="classes()"
+    >
+      <ng-content />
+    </button>
+  `,
+})
+export class IconButtonComponent {
+  readonly size     = input<'sm' | 'md'>('md');
+  readonly active   = input<boolean>(false);
+  readonly disabled = input<boolean>(false);
+  readonly title    = input<string>('');
+  readonly type     = input<'button' | 'submit' | 'reset'>('button');
+
+  readonly clicked = output<void>();
+
+  classes(): string {
+    const s = this.size() === 'sm' ? 'w-6 h-6' : 'w-8 h-8';
+    return this.active()
+      ? `${s} border-accent text-accent bg-accent/10`
+      : `${s} border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary`;
+  }
+}

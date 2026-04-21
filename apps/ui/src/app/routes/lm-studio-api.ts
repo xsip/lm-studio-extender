@@ -25,6 +25,8 @@ import {
 } from './lm-studio-api/model-selector.component';
 import { InfoComponent } from './lm-studio-api/info.component';
 import { LmStudioEvent } from '../lmstudio-stream.service';
+import { IconButtonComponent } from '../shared/components/ui/icon-button.component';
+import { ButtonComponent } from '../shared/components/ui/button.component';
 
 @Component({
   selector: 'app-debug',
@@ -38,6 +40,8 @@ import { LmStudioEvent } from '../lmstudio-stream.service';
     EventLogComponent,
     ModelSelectorComponent,
     InfoComponent,
+    IconButtonComponent,
+    ButtonComponent,
   ],
   providers: [ChatService],
   template: `
@@ -48,26 +52,21 @@ import { LmStudioEvent } from '../lmstudio-stream.service';
       <div
         class="flex items-center gap-3 border-b border-border-default px-3 py-2.5 shrink-0 bg-surface-raised"
       >
-        <button
-          type="button"
-          (click)="showChatsSidebar.set(!showChatsSidebar())"
-          class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs border border-border-default rounded-lg text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors"
+        <ui-button
+          variant="secondary"
+          size="xs"
+          [active]="showChatsSidebar()"
+          (clicked)="showChatsSidebar.set(!showChatsSidebar())"
           title="Toggle chat history"
         >
-          <svg
-            class="w-3.5 h-3.5"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M3 12h18M3 18h18" />
           </svg>
           <span class="hidden sm:inline">Chats</span>
-        </button>
+        </ui-button>
 
         <div class="w-1.5 h-1.5 rounded-full bg-success-muted animate-pulse ml-1"></div>
-        <span class="text-xs text-text-muted tracking-wide font-medium">LM Studio Extender</span>
+        <span class="text-xs text-text-muted tracking-wide font-medium hidden md:block">LM Studio Extender</span>
 
         <div class="relative ml-auto">
           <app-model-selector
@@ -95,32 +94,15 @@ import { LmStudioEvent } from '../lmstudio-stream.service';
           }
         </button>!-->
 
-        <!-- User / Info panel toggle -->
-        <button
-          type="button"
-          (click)="showInfoPanel.set(!showInfoPanel())"
-          class="flex items-center justify-center w-8 h-8 rounded-lg border transition-colors"
-          [class]="
-            showInfoPanel()
-              ? 'border-accent text-accent bg-accent/10'
-              : 'border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary'
-          "
+        <ui-icon-button
+          [active]="showInfoPanel()"
           title="User info"
+          (clicked)="showInfoPanel.set(!showInfoPanel())"
         >
-          <svg
-            class="w-3.5 h-3.5"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-            />
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
-        </button>
+        </ui-icon-button>
       </div>
 
       <!-- ── Body ── -->
@@ -179,22 +161,11 @@ import { LmStudioEvent } from '../lmstudio-stream.service';
               class="flex items-center justify-between px-3 py-2 border-b border-border-default shrink-0"
             >
               <span class="text-xs font-semibold text-text-primary">Info</span>
-              <button
-                type="button"
-                (click)="showInfoPanel.set(false)"
-                class="flex items-center justify-center w-6 h-6 rounded-md text-text-muted hover:text-text-primary hover:bg-surface-overlay transition-colors"
-                title="Close"
-              >
-                <svg
-                  class="w-3.5 h-3.5"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                >
+              <ui-icon-button size="sm" title="Close" (clicked)="showInfoPanel.set(false)">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
-              </button>
+              </ui-icon-button>
             </div>
             <div class="flex-1 overflow-hidden">
               <app-info [uiType]="'LMSTUDIO'" />
@@ -216,11 +187,10 @@ export class LmStudioApi implements OnDestroy, OnInit {
   @ViewChild('messageContainer') private messageContainer?: ElementRef<HTMLElement>;
   @ViewChild('chatSidebar') private chatSidebarRef?: ChatSidebarComponent;
 
-  readonly showEventPanel = signal(false);
-  readonly showChatsSidebar = signal(true);
-  readonly showInfoPanel = signal(false);
-  readonly isDark = signal(this.readStoredTheme());
-  readonly chatList = signal<any[]>([]);
+  readonly showEventPanel    = signal(false);
+  readonly showChatsSidebar  = signal(true);
+  readonly showInfoPanel     = signal(false);
+  readonly chatList          = signal<any[]>([]);
   readonly chatsLoading = signal(false);
   readonly events = signal<EventEntry[]>([]);
   readonly reasoning = signal<ChatRequestDto.ReasoningEnum | undefined>(undefined);
@@ -230,7 +200,6 @@ export class LmStudioApi implements OnDestroy, OnInit {
   readonly selectedModel = signal<ModelDto | null>(this.loadStoredModel());
 
   private static readonly MODEL_STORAGE_KEY = 'lmstudio_selected_model';
-  private static readonly THEME_STORAGE_KEY = 'theme';
   private pendingModelKey: string | null = null;
   private eventCounter = 0;
 
@@ -502,28 +471,6 @@ export class LmStudioApi implements OnDestroy, OnInit {
         );
       },
     });
-  }
-
-  // ── Theme ────────────────────────────────────────────────────────────────
-
-  private readStoredTheme(): boolean {
-    try {
-      const stored = localStorage.getItem(LmStudioApi.THEME_STORAGE_KEY);
-      return stored ? stored === 'dark' : true; // default dark
-    } catch {
-      return true;
-    }
-  }
-
-  toggleDarkMode(): void {
-    const next = !this.isDark();
-    this.isDark.set(next);
-    document.documentElement.classList.toggle('dark', next);
-    try {
-      localStorage.setItem(LmStudioApi.THEME_STORAGE_KEY, next ? 'dark' : 'light');
-    } catch {
-      /* ignore */
-    }
   }
 
   // ── Utilities ─────────────────────────────────────────────────────────────

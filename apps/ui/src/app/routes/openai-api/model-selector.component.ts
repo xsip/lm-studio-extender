@@ -11,7 +11,7 @@ import { SpinnerComponent } from '../../shared/components/spinner.component';
       <button
         type="button"
         (click)="!hasChatOpen() && dropdownOpen.set(!dropdownOpen())"
-        class="flex items-center gap-2 px-3 py-1.5 text-xs border rounded-lg transition-colors md:max-w-[260px] max-w-[100px]"
+        class="flex items-center gap-2 px-3 py-1.5 text-xs border rounded-lg transition-colors md:max-w-[260px] max-w-[230px]"
         [class]="
           hasChatOpen()
             ? 'border-border-default text-text-secondary cursor-not-allowed opacity-75'

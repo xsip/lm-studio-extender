@@ -1,27 +1,22 @@
-import { Component, input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, input, output } from '@angular/core';
+import { ButtonComponent } from './ui/button.component';
 
 /**
- * Reusable submit / send button for chat input forms.
- *
- * Usage:
- *   <app-send-button [disabled]="form.invalid || streaming()" [streaming]="streaming()" />
- *
- * The component is a presentational button — attach (click) or use inside a
- * form with type="submit".
+ * Chat send button. Thin wrapper over ButtonComponent.
+ * Kept for backwards compatibility with existing imports.
  */
 @Component({
   selector: 'app-send-button',
   standalone: true,
-  imports: [CommonModule],
+  imports: [ButtonComponent],
   template: `
-    <button
+    <ui-button
       type="submit"
+      variant="primary"
       [disabled]="disabled()"
-      class="px-5 py-1.5 text-xs font-semibold bg-accent hover:bg-accent-hover disabled:bg-surface-sunken disabled:text-text-muted disabled:cursor-not-allowed text-white rounded-lg transition-colors"
     >
       {{ streaming() ? 'Streaming...' : 'Send' }}
-    </button>
+    </ui-button>
   `,
 })
 export class SendButtonComponent {
