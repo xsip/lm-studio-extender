@@ -62,15 +62,26 @@ import { TranslateModule } from '@ngx-translate/core';
           (clicked)="showChatsSidebar.set(!showChatsSidebar())"
           [title]="'toolbar.toggleChats' | translate"
         >
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <svg
+            class="w-3.5 h-3.5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M3 12h18M3 18h18" />
           </svg>
           <span class="hidden sm:inline">{{ 'toolbar.chats' | translate }}</span>
         </ui-button>
 
         <div class="flex items-center gap-1.5 ml-1">
-          <div class="w-1.5 h-1.5 rounded-full bg-success-muted animate-pulse" style="box-shadow: 0 0 6px var(--color-success-muted);"></div>
-          <span class="text-xs text-text-muted tracking-wide font-medium hidden md:block">{{ 'login.appName' | translate }}</span>
+          <div
+            class="w-1.5 h-1.5 rounded-full bg-success-muted animate-pulse"
+            style="box-shadow: 0 0 6px var(--color-success-muted);"
+          ></div>
+          <span class="text-xs text-text-muted tracking-wide font-medium hidden md:block">{{
+            'login.appName' | translate
+          }}</span>
         </div>
 
         <div class="relative ml-auto">
@@ -104,14 +115,27 @@ import { TranslateModule } from '@ngx-translate/core';
           [title]="'toolbar.userInfo' | translate"
           (clicked)="showInfoPanel.set(!showInfoPanel())"
         >
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          <svg
+            class="w-3.5 h-3.5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            />
           </svg>
         </ui-icon-button>
       </div>
 
       <!-- ── Body ── -->
-      <div class="flex flex-1 overflow-hidden relative min-h-0" style="background: var(--color-surface-base);">
+      <div
+        class="flex flex-1 overflow-hidden relative min-h-0"
+        style="background: var(--color-surface-base);"
+      >
         @if (showChatsSidebar()) {
           <app-chat-sidebar
             #chatSidebar
@@ -134,6 +158,7 @@ import { TranslateModule } from '@ngx-translate/core';
             <div #messageContainer class="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3">
               <app-chat-messages
                 client="LMSTUDIO"
+                [isLoadingMessages]="this.isLoadingMessages()"
                 [messages]="chatService.chatMessages()"
                 [streaming]="chatService.streaming()"
                 [showResend]="chatService.showResend()"
@@ -165,9 +190,21 @@ import { TranslateModule } from '@ngx-translate/core';
             <div
               class="flex items-center justify-between px-3 py-2 border-b border-border-default shrink-0"
             >
-              <span class="text-xs font-semibold text-text-primary">{{ 'info.info' | translate }}</span>
-              <ui-icon-button size="sm" [title]="'common.close' | translate" (clicked)="showInfoPanel.set(false)">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <span class="text-xs font-semibold text-text-primary">{{
+                'info.info' | translate
+              }}</span>
+              <ui-icon-button
+                size="sm"
+                [title]="'common.close' | translate"
+                (clicked)="showInfoPanel.set(false)"
+              >
+                <svg
+                  class="w-3.5 h-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
                   <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </ui-icon-button>
@@ -192,13 +229,15 @@ export class LmStudioApi implements OnDestroy, OnInit {
   @ViewChild('messageContainer') private messageContainer?: ElementRef<HTMLElement>;
   @ViewChild('chatSidebar') private chatSidebarRef?: ChatSidebarComponent;
 
-  readonly showEventPanel    = signal(false);
-  readonly showChatsSidebar  = signal(true);
-  readonly showInfoPanel     = signal(false);
-  readonly chatList          = signal<any[]>([]);
+  readonly showEventPanel = signal(false);
+  readonly showChatsSidebar = signal(true);
+  readonly showInfoPanel = signal(false);
+  readonly chatList = signal<any[]>([]);
   readonly chatsLoading = signal(false);
   readonly events = signal<EventEntry[]>([]);
   readonly reasoning = signal<ChatRequestDto.ReasoningEnum | undefined>(undefined);
+
+  readonly isLoadingMessages = signal(false);
 
   readonly models = signal<ModelDto[]>([]);
   readonly modelsLoading = signal(false);
@@ -323,6 +362,7 @@ export class LmStudioApi implements OnDestroy, OnInit {
   }
 
   private loadChatHistory(chatId: string): void {
+    this.isLoadingMessages.set(true);
     this.chatsApi.getChatEntries(chatId).subscribe((res) => {
       const messages: any[] = [];
       for (const entry of res) {
@@ -374,6 +414,7 @@ export class LmStudioApi implements OnDestroy, OnInit {
           }
         }
       }
+      this.isLoadingMessages.set(false);
       this.chatService.chatMessages.set(messages);
     });
   }

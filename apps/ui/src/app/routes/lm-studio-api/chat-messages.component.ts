@@ -5,9 +5,17 @@ import { ChatMessage } from './chat.service';
 import { MarkdownPipe, StripMarkdownPipe } from './markdown.pipe';
 import ClientEnum = CreateChatMetadataDto.ClientEnum;
 import { CreateChatMetadataDto } from '../../client';
+import { SpinnerComponent } from '../../shared';
 @Component({
   selector: 'app-chat-messages',
-  imports: [CommonModule, DatePipe, TranslateModule, MarkdownPipe, StripMarkdownPipe],
+  imports: [
+    CommonModule,
+    DatePipe,
+    TranslateModule,
+    MarkdownPipe,
+    StripMarkdownPipe,
+    SpinnerComponent,
+  ],
   template: `
     @if (messages().length === 0 && !streaming()) {
       @if (client() === 'OPENAI') {
@@ -21,6 +29,11 @@ import { CreateChatMetadataDto } from '../../client';
       }
     }
 
+    @if (isLoadingMessages()) {
+      <div class=" flex items-center justify-center h-full text-xs text-text-muted tracking-wide">
+      <app-spinner size="xl" />
+      </div>
+    }
     @for (msg of messages(); track $index) {
       @if (msg.role === 'user') {
         @if (msg.image) {
@@ -29,7 +42,7 @@ import { CreateChatMetadataDto } from '../../client';
               class="max-w-[75%] break-words text-text-primary rounded-2xl rounded-br-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap"
               style="background: var(--color-accent-subtle); border: 1px solid var(--color-accent-glow); box-shadow: var(--shadow-sm);"
             >
-              <img [src]="msg.image" alt="Attached image"/>
+              <img [src]="msg.image" alt="Attached image" />
             </div>
             @if (msg.date) {
               <span class="text-xs text-text-muted">{{ msg.date | date: 'HH:mm' }}</span>
@@ -319,6 +332,7 @@ export class ChatMessagesComponent implements OnInit {
   readonly messages = input.required<ChatMessage[]>();
   readonly streaming = input.required<boolean>();
   readonly showResend = input.required<boolean>();
+  readonly isLoadingMessages = input.required<boolean>();
   readonly client = input.required<ClientEnum>();
   readonly toggleCollapsed = output<number>();
   readonly resend = output<void>();

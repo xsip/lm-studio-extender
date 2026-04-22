@@ -146,6 +146,7 @@ import { TranslateModule } from '@ngx-translate/core';
             <div #messageContainer class="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3">
               <app-chat-messages
                 client="OPENAI"
+                [isLoadingMessages]="this.isLoadingMessages()"
                 [messages]="$any(chatService.chatMessages())"
                 [streaming]="chatService.streaming()"
                 [showResend]="chatService.showResend()"
@@ -319,6 +320,7 @@ export class OpenAiApi implements OnDestroy, OnInit {
   readonly chatList = signal<any[]>([]);
   readonly chatsLoading = signal(false);
   readonly appendedFiles = signal<AppendedFile[]>([]);
+  readonly isLoadingMessages = signal(false);
 
   // ── New-chat options ───────────────────────────────────────────────────────
   readonly newChatEndpointPreference =
@@ -529,6 +531,7 @@ export class OpenAiApi implements OnDestroy, OnInit {
   }
 
   private loadChatHistory(chatId: string): void {
+    this.isLoadingMessages.set(true);
     this.chatsApi.getChatEntries(chatId).subscribe((res) => {
       const messages: any[] = [];
       for (const entry of res) {
@@ -602,6 +605,8 @@ export class OpenAiApi implements OnDestroy, OnInit {
           }
         }
       }
+      this.isLoadingMessages.set(false);
+
       this.chatService.chatMessages.set(messages);
     });
   }
