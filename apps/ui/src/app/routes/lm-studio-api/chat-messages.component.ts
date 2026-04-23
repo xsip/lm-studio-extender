@@ -31,7 +31,7 @@ import { SpinnerComponent } from '../../shared';
 
     @if (isLoadingMessages()) {
       <div class=" flex items-center justify-center h-full text-xs text-text-muted tracking-wide">
-      <app-spinner size="xl" />
+        <app-spinner size="xl" />
       </div>
     }
     @for (msg of messages(); track $index) {
@@ -42,7 +42,7 @@ import { SpinnerComponent } from '../../shared';
               class="max-w-[75%] break-words text-text-primary rounded-2xl rounded-br-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap"
               style="background: var(--color-accent-subtle); border: 1px solid var(--color-accent-glow); box-shadow: var(--shadow-sm);"
             >
-              <img [src]="msg.image" alt="Attached image" />
+              <img [src]="msg.image" class="rounded-md" alt="Attached image" />
             </div>
             @if (msg.date) {
               <span class="text-xs text-text-muted">{{ msg.date | date: 'HH:mm' }}</span>
@@ -77,7 +77,7 @@ import { SpinnerComponent } from '../../shared';
       } @else if (msg.role === 'info') {
         <div class="flex flex-col items-start gap-1">
           <div
-            class="max-w-[80%] bg-info-bg border border-info-border text-info-text rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap flex items-start gap-2"
+            class="mt-2 max-w-[80%] bg-info-bg border border-info-border text-info-text rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap flex items-start gap-2"
           >
             <span class="shrink-0 mt-0.5 text-info-muted">&#9888;</span>
             <span>{{ msg.text }}</span>
@@ -284,9 +284,12 @@ import { SpinnerComponent } from '../../shared';
               style="background: var(--color-reasoning-bg); border: 1px solid var(--color-reasoning-border); box-shadow: var(--shadow-sm);"
             >
               @if (msg.streaming) {
+                <div
+                  class="markdown-body markdown-body--violet"
+                  [innerHTML]="msg.text | markdown"
+                ></div>
                 <span class="whitespace-pre-wrap break-words"
-                  >{{ msg.text
-                  }}<span
+                  ><span
                     class="inline-block w-1.5 h-3 bg-reasoning-muted animate-pulse ml-0.5 align-middle rounded-sm"
                   ></span
                 ></span>
@@ -310,9 +313,9 @@ import { SpinnerComponent } from '../../shared';
             style="background: var(--color-surface-raised); border: 1px solid var(--color-border-default); box-shadow: var(--shadow-md);"
           >
             @if (msg.streaming) {
+              <div class="markdown-body" [innerHTML]="msg.text | markdown"></div>
               <span class="whitespace-pre-wrap break-words"
-                >{{ msg.text
-                }}<span
+                ><span
                   class="inline-block w-1.5 h-4 bg-accent animate-pulse ml-0.5 align-middle rounded-sm"
                 ></span
               ></span>

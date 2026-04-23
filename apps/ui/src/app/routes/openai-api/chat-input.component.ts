@@ -16,7 +16,7 @@ export type { AppendedFile };
   selector: 'app-openai-chat-input',
   imports: [CommonModule, ReactiveFormsModule, TranslateModule, SendButtonComponent, ResetButtonComponent, ReasoningDropdownComponent],
   template: `
-    <div class="shrink-0 border-t border-border-default px-4 py-3 bg-surface-raised">
+    <div class="shrink-0 border rounded-t-none md:rounded-t-md border-border-default px-4 py-3 bg-surface-raised">
       <form [formGroup]="form()" (ngSubmit)="submitted.emit()" class="flex flex-col gap-2">
         <textarea
           formControlName="input"
