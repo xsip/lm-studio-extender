@@ -1082,6 +1082,33 @@
           "auth"
         ]
       }
+    },
+    "/invoke/test": {
+      "get": {
+        "operationId": "testGenerateImage",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Test of generating an image",
+        "tags": [
+          "Invoke"
+        ]
+      }
     }
   },
   "info": {

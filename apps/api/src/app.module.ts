@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { McpModule, McpTransportType } from '@rekog/mcp-nest';
 import { ApiTools } from './tools/api.tools';
@@ -42,6 +41,7 @@ import { OpenaiModule } from './modules/openai/openai.module';
     ChatMetadataModule,
     AuthModule,
     TokenLimitModule,
+    // InvokeModule.forRoot('http://127.0.0.1:9090'),
   ],
   controllers: [],
   providers: [
