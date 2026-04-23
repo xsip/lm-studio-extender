@@ -52,6 +52,6 @@ export class AssetsService {
       data,
     });
 
-    return { url: `assets/${chatId}/${filename}` };
+    return { url: `assets/${chatId}/${filename}`, filename };
   }
 }

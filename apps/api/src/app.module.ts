@@ -15,8 +15,6 @@ import { TokenLimitModule } from './modules/token-limit/token-limit.module';
 import { OpenaiModule } from './modules/openai/openai.module';
 import { InvokeModule } from './modules/invoke/invoke.module';
 import { HttpModule } from '@nestjs/axios';
-import { join } from 'node:path';
-import { ServeStaticModule } from '@nestjs/serve-static';
 import { AssetsModule } from './modules/assets/assets.module';
 
 @Module({
@@ -31,11 +29,9 @@ import { AssetsModule } from './modules/assets/assets.module';
         ),
       }),
     }),
+    AuthModule,
+
     AssetsModule,
-    ServeStaticModule.forRoot({
-      rootPath: join(process.cwd(), 'files'),
-      serveRoot: '/files',
-    }),
     McpModule.forRoot({
       name: 'my-toolbox',
       version: '1.0.0',
@@ -50,7 +46,6 @@ import { AssetsModule } from './modules/assets/assets.module';
     OpenaiModule,
     ChatsModule,
     ChatMetadataModule,
-    AuthModule,
     TokenLimitModule,
     InvokeModule.forRoot('http://127.0.0.1:9090'),
   ],

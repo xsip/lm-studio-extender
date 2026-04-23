@@ -169,76 +169,26 @@ export class ApiTools {
     const buffer = Buffer.from(imageResponse.data);
 
     // Upload via assetsService, same as the REST endpoint
-    const { url } = await this.assetsService.uploadFile(
+    const { url, filename } = await this.assetsService.uploadFile(
       user._id + '',
       chatId,
       fileName,
       buffer,
       mimeType,
     );
-
-    return {
-      content: [
-        {
-          type: 'text',
-          text: `Here is the generated image:\n\n![image](${process.env.SELF_URL}/${url})\n\nPresent this image to the user by rendering the markdown above and say something about the image`,
+    return [
+      {
+        type: 'image',
+        source: {
+          type: 'url',
+          url: `${process.env.SELF_URL}/assets/filequery/${filename}?userId=${user._id + ''}&chatId=${chatId}`,
         },
-      ],
-    };
+      },
+      {
+        role: 'ai',
+        type: 'text',
+        text: 'Please show the image url in form of markdown and describe this generated image to me.',
+      },
+    ];
   }
-  /*
-  @Tool({
-    name: 'generate-image-tool',
-    description: 'Generates an image with the users prompt',
-    parameters: z.object({
-      prompt: z.string().default('Generate an image of a dog'),
-    }),
-  })
-  async generateImage(
-    { prompt }: { prompt: string },
-    context: Context,
-    request: Request,
-  ) {
-    // @ts-ignore
-    const user = request.user as User;
-    const chatId = request.headers['chatid'] as string;
-
-    if (!prompt) {
-      return `Didnt receive any message to decrypt!`;
-    }
-
-    const img = await this.invokeService.generateImage(prompt);
-    const imgUrl = img.fullPath;
-
-    // Extract filename from URL
-    // e.g. http://127.0.0.1:9090/api/v1/images/i/ff36c9c2-f2fa-42f4-9709-33e1d2afa1c1.png/full
-    const fileName =
-      imgUrl
-        .split('/')
-        .reverse()
-        .find((segment) => segment.includes('.')) ?? 'image.png';
-
-    // Fetch image and convert to base64
-    const imageResponse = await firstValueFrom(
-      this.httpService.get<ArrayBuffer>(imgUrl, {
-        responseType: 'arraybuffer',
-      }),
-    );
-    const base64 = Buffer.from(imageResponse.data).toString('base64');
-
-    return {
-      content: [
-        {
-          type: 'image',
-          fileName,
-          data: imgUrl,
-          mimeType: 'image/png',
-          markdown: `![Image](${base64})`,
-          $hint:
-            'This is an image file. Present the image to the user by using the markdown above',
-        },
-      ],
-    };
-  }
-   */
 }

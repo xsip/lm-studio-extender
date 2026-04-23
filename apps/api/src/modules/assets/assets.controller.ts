@@ -5,6 +5,7 @@ import {
   NotFoundException,
   Param,
   Post,
+  Query,
   Res,
   UploadedFile,
   UseInterceptors,
@@ -17,6 +18,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { Response } from 'express';
@@ -26,6 +28,7 @@ import { User } from '../auth/user.schema';
 import { AssetsService } from './assets.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
+import { Public } from '../auth/public.decorator';
 
 const IMAGE_FILTER = (_req: any, file: Express.Multer.File, cb: any) => {
   const allowed = /^image\/(jpeg|jpg|png|webp|gif|avif)$/;
@@ -44,6 +47,48 @@ const IMAGE_FILTER = (_req: any, file: Express.Multer.File, cb: any) => {
 @Controller('assets')
 export class AssetsController {
   constructor(private readonly assetService: AssetsService) {}
+
+  @Public()
+  @Get('filequery/:filename')
+  @ApiOperation({
+    operationId: 'getImageQuery',
+    summary: 'Retrieve an file blob from the database for a chat',
+  })
+  @ApiParam({
+    name: 'filename',
+    description: 'Filename returned by the upload endpoint',
+  })
+  @ApiQuery({
+    name: 'chatId',
+    description: 'ChatId the file belongs to',
+  })
+  @ApiQuery({
+    name: 'userId',
+    description: 'User the file belongs to',
+  })
+  @ApiOkResponse({ description: 'Binary image data with correct Content-Type' })
+  @ApiNotFoundResponse({ description: 'File not found' })
+  async getImageQuery(
+    @Param('filename')
+    filename: string,
+    @Query('chatId')
+    chatId: string,
+    @Query('userId')
+    userId: string,
+    @Res() res: Response,
+  ) {
+    const blob = await this.assetService.getAsset(userId, chatId, filename);
+
+    // Validate stored MIME type
+    const allowed = /^image\/(jpeg|jpg|png|webp|gif|avif)$/;
+    if (!allowed.test(blob.mimeType)) {
+      throw new NotFoundException('Invalid image type');
+    }
+
+    res.setHeader('Content-Type', blob.mimeType);
+    res.setHeader('Cache-Control', 'public, max-age=86400'); // 1 day
+    res.send(blob.data);
+  }
 
   @Get(':chatId/:filename')
   @ApiOperation({

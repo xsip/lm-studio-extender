@@ -1,6 +1,345 @@
 {
   "openapi": "3.0.0",
   "paths": {
+    "/auth/me": {
+      "get": {
+        "operationId": "getMe",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returns public user profile data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid JWT"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the currently authenticated user",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns a signed JWT string"
+          },
+          "401": {
+            "description": "Wrong username or password"
+          }
+        },
+        "summary": "Log in and receive a JWT",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "description": "Requires a valid `REGISTER_SECRET` env value in the request body to prevent open registration. Returns the generated activation hash (to be sent via email in a real deployment).",
+        "operationId": "register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created — returns the activation hash in dev mode"
+          },
+          "401": {
+            "description": "Invalid register secret"
+          },
+          "409": {
+            "description": "Username or email already taken"
+          }
+        },
+        "summary": "Register a new user",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/activate": {
+      "get": {
+        "description": "Verifies the activation hash and marks the account as active. Returns a signed JWT so the user is immediately logged in after activation.",
+        "operationId": "activateAccount",
+        "parameters": [
+          {
+            "name": "hash",
+            "required": true,
+            "in": "query",
+            "description": "The MD5 activation hash from the registration response",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account activated — returns a signed JWT"
+          },
+          "404": {
+            "description": "Invalid or already-used activation hash"
+          }
+        },
+        "summary": "Activate a user account",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/token-limit-configs": {
+      "post": {
+        "operationId": "createTokenLimitConfig",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTokenLimitConfigDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a token-limit config for a subscription tier",
+        "tags": [
+          "Token Limit Config"
+        ]
+      },
+      "get": {
+        "operationId": "findAllTokenLimitConfigs",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List all token-limit configs",
+        "tags": [
+          "Token Limit Config"
+        ]
+      }
+    },
+    "/token-limit-configs/subscription/{subscription}": {
+      "get": {
+        "operationId": "findTokenLimitConfigBySubscription",
+        "parameters": [
+          {
+            "name": "subscription",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "enum": [
+                "free",
+                "basic"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the token-limit config for a specific subscription tier",
+        "tags": [
+          "Token Limit Config"
+        ]
+      }
+    },
+    "/token-limit-configs/{id}": {
+      "get": {
+        "operationId": "findTokenLimitConfigById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a token-limit config by id",
+        "tags": [
+          "Token Limit Config"
+        ]
+      },
+      "put": {
+        "operationId": "updateTokenLimitConfig",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTokenLimitConfigDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a token-limit config",
+        "tags": [
+          "Token Limit Config"
+        ]
+      },
+      "delete": {
+        "operationId": "deleteTokenLimitConfig",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a token-limit config",
+        "tags": [
+          "Token Limit Config"
+        ]
+      }
+    },
+    "/assets/filequery/{filename}": {
+      "get": {
+        "operationId": "getImageQuery",
+        "parameters": [
+          {
+            "name": "filename",
+            "required": true,
+            "in": "path",
+            "description": "Filename returned by the upload endpoint",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "chatId",
+            "required": true,
+            "in": "query",
+            "description": "ChatId the file belongs to",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "query",
+            "description": "User the file belongs to",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Binary image data with correct Content-Type"
+          },
+          "404": {
+            "description": "File not found"
+          }
+        },
+        "summary": "Retrieve an file blob from the database for a chat",
+        "tags": [
+          "assets"
+        ]
+      }
+    },
     "/assets/{chatId}/{filename}": {
       "get": {
         "operationId": "getImage",
@@ -547,180 +886,6 @@
         ]
       }
     },
-    "/token-limit-configs": {
-      "post": {
-        "operationId": "createTokenLimitConfig",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateTokenLimitConfigDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Create a token-limit config for a subscription tier",
-        "tags": [
-          "Token Limit Config"
-        ]
-      },
-      "get": {
-        "operationId": "findAllTokenLimitConfigs",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "List all token-limit configs",
-        "tags": [
-          "Token Limit Config"
-        ]
-      }
-    },
-    "/token-limit-configs/subscription/{subscription}": {
-      "get": {
-        "operationId": "findTokenLimitConfigBySubscription",
-        "parameters": [
-          {
-            "name": "subscription",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "enum": [
-                "free",
-                "basic"
-              ],
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get the token-limit config for a specific subscription tier",
-        "tags": [
-          "Token Limit Config"
-        ]
-      }
-    },
-    "/token-limit-configs/{id}": {
-      "get": {
-        "operationId": "findTokenLimitConfigById",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get a token-limit config by id",
-        "tags": [
-          "Token Limit Config"
-        ]
-      },
-      "put": {
-        "operationId": "updateTokenLimitConfig",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateTokenLimitConfigDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Update a token-limit config",
-        "tags": [
-          "Token Limit Config"
-        ]
-      },
-      "delete": {
-        "operationId": "deleteTokenLimitConfig",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Delete a token-limit config",
-        "tags": [
-          "Token Limit Config"
-        ]
-      }
-    },
     "/openai/models": {
       "get": {
         "operationId": "getModelsOpenAi",
@@ -1042,125 +1207,6 @@
         ]
       }
     },
-    "/auth/me": {
-      "get": {
-        "operationId": "getMe",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Returns public user profile data",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MeDto"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Missing or invalid JWT"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get the currently authenticated user",
-        "tags": [
-          "auth"
-        ]
-      }
-    },
-    "/auth/login": {
-      "post": {
-        "operationId": "login",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Returns a signed JWT string"
-          },
-          "401": {
-            "description": "Wrong username or password"
-          }
-        },
-        "summary": "Log in and receive a JWT",
-        "tags": [
-          "auth"
-        ]
-      }
-    },
-    "/auth/register": {
-      "post": {
-        "description": "Requires a valid `REGISTER_SECRET` env value in the request body to prevent open registration. Returns the generated activation hash (to be sent via email in a real deployment).",
-        "operationId": "register",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RegisterDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "User created — returns the activation hash in dev mode"
-          },
-          "401": {
-            "description": "Invalid register secret"
-          },
-          "409": {
-            "description": "Username or email already taken"
-          }
-        },
-        "summary": "Register a new user",
-        "tags": [
-          "auth"
-        ]
-      }
-    },
-    "/auth/activate": {
-      "get": {
-        "description": "Verifies the activation hash and marks the account as active. Returns a signed JWT so the user is immediately logged in after activation.",
-        "operationId": "activateAccount",
-        "parameters": [
-          {
-            "name": "hash",
-            "required": true,
-            "in": "query",
-            "description": "The MD5 activation hash from the registration response",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Account activated — returns a signed JWT"
-          },
-          "404": {
-            "description": "Invalid or already-used activation hash"
-          }
-        },
-        "summary": "Activate a user account",
-        "tags": [
-          "auth"
-        ]
-      }
-    },
     "/invoke/test": {
       "get": {
         "operationId": "testGenerateImage",
@@ -1206,6 +1252,131 @@
       }
     },
     "schemas": {
+      "MeDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "subscription": {
+            "type": "string"
+          },
+          "isActivated": {
+            "type": "boolean"
+          },
+          "usedTokens": {
+            "type": "number"
+          },
+          "tokenCountResetDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "tokenLimit": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "username",
+          "role",
+          "subscription",
+          "isActivated",
+          "usedTokens",
+          "tokenCountResetDate",
+          "tokenLimit"
+        ]
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "string",
+            "example": "admin"
+          },
+          "password": {
+            "type": "string",
+            "example": "hunter2"
+          }
+        },
+        "required": [
+          "user",
+          "password"
+        ]
+      },
+      "RegisterDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "admin",
+            "description": "Unique username"
+          },
+          "password": {
+            "type": "string",
+            "example": "hunter2",
+            "description": "Password (min 8 chars)"
+          },
+          "registerSecret": {
+            "type": "string",
+            "example": "SUPER_SECRET_REGISTER_KEY",
+            "description": "Server-side registration secret from env REGISTER_SECRET"
+          }
+        },
+        "required": [
+          "username",
+          "password",
+          "registerSecret"
+        ]
+      },
+      "CreateTokenLimitConfigDto": {
+        "type": "object",
+        "properties": {
+          "minutesTillReset": {
+            "type": "number",
+            "example": 1
+          },
+          "tokensPerIntervall": {
+            "type": "number",
+            "example": 9000
+          },
+          "subscription": {
+            "type": "string",
+            "enum": [
+              "free",
+              "basic"
+            ],
+            "example": "basic"
+          }
+        },
+        "required": [
+          "minutesTillReset",
+          "tokensPerIntervall",
+          "subscription"
+        ]
+      },
+      "UpdateTokenLimitConfigDto": {
+        "type": "object",
+        "properties": {
+          "minutesTillReset": {
+            "type": "number",
+            "example": 1
+          },
+          "tokensPerIntervall": {
+            "type": "number",
+            "example": 9000
+          },
+          "subscription": {
+            "type": "string",
+            "enum": [
+              "free",
+              "basic"
+            ],
+            "example": "basic"
+          }
+        }
+      },
       "TextInputDto": {
         "type": "object",
         "properties": {
@@ -1987,53 +2158,6 @@
               "RESPONSES",
               "COMPLETION"
             ]
-          }
-        }
-      },
-      "CreateTokenLimitConfigDto": {
-        "type": "object",
-        "properties": {
-          "minutesTillReset": {
-            "type": "number",
-            "example": 1
-          },
-          "tokensPerIntervall": {
-            "type": "number",
-            "example": 9000
-          },
-          "subscription": {
-            "type": "string",
-            "enum": [
-              "free",
-              "basic"
-            ],
-            "example": "basic"
-          }
-        },
-        "required": [
-          "minutesTillReset",
-          "tokensPerIntervall",
-          "subscription"
-        ]
-      },
-      "UpdateTokenLimitConfigDto": {
-        "type": "object",
-        "properties": {
-          "minutesTillReset": {
-            "type": "number",
-            "example": 1
-          },
-          "tokensPerIntervall": {
-            "type": "number",
-            "example": 9000
-          },
-          "subscription": {
-            "type": "string",
-            "enum": [
-              "free",
-              "basic"
-            ],
-            "example": "basic"
           }
         }
       },
@@ -11799,84 +11923,6 @@
           "created",
           "model",
           "object"
-        ]
-      },
-      "MeDto": {
-        "type": "object",
-        "properties": {
-          "username": {
-            "type": "string"
-          },
-          "role": {
-            "type": "string"
-          },
-          "subscription": {
-            "type": "string"
-          },
-          "isActivated": {
-            "type": "boolean"
-          },
-          "usedTokens": {
-            "type": "number"
-          },
-          "tokenCountResetDate": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "tokenLimit": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "username",
-          "role",
-          "subscription",
-          "isActivated",
-          "usedTokens",
-          "tokenCountResetDate",
-          "tokenLimit"
-        ]
-      },
-      "LoginDto": {
-        "type": "object",
-        "properties": {
-          "user": {
-            "type": "string",
-            "example": "admin"
-          },
-          "password": {
-            "type": "string",
-            "example": "hunter2"
-          }
-        },
-        "required": [
-          "user",
-          "password"
-        ]
-      },
-      "RegisterDto": {
-        "type": "object",
-        "properties": {
-          "username": {
-            "type": "string",
-            "example": "admin",
-            "description": "Unique username"
-          },
-          "password": {
-            "type": "string",
-            "example": "hunter2",
-            "description": "Password (min 8 chars)"
-          },
-          "registerSecret": {
-            "type": "string",
-            "example": "SUPER_SECRET_REGISTER_KEY",
-            "description": "Server-side registration secret from env REGISTER_SECRET"
-          }
-        },
-        "required": [
-          "username",
-          "password",
-          "registerSecret"
         ]
       }
     }
