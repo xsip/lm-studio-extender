@@ -12,6 +12,7 @@
     "test": "nx run-many --target=test --all",
     "lint": "nx run-many --target=lint --all",
     "gen:client": "npx @openapitools/openapi-generator-cli generate -i ./openapi.json -g typescript-angular -o ./apps/ui/src/app/client --additional-properties=ngVersion=21,providedIn=root,useStandalone=true",
+    "gen:invoke": "npx @openapitools/openapi-generator-cli generate -i http://127.0.0.1:9090/openapi.json -g typescript-nestjs -o ./apps/api/src/modules/invoke --global-property models",
     "start": "nx run-many --target=serve --projects=api,ui"
   },
   "dependencies": {
@@ -32,7 +33,7 @@
     "@ngx-translate/core": "^17.0.0",
     "@ngx-translate/http-loader": "^17.0.0",
     "@rekog/mcp-nest": "^1.9.9",
-    "axios": "^1.15.0",
+    "axios": "^1.15.2",
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
