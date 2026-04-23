@@ -21,7 +21,7 @@ export class InvokeController {
     operationId: 'testGenerateImage',
   })
   @ApiOkResponse({ type: String })
-  testGenerateImage(): Promise<string> {
-    return this.invokeService.generateImage('Image of a cat photorealistic');
+  testGenerateImage(): Promise<{ thumbPath: string; fullPath: string }> {
+    return this.invokeService.generateImage('Image of a duck');
   }
 }

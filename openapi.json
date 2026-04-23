@@ -1,6 +1,84 @@
 {
   "openapi": "3.0.0",
   "paths": {
+    "/assets/{chatId}/{filename}": {
+      "get": {
+        "operationId": "getImage",
+        "parameters": [
+          {
+            "name": "filename",
+            "required": true,
+            "in": "path",
+            "description": "Filename returned by the upload endpoint",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "chatId",
+            "required": true,
+            "in": "path",
+            "description": "ChatId the file belongs to",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Binary image data with correct Content-Type"
+          },
+          "404": {
+            "description": "File not found"
+          }
+        },
+        "summary": "Retrieve an file blob from the database for a chat",
+        "tags": [
+          "assets"
+        ]
+      }
+    },
+    "/assets/{chatId}": {
+      "post": {
+        "operationId": "uploadImage",
+        "parameters": [
+          {
+            "name": "chatId",
+            "required": true,
+            "in": "path",
+            "description": "ChatId the file belongs to",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "{ url: string }"
+          }
+        },
+        "summary": "Upload an image for a specific chat",
+        "tags": [
+          "assets"
+        ]
+      }
+    },
     "/tools/sse": {
       "get": {
         "operationId": "SseController_sse",

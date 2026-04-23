@@ -13,6 +13,11 @@ import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './modules/auth/roles.guard';
 import { TokenLimitModule } from './modules/token-limit/token-limit.module';
 import { OpenaiModule } from './modules/openai/openai.module';
+import { InvokeModule } from './modules/invoke/invoke.module';
+import { HttpModule } from '@nestjs/axios';
+import { join } from 'node:path';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { AssetsModule } from './modules/assets/assets.module';
 
 @Module({
   imports: [
@@ -26,6 +31,11 @@ import { OpenaiModule } from './modules/openai/openai.module';
         ),
       }),
     }),
+    AssetsModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'files'),
+      serveRoot: '/files',
+    }),
     McpModule.forRoot({
       name: 'my-toolbox',
       version: '1.0.0',
@@ -35,13 +45,14 @@ import { OpenaiModule } from './modules/openai/openai.module';
         enableJsonResponse: true,
       },
     }),
+    HttpModule,
     LmStudioModule,
     OpenaiModule,
     ChatsModule,
     ChatMetadataModule,
     AuthModule,
     TokenLimitModule,
-    // InvokeModule.forRoot('http://127.0.0.1:9090'),
+    InvokeModule.forRoot('http://127.0.0.1:9090'),
   ],
   controllers: [],
   providers: [

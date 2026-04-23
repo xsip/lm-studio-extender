@@ -8,12 +8,21 @@ import dayjs from 'dayjs';
 import { ChatMetadataService } from '../modules/chat-metadata/chat-metadata.service';
 import { Types } from 'mongoose';
 import * as CryptoJS from 'crypto-js';
+import { InvokeService } from '../modules/invoke/invoke.service';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
+import * as fs from 'node:fs';
+import { join } from 'node:path';
+import { AssetsService } from '../modules/assets/assets.service';
 
 @Injectable()
 export class ApiTools {
   constructor(
     private readonly tokenLimitService: TokenLimitService,
     private readonly chatMetaDataService: ChatMetadataService,
+    private readonly invokeService: InvokeService,
+    private readonly httpService: HttpService,
+    private readonly assetsService: AssetsService,
   ) {}
 
   @Tool({
@@ -117,4 +126,119 @@ export class ApiTools {
       return `There was an error decrypting your message!!`;
     }
   }
+
+  @Tool({
+    name: 'generate-image-tool',
+    description: 'Generates an image with the users prompt',
+    parameters: z.object({
+      prompt: z.string().default('Generate an image of a dog'),
+    }),
+  })
+  async generateImage(
+    { prompt }: { prompt: string },
+    context: Context,
+    request: Request,
+  ) {
+    const user = (request as any).user as User & { _id?: Types.ObjectId };
+    const chatId = request.headers['chatid'] as string;
+
+    if (!user) return `User not defined!!`;
+    if (!chatId) return `chatId not defined!!`;
+    if (!prompt) return `Didn't receive any prompt!`;
+
+    const img = await this.invokeService.generateImage(prompt);
+
+    const fileName =
+      img.fullPath
+        .split('/')
+        .reverse()
+        .find((segment) => segment.includes('.')) ?? 'image.png';
+
+    const imageResponse = await firstValueFrom(
+      this.httpService.get<ArrayBuffer>(img.fullPath, {
+        responseType: 'arraybuffer',
+      }),
+    );
+
+    const mimeType =
+      (imageResponse.headers['content-type'] as string)?.split(';')[0].trim() ??
+      (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')
+        ? 'image/jpeg'
+        : 'image/png');
+
+    const buffer = Buffer.from(imageResponse.data);
+
+    // Upload via assetsService, same as the REST endpoint
+    const { url } = await this.assetsService.uploadFile(
+      user._id + '',
+      chatId,
+      fileName,
+      buffer,
+      mimeType,
+    );
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Here is the generated image:\n\n![image](${process.env.SELF_URL}/${url})\n\nPresent this image to the user by rendering the markdown above and say something about the image`,
+        },
+      ],
+    };
+  }
+  /*
+  @Tool({
+    name: 'generate-image-tool',
+    description: 'Generates an image with the users prompt',
+    parameters: z.object({
+      prompt: z.string().default('Generate an image of a dog'),
+    }),
+  })
+  async generateImage(
+    { prompt }: { prompt: string },
+    context: Context,
+    request: Request,
+  ) {
+    // @ts-ignore
+    const user = request.user as User;
+    const chatId = request.headers['chatid'] as string;
+
+    if (!prompt) {
+      return `Didnt receive any message to decrypt!`;
+    }
+
+    const img = await this.invokeService.generateImage(prompt);
+    const imgUrl = img.fullPath;
+
+    // Extract filename from URL
+    // e.g. http://127.0.0.1:9090/api/v1/images/i/ff36c9c2-f2fa-42f4-9709-33e1d2afa1c1.png/full
+    const fileName =
+      imgUrl
+        .split('/')
+        .reverse()
+        .find((segment) => segment.includes('.')) ?? 'image.png';
+
+    // Fetch image and convert to base64
+    const imageResponse = await firstValueFrom(
+      this.httpService.get<ArrayBuffer>(imgUrl, {
+        responseType: 'arraybuffer',
+      }),
+    );
+    const base64 = Buffer.from(imageResponse.data).toString('base64');
+
+    return {
+      content: [
+        {
+          type: 'image',
+          fileName,
+          data: imgUrl,
+          mimeType: 'image/png',
+          markdown: `![Image](${base64})`,
+          $hint:
+            'This is an image file. Present the image to the user by using the markdown above',
+        },
+      ],
+    };
+  }
+   */
 }

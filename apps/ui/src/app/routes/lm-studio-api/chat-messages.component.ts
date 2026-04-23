@@ -159,8 +159,8 @@ import { SpinnerComponent } from '../../shared';
                   <pre
                     class="mt-1 whitespace-pre-wrap break-all leading-relaxed"
                     [class]="msg.toolFailed ? 'text-red-600' : 'text-emerald-600'"
-                    >{{ msg.toolOutput }}</pre
-                  >
+                    [innerHTML]="msg.toolOutput | markdown"
+                  ></pre>
                 </div>
               } @else if (msg.streaming) {
                 <div class="px-3 py-2 text-tool-muted italic">
