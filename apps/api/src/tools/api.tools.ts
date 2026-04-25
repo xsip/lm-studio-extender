@@ -151,9 +151,23 @@ export class ApiTools {
     if (!chatId) return `chatId not defined!!`;
     if (!prompt) return `Didn't receive any prompt!`;
 
+
+    const chatMetaData = await this.chatMetaDataService.findOne(
+      (user as any)._id as Types.ObjectId,
+      chatId,
+    );
+
+    if (!chatMetaData) {
+      return `Sorry, but chat with id ${chatId} not found.`;
+    }
+
+
+    if (!chatMetaData.useInvoke || chatMetaData.useInvoke && !chatMetaData.invokeAiModelToUse) {
+      return 'Invoke integration is not enabledFor this session!';
+    }
     const img = await this.invokeService.generateImage(
       prompt,
-      InvokeAiModel.DREAMSHAPER_8,
+      chatMetaData.invokeAiModelToUse,
     );
 
     const fileName =
