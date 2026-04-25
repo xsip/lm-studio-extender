@@ -6,6 +6,12 @@ import { BodyEnqueueBatch } from './model/bodyEnqueueBatch';
 import { EnqueueBatchResult } from './model/enqueueBatchResult';
 
 import { io, Socket } from 'socket.io-client';
+import { NodesValue } from './model/nodesValue';
+
+export enum InvokeAiModel {
+  DREAMSHAPER_8 = 'Dreamshaper 8',
+  JUGGERNAUT_XL_V9 = 'Juggernaut XL v9',
+}
 
 @Injectable()
 export class InvokeService {
@@ -26,7 +32,7 @@ export class InvokeService {
 
   async generateImage(
     prompt: string,
-    modelName: string = 'Dreamshaper 8',
+    modelName: InvokeAiModel = InvokeAiModel.DREAMSHAPER_8,
   ): Promise<{
     fullPath: string;
     thumbPath: string;
@@ -43,16 +49,19 @@ export class InvokeService {
       );
     }
 
-    // Generate unique 10-char alphanumeric suffixes for each node and the graph
     const randomId = () =>
       Math.random().toString(36).slice(2, 7) +
       Math.random().toString(36).slice(2, 7);
 
+    const isSDXL = model.base === 'sdxl';
+
+    const modelLoaderType = isSDXL ? 'sdxl_model_loader' : 'main_model_loader';
+
     const ids = {
-      graph: `sd1_graph:${randomId()}`,
+      graph: `${model.base}_graph:${randomId()}`,
       seed: `seed:${randomId()}`,
       positivePrompt: `positive_prompt:${randomId()}`,
-      sd1ModelLoader: `sd1_model_loader:${randomId()}`,
+      modelLoader: `model_loader:${randomId()}`,
       clipSkip: `clip_skip:${randomId()}`,
       posCond: `pos_cond:${randomId()}`,
       posCondCollect: `pos_cond_collect:${randomId()}`,
@@ -64,7 +73,6 @@ export class InvokeService {
       canvasOutput: `canvas_output:${randomId()}`,
     };
 
-    // Connect socket and wait for invocation_complete before returning
     const imageUrl = await new Promise<{ fullPath: string; thumbPath: string }>(
       (resolve, reject) => {
         const socket: Socket = io(this.invokeBaseUrl, {
@@ -92,284 +100,282 @@ export class InvokeService {
           reject(new Error(`Socket connection failed: ${err.message}`));
         });
 
-        // Enqueue the batch after socket is ready
+        // --- Nodes ---
+        const condNodes = isSDXL
+          ? {
+              [ids.posCond]: {
+                type: 'sdxl_compel_prompt',
+                id: ids.posCond,
+                is_intermediate: true,
+                use_cache: true,
+              },
+              [ids.negCond]: {
+                type: 'sdxl_compel_prompt',
+                id: ids.negCond,
+                prompt: '',
+                style: '',
+                is_intermediate: true,
+                use_cache: true,
+              },
+            }
+          : {
+              [ids.clipSkip]: {
+                type: 'clip_skip',
+                id: ids.clipSkip,
+                skipped_layers: 0,
+                is_intermediate: true,
+                use_cache: true,
+              },
+              [ids.posCond]: {
+                type: 'compel',
+                id: ids.posCond,
+                is_intermediate: true,
+                use_cache: true,
+              },
+              [ids.negCond]: {
+                type: 'compel',
+                id: ids.negCond,
+                prompt: '',
+                is_intermediate: true,
+                use_cache: true,
+              },
+            };
+
+        // --- Edges ---
+        const condEdges = isSDXL
+          ? [
+              {
+                source: { node_id: ids.modelLoader, field: 'clip' },
+                destination: { node_id: ids.posCond, field: 'clip' },
+              },
+              {
+                source: { node_id: ids.modelLoader, field: 'clip' },
+                destination: { node_id: ids.negCond, field: 'clip' },
+              },
+              {
+                source: { node_id: ids.modelLoader, field: 'clip2' },
+                destination: { node_id: ids.posCond, field: 'clip2' },
+              },
+              {
+                source: { node_id: ids.modelLoader, field: 'clip2' },
+                destination: { node_id: ids.negCond, field: 'clip2' },
+              },
+              {
+                source: { node_id: ids.positivePrompt, field: 'value' },
+                destination: { node_id: ids.posCond, field: 'prompt' },
+              },
+              {
+                source: { node_id: ids.positivePrompt, field: 'value' },
+                destination: { node_id: ids.posCond, field: 'style' },
+              },
+            ]
+          : [
+              {
+                source: { node_id: ids.modelLoader, field: 'clip' },
+                destination: { node_id: ids.clipSkip, field: 'clip' },
+              },
+              {
+                source: { node_id: ids.clipSkip, field: 'clip' },
+                destination: { node_id: ids.posCond, field: 'clip' },
+              },
+              {
+                source: { node_id: ids.clipSkip, field: 'clip' },
+                destination: { node_id: ids.negCond, field: 'clip' },
+              },
+              {
+                source: { node_id: ids.positivePrompt, field: 'value' },
+                destination: { node_id: ids.posCond, field: 'prompt' },
+              },
+            ];
+
+        const req: BodyEnqueueBatch = {
+          prepend: false,
+          batch: {
+            graph: {
+              id: ids.graph,
+              nodes: {
+                [ids.seed]: {
+                  id: ids.seed,
+                  type: 'integer',
+                  is_intermediate: true,
+                  use_cache: true,
+                },
+                [ids.positivePrompt]: {
+                  id: ids.positivePrompt,
+                  type: 'string',
+                  is_intermediate: true,
+                  use_cache: true,
+                },
+                [ids.modelLoader]: {
+                  type: modelLoaderType as any,
+                  id: ids.modelLoader,
+                  model: model,
+                  is_intermediate: true,
+                  use_cache: true,
+                },
+                ...condNodes,
+                [ids.posCondCollect]: {
+                  type: 'collect',
+                  id: ids.posCondCollect,
+                  is_intermediate: true,
+                  use_cache: true,
+                },
+                [ids.negCondCollect]: {
+                  type: 'collect',
+                  id: ids.negCondCollect,
+                  is_intermediate: true,
+                  use_cache: true,
+                },
+                [ids.noise]: {
+                  type: 'noise',
+                  id: ids.noise,
+                  use_cpu: true,
+                  is_intermediate: true,
+                  use_cache: true,
+                  width: isSDXL ? 512 : 512,
+                  height: isSDXL ? 512 : 512,
+                },
+                [ids.denoiseLatents]: {
+                  type: 'denoise_latents',
+                  id: ids.denoiseLatents,
+                  cfg_scale: 7.5,
+                  cfg_rescale_multiplier: 0,
+                  scheduler: 'dpmpp_3m_k',
+                  steps: 30,
+                  denoising_start: 0,
+                  denoising_end: 1,
+                  is_intermediate: true,
+                  use_cache: true,
+                },
+                [ids.coreMetadata]: {
+                  id: ids.coreMetadata,
+                  type: 'core_metadata',
+                  is_intermediate: true,
+                  use_cache: true,
+                  cfg_scale: 7.5,
+                  cfg_rescale_multiplier: 0,
+                  negative_prompt: '',
+                  model: {
+                    key: model.key,
+                    hash: model.hash,
+                    name: model.name,
+                    base: model.base,
+                    type: model.type,
+                  },
+                  steps: 30,
+                  rand_device: 'cpu',
+                  scheduler: 'dpmpp_3m_k',
+                  clip_skip: 0,
+                  seamless_x: false,
+                  seamless_y: false,
+                  width: isSDXL ? 1024 : 512,
+                  height: isSDXL ? 1024 : 512,
+                  generation_mode: isSDXL ? 'sdxl_txt2img' : 'txt2img',
+                  ref_images: [],
+                },
+                [ids.canvasOutput]: {
+                  type: 'l2i',
+                  id: ids.canvasOutput,
+                  fp32: true,
+                  is_intermediate: false,
+                  use_cache: false,
+                },
+              } as unknown as Record<string, NodesValue>,
+              edges: [
+                {
+                  source: { node_id: ids.modelLoader, field: 'unet' },
+                  destination: { node_id: ids.denoiseLatents, field: 'unet' },
+                },
+                ...condEdges,
+                {
+                  source: { node_id: ids.posCond, field: 'conditioning' },
+                  destination: { node_id: ids.posCondCollect, field: 'item' },
+                },
+                {
+                  source: { node_id: ids.posCondCollect, field: 'collection' },
+                  destination: {
+                    node_id: ids.denoiseLatents,
+                    field: 'positive_conditioning',
+                  },
+                },
+                {
+                  source: { node_id: ids.negCond, field: 'conditioning' },
+                  destination: { node_id: ids.negCondCollect, field: 'item' },
+                },
+                {
+                  source: { node_id: ids.negCondCollect, field: 'collection' },
+                  destination: {
+                    node_id: ids.denoiseLatents,
+                    field: 'negative_conditioning',
+                  },
+                },
+                {
+                  source: { node_id: ids.seed, field: 'value' },
+                  destination: { node_id: ids.noise, field: 'seed' },
+                },
+                {
+                  source: { node_id: ids.noise, field: 'noise' },
+                  destination: { node_id: ids.denoiseLatents, field: 'noise' },
+                },
+                {
+                  source: { node_id: ids.denoiseLatents, field: 'latents' },
+                  destination: { node_id: ids.canvasOutput, field: 'latents' },
+                },
+                {
+                  source: { node_id: ids.seed, field: 'value' },
+                  destination: { node_id: ids.coreMetadata, field: 'seed' },
+                },
+                {
+                  source: { node_id: ids.positivePrompt, field: 'value' },
+                  destination: {
+                    node_id: ids.coreMetadata,
+                    field: 'positive_prompt',
+                  },
+                },
+                {
+                  source: { node_id: ids.modelLoader, field: 'vae' },
+                  destination: { node_id: ids.canvasOutput, field: 'vae' },
+                },
+                {
+                  source: { node_id: ids.coreMetadata, field: 'metadata' },
+                  destination: { node_id: ids.canvasOutput, field: 'metadata' },
+                },
+              ],
+            },
+            runs: 1,
+            data: [
+              [
+                {
+                  node_path: ids.seed,
+                  field_name: 'value',
+                  items: [Math.floor(Math.random() * 2 ** 32) as any],
+                },
+              ],
+              [
+                {
+                  node_path: ids.positivePrompt,
+                  field_name: 'value',
+                  items: [prompt],
+                },
+              ],
+            ],
+            origin: 'generate',
+            destination: 'generate',
+          },
+        };
+
         socket.on('connect', async () => {
           try {
             await lastValueFrom(
               this.httpService.post<EnqueueBatchResult, BodyEnqueueBatch>(
                 `${this.invokeBaseUrl}/api/v1/queue/default/enqueue_batch`,
-                {
-                  prepend: false,
-                  batch: {
-                    graph: {
-                      id: ids.graph,
-                      nodes: {
-                        [ids.seed]: {
-                          id: ids.seed,
-                          type: 'integer',
-                          is_intermediate: true,
-                          use_cache: true,
-                        },
-                        [ids.positivePrompt]: {
-                          id: ids.positivePrompt,
-                          type: 'string',
-                          is_intermediate: true,
-                          use_cache: true,
-                        },
-                        [ids.sd1ModelLoader]: {
-                          type: 'main_model_loader',
-                          id: ids.sd1ModelLoader,
-                          model: model,
-                          is_intermediate: true,
-                          use_cache: true,
-                        },
-                        [ids.clipSkip]: {
-                          type: 'clip_skip',
-                          id: ids.clipSkip,
-                          skipped_layers: 0,
-                          is_intermediate: true,
-                          use_cache: true,
-                        },
-                        [ids.posCond]: {
-                          type: 'compel',
-                          id: ids.posCond,
-                          is_intermediate: true,
-                          use_cache: true,
-                        },
-                        [ids.posCondCollect]: {
-                          type: 'collect',
-                          id: ids.posCondCollect,
-                          is_intermediate: true,
-                          use_cache: true,
-                        },
-                        [ids.negCond]: {
-                          type: 'compel',
-                          id: ids.negCond,
-                          prompt: '',
-                          is_intermediate: true,
-                          use_cache: true,
-                        },
-                        [ids.negCondCollect]: {
-                          type: 'collect',
-                          id: ids.negCondCollect,
-                          is_intermediate: true,
-                          use_cache: true,
-                        },
-                        [ids.noise]: {
-                          type: 'noise',
-                          id: ids.noise,
-                          use_cpu: true,
-                          is_intermediate: true,
-                          use_cache: true,
-                          width: 512,
-                          height: 512,
-                        },
-                        [ids.denoiseLatents]: {
-                          type: 'denoise_latents',
-                          id: ids.denoiseLatents,
-                          cfg_scale: 7.5,
-                          cfg_rescale_multiplier: 0,
-                          scheduler: 'dpmpp_3m_k',
-                          steps: 30,
-                          denoising_start: 0,
-                          denoising_end: 1,
-                          is_intermediate: true,
-                          use_cache: true,
-                        },
-                        [ids.coreMetadata]: {
-                          id: ids.coreMetadata,
-                          type: 'core_metadata',
-                          is_intermediate: true,
-                          use_cache: true,
-                          cfg_scale: 7.5,
-                          cfg_rescale_multiplier: 0,
-                          negative_prompt: '',
-                          model: {
-                            key: model.key,
-                            hash: model.hash,
-                            name: model.name,
-                            base: model.base,
-                            type: model.type,
-                          },
-                          steps: 30,
-                          rand_device: 'cpu',
-                          scheduler: 'dpmpp_3m_k',
-                          clip_skip: 0,
-                          seamless_x: false,
-                          seamless_y: false,
-                          width: 512,
-                          height: 512,
-                          generation_mode: 'txt2img',
-                          ref_images: [],
-                        },
-                        [ids.canvasOutput]: {
-                          type: 'l2i',
-                          id: ids.canvasOutput,
-                          fp32: true,
-                          is_intermediate: false,
-                          use_cache: false,
-                        },
-                      },
-                      edges: [
-                        {
-                          source: {
-                            node_id: ids.sd1ModelLoader,
-                            field: 'unet',
-                          },
-                          destination: {
-                            node_id: ids.denoiseLatents,
-                            field: 'unet',
-                          },
-                        },
-                        {
-                          source: {
-                            node_id: ids.sd1ModelLoader,
-                            field: 'clip',
-                          },
-                          destination: { node_id: ids.clipSkip, field: 'clip' },
-                        },
-                        {
-                          source: { node_id: ids.clipSkip, field: 'clip' },
-                          destination: { node_id: ids.posCond, field: 'clip' },
-                        },
-                        {
-                          source: { node_id: ids.clipSkip, field: 'clip' },
-                          destination: { node_id: ids.negCond, field: 'clip' },
-                        },
-                        {
-                          source: {
-                            node_id: ids.positivePrompt,
-                            field: 'value',
-                          },
-                          destination: {
-                            node_id: ids.posCond,
-                            field: 'prompt',
-                          },
-                        },
-                        {
-                          source: {
-                            node_id: ids.posCond,
-                            field: 'conditioning',
-                          },
-                          destination: {
-                            node_id: ids.posCondCollect,
-                            field: 'item',
-                          },
-                        },
-                        {
-                          source: {
-                            node_id: ids.posCondCollect,
-                            field: 'collection',
-                          },
-                          destination: {
-                            node_id: ids.denoiseLatents,
-                            field: 'positive_conditioning',
-                          },
-                        },
-                        {
-                          source: {
-                            node_id: ids.negCond,
-                            field: 'conditioning',
-                          },
-                          destination: {
-                            node_id: ids.negCondCollect,
-                            field: 'item',
-                          },
-                        },
-                        {
-                          source: {
-                            node_id: ids.negCondCollect,
-                            field: 'collection',
-                          },
-                          destination: {
-                            node_id: ids.denoiseLatents,
-                            field: 'negative_conditioning',
-                          },
-                        },
-                        {
-                          source: { node_id: ids.seed, field: 'value' },
-                          destination: { node_id: ids.noise, field: 'seed' },
-                        },
-                        {
-                          source: { node_id: ids.noise, field: 'noise' },
-                          destination: {
-                            node_id: ids.denoiseLatents,
-                            field: 'noise',
-                          },
-                        },
-                        {
-                          source: {
-                            node_id: ids.denoiseLatents,
-                            field: 'latents',
-                          },
-                          destination: {
-                            node_id: ids.canvasOutput,
-                            field: 'latents',
-                          },
-                        },
-                        {
-                          source: { node_id: ids.seed, field: 'value' },
-                          destination: {
-                            node_id: ids.coreMetadata,
-                            field: 'seed',
-                          },
-                        },
-                        {
-                          source: {
-                            node_id: ids.positivePrompt,
-                            field: 'value',
-                          },
-                          destination: {
-                            node_id: ids.coreMetadata,
-                            field: 'positive_prompt',
-                          },
-                        },
-                        {
-                          source: { node_id: ids.sd1ModelLoader, field: 'vae' },
-                          destination: {
-                            node_id: ids.canvasOutput,
-                            field: 'vae',
-                          },
-                        },
-                        {
-                          source: {
-                            node_id: ids.coreMetadata,
-                            field: 'metadata',
-                          },
-                          destination: {
-                            node_id: ids.canvasOutput,
-                            field: 'metadata',
-                          },
-                        },
-                      ],
-                    },
-                    runs: 1,
-                    data: [
-                      [
-                        {
-                          node_path: ids.seed,
-                          field_name: 'value',
-                          items: [3375714790 as any],
-                        },
-                      ],
-                      [
-                        {
-                          node_path: ids.positivePrompt,
-                          field_name: 'value',
-                          items: [prompt],
-                        },
-                      ],
-                    ],
-                    origin: 'generate',
-                    destination: 'generate',
-                  },
-                },
+                req,
               ),
             );
           } catch (err) {
             console.log(err);
             socket.disconnect();
-            reject(err);
+            reject(JSON.stringify(err));
           }
         });
       },

@@ -49,7 +49,7 @@ import { SpinnerComponent } from '../../shared';
             }
           </div>
         } @else if (msg.text) {
-          <div class="flex flex-col items-end gap-1">
+          <div class="flex flex-col items-end gap-1 mt-1">
             <div
               class="max-w-[75%] break-words text-text-primary rounded-2xl rounded-br-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap"
               style="background: var(--color-accent-subtle); border: 1px solid var(--color-accent-glow); box-shadow: var(--shadow-sm);"

@@ -8,11 +8,9 @@ import dayjs from 'dayjs';
 import { ChatMetadataService } from '../modules/chat-metadata/chat-metadata.service';
 import { Types } from 'mongoose';
 import * as CryptoJS from 'crypto-js';
-import { InvokeService } from '../modules/invoke/invoke.service';
+import { InvokeAiModel, InvokeService } from '../modules/invoke/invoke.service';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import * as fs from 'node:fs';
-import { join } from 'node:path';
 import { AssetsService } from '../modules/assets/assets.service';
 import { ConfigService } from '@nestjs/config';
 
@@ -24,7 +22,7 @@ export class ApiTools {
     private readonly invokeService: InvokeService,
     private readonly httpService: HttpService,
     private readonly assetsService: AssetsService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
   ) {}
 
   @Tool({
@@ -141,7 +139,8 @@ export class ApiTools {
     context: Context,
     request: Request,
   ) {
-    const useInvoke = this.configService.get<string>('INVOKE_INTEGRATION') === 'true';
+    const useInvoke =
+      this.configService.get<string>('INVOKE_INTEGRATION') === 'true';
     if (!useInvoke) {
       return 'Invoke integration is not enabled. Tell the user to Make sure to set "INVOKE_INTEGRATION" to true in .env when starting LMStudio Extender!';
     }
@@ -152,7 +151,10 @@ export class ApiTools {
     if (!chatId) return `chatId not defined!!`;
     if (!prompt) return `Didn't receive any prompt!`;
 
-    const img = await this.invokeService.generateImage(prompt);
+    const img = await this.invokeService.generateImage(
+      prompt,
+      InvokeAiModel.DREAMSHAPER_8,
+    );
 
     const fileName =
       img.fullPath

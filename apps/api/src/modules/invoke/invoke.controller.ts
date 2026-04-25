@@ -6,7 +6,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Public } from '../auth/public.decorator';
-import { InvokeService } from './invoke.service';
+import { InvokeAiModel, InvokeService } from './invoke.service';
 
 @ApiTags('Invoke')
 @ApiBearerAuth()
@@ -22,6 +22,9 @@ export class InvokeController {
   })
   @ApiOkResponse({ type: String })
   testGenerateImage(): Promise<{ thumbPath: string; fullPath: string }> {
-    return this.invokeService.generateImage('Image of a duck');
+    return this.invokeService.generateImage(
+      'generate ma a image of a blue cat',
+      InvokeAiModel.JUGGERNAUT_XL_V9,
+    );
   }
 }
