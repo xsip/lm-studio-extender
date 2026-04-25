@@ -166,7 +166,7 @@ export class OpenAiService {
       tools: [
         {
           type: 'mcp',
-          server_label: 'my-toolbox',
+          server_label: 'lm-studio-extender-toolbox',
           server_url: this.selfMcpUrl,
           headers: {
             authorization: `Bearer ${token}`,
@@ -358,7 +358,7 @@ The final response must be a direct answer to the decrypted message, not a repet
       tools: [
         {
           type: 'mcp',
-          server_label: 'my-toolbox',
+          server_label: 'lm-studio-extender-toolbox',
           server_url: this.selfMcpUrl,
           headers: {
             authorization: `Bearer ${token}`,

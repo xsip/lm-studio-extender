@@ -124,7 +124,7 @@ export class LmStudioService {
     dto.integrations = [
       {
         type: 'ephemeral_mcp',
-        server_label: 'my-toolbox',
+        server_label: 'lm-studio-extender-toolbox',
         server_url: this.selfMcpUrl,
         headers: {
           authorization: `Bearer ${token}`,

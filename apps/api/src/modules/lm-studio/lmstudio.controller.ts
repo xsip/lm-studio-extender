@@ -162,7 +162,7 @@ export class LmStudioController {
       tools: [
         {
           type: 'mcp',
-          server_label: 'my-toolbox',
+          server_label: 'lm-studio-extender-toolbox',
           server_url: this.lmStudioService.selfMcpUrl,
           headers: {
             authorization: `Bearer ${token}`,

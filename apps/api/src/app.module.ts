@@ -33,7 +33,7 @@ import { AssetsModule } from './modules/assets/assets.module';
 
     AssetsModule,
     McpModule.forRoot({
-      name: 'my-toolbox',
+      name: 'lm-studio-extender-toolbox',
       version: '1.0.0',
       apiPrefix: 'tools',
       transport: [McpTransportType.STREAMABLE_HTTP, McpTransportType.SSE],
