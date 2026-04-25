@@ -13,6 +13,7 @@ import {
   McpItemTracking,
 } from './openai-stream.service';
 import {
+  ChatMetadataDto,
   ChatMetadataService,
   CreateChatMetadataDto,
   EasyInputMessageDto,
@@ -36,6 +37,7 @@ import {
   safeParseJson,
 } from '../../shared/utils/chat-message.utils';
 import * as CryptoJS from 'crypto-js';
+import InvokeAiModelToUseEnum = ChatMetadataDto.InvokeAiModelToUseEnum;
 
 // Re-export ChatMessage so existing consumers importing from this file keep working.
 export type { ChatMessage };
@@ -103,6 +105,8 @@ export class ChatService {
       useCrypto?: boolean;
       cryptoKey?: string;
       openAiEndpointPreference?: CreateChatMetadataDto.OpenAiEndpointPreferenceEnum;
+      useInvoke?: boolean;
+      invokeAiModelToUse?: InvokeAiModelToUseEnum
     },
   ): void {
     if (this.form.invalid || this.streaming()) return;

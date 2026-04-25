@@ -28,7 +28,7 @@ import { CommonModule } from '@angular/common';
       [type]="type()"
       [disabled]="disabled()"
       (click)="clicked.emit()"
-      class="inline-flex items-center justify-center gap-1.5 font-medium rounded-lg border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:cursor-not-allowed"
+      class="inline-flex relative items-center justify-center gap-1.5 font-medium rounded-lg border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:cursor-not-allowed"
       [class]="classes()"
     >
       <ng-content />
@@ -59,7 +59,7 @@ export class ButtonComponent {
     const shadowStyle = 'shadow-depth-sm';
     const variants: Record<string, string> = {
       primary:   `bg-accent hover:bg-accent-hover border-transparent text-white disabled:bg-surface-sunken disabled:text-text-muted ${shadowStyle}`,
-      secondary: active
+      secondary: active && !this.disabled()
         ? 'border-accent text-accent bg-accent-subtle hover:bg-accent/15'
         : `border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary disabled:opacity-50 ${shadowStyle}`,
       danger: `border-red-500/50 text-red-400 hover:border-red-500 hover:bg-red-950/30 disabled:opacity-50 ${shadowStyle}`,

@@ -100,6 +100,7 @@ import {
 } from '../chat-metadata/chat-metadata.schema';
 import { ChatCompletionDto } from './dto/completions-dtos/ChatCompletionDto';
 import { ChatCompletionChunkDto } from './dto/completions-dtos/ChatCompletionChunkDto';
+import { InvokeAiModel } from '../invoke/invoke.service';
 
 @ApiTags('OpenAI')
 @ApiBearerAuth()
@@ -214,6 +215,19 @@ export class OpenaiController {
     description: 'Name for new chat',
   })
   @ApiQuery({
+    name: 'invokeModel',
+    type: 'string',
+    enum: InvokeAiModel,
+    required: false,
+    description: 'Invoke model to use',
+  })
+  @ApiQuery({
+    name: 'useInvoke',
+    type: 'boolean',
+    required: false,
+    description: 'Use Invoke MCP in this chat',
+  })
+  @ApiQuery({
     name: 'cryptoKey',
     type: 'string',
     required: false,
@@ -262,6 +276,10 @@ export class OpenaiController {
     @Query('cryptoKey') cryptoKey?: string,
     @Query('openAiEndpointPreference')
     openAiEndpointPreference?: OpenAiEndpointPreference,
+    @Query('useInvoke')
+    useInvoke?: boolean,
+    @Query('invokeModel')
+    invokeModel?: InvokeAiModel,
   ): Promise<void> {
     const userId = (user as any)._id as Types.ObjectId;
 
@@ -300,6 +318,8 @@ export class OpenaiController {
         cryptoKey,
         chatName,
         openAiEndpointPreference,
+        useInvoke,
+        invokeModel,
       },
     );
     // ───────────────────────────────────────────────────────────────────────

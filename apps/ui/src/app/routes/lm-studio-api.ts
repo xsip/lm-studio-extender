@@ -491,10 +491,18 @@ export class LmStudioApi implements OnDestroy, OnInit {
           chat.name ?? '',
           chat.useCrypto ?? false,
           chat.cryptoKey ?? '',
+          chat.useInvoke ?? false,
+          chat.invokeAiModelToUse ?? undefined
         );
       },
       error: () => {
-        this.chatSidebarRef?.loadSettingsData('', false, '');
+        this.chatSidebarRef?.loadSettingsData(
+          '',
+          false,
+          '',
+          false,
+           undefined,
+        );
       },
     });
   }

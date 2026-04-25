@@ -65,6 +65,7 @@ import { ChatCompletionCreateParamsNonStreamingDto } from './dto/completions-dto
 import { ChatCompletionDto } from './dto/completions-dtos/ChatCompletionDto';
 import { ChatCompletionCustomToolDto } from './dto/completions-dtos/ChatCompletionCustomToolDto';
 import { ChatCompletionFunctionToolDto } from './dto/completions-dtos/ChatCompletionFunctionToolDto';
+import { InvokeAiModel } from '../invoke/invoke.service';
 
 interface ChatEndEvent {
   type: 'chat.end';
@@ -150,6 +151,8 @@ export class OpenAiService {
       useCrypto?: boolean;
       cryptoKey?: string;
       chatName?: string;
+      useInvoke?: boolean;
+      invokeModel?: InvokeAiModel;
     },
   ): Promise<void> {
     const mappedDto:
@@ -172,7 +175,6 @@ export class OpenAiService {
           allowed_tools: [
             'greeting-tool',
             'get-token-usage-tool',
-            'generate-image-tool',
           ],
         } as any,
       ],
@@ -193,6 +195,8 @@ export class OpenAiService {
           cryptoKey: newChatConfig?.cryptoKey,
           useCrypto: newChatConfig?.useCrypto,
           usedModel: dto.model!,
+          useInvoke: newChatConfig?.useInvoke,
+          invokeAiModelToUse: newChatConfig?.invokeModel,
           lastMessageSentAt: new Date(),
           reasoningMode: dto.reasoning?.effort ?? 'off',
           tools: (mappedDto.tools?.filter(
@@ -257,6 +261,10 @@ The final response must be a direct answer to the decrypted message, not a repet
         ...(mappedDto.input as any[]),
       ];
       (mappedDto.tools![0] as any).allowed_tools.push('decrypt-message-tool');
+    }
+
+    if(chatMeta.useInvoke && chatMeta.invokeAiModelToUse) {
+      (mappedDto.tools![0] as any).allowed_tools.push('generate-image-tool');
     }
 
     res.setHeader('Content-Type', 'text/event-stream');

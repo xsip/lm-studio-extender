@@ -36,6 +36,9 @@
     "encryption": "Verschlüsselung",
     "encryptionHint": "Nachrichten mit einem Schlüssel verschlüsseln",
     "encryptionKey": "Verschlüsselungsschlüssel",
+    "invoke": "InvokeAI",
+    "invokeHint": "Bild Generator",
+    "invokeModel": "Invoke Model",
     "encryptionKeyPlaceholder": "Verschlüsselungsschlüssel eingeben…",
     "save": "Speichern",
     "cancel": "Abbrechen"
@@ -124,6 +127,7 @@
     "newChatOptions": "Neuer-Chat-Optionen",
     "optionalName": "Optionaler Name…",
     "endpoint": "Endpunkt",
+    "model": "Model",
     "responsesApi": "Responses-API",
     "chatCompletions": "Chat-Completions",
     "endpointResponsesDesc": "/responses-Endpunkt — unterstützt Reasoning & Datei-Eingaben.",

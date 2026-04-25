@@ -970,6 +970,28 @@
               ],
               "type": "string"
             }
+          },
+          {
+            "name": "useInvoke",
+            "required": false,
+            "in": "query",
+            "description": "Use Invoke MCP in this chat",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "invokeModel",
+            "required": false,
+            "in": "query",
+            "description": "Invoke model to use",
+            "schema": {
+              "enum": [
+                "Dreamshaper 8",
+                "Juggernaut XL v9"
+              ],
+              "type": "string"
+            }
           }
         ],
         "requestBody": {

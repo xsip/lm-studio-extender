@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
+  ChatMetadataDto,
   ChatMetadataService,
   ChatRequestDto,
   ChatsService,
@@ -18,7 +19,7 @@ import {
   ResponseInputTextDto,
   ResponseOutputMessageDtoContentInner,
   ResponseOutputRefusalDto,
-  ResponseOutputTextDto
+  ResponseOutputTextDto,
 } from '../client';
 import { ChatMessage, ChatService } from './openai-api/chat.service';
 import { OpenAiModelSelectorComponent } from './openai-api/model-selector.component';
@@ -36,6 +37,7 @@ import { LabelComponent } from '../shared/components/ui/label.component';
 import { TextInputComponent } from '../shared/components/ui/text-input.component';
 import { ToggleComponent } from '../shared/components/ui/toggle.component';
 import { TranslateModule } from '@ngx-translate/core';
+import InvokeAiModelToUseEnum = ChatMetadataDto.InvokeAiModelToUseEnum;
 
 @Component({
   selector: 'app-openai-api',
@@ -155,7 +157,7 @@ import { TranslateModule } from '@ngx-translate/core';
               >
                 @if (!chatService.hasChatOpen()) {
                   <div
-                    class="flex flex-col gap-4 w-full max-w-md mx-auto mt-6 p-5 bg-surface-raised border border-border-default rounded-xl shadow-lg shadow-black/20"
+                    class="flex flex-col gap-4 w-full max-w-xl mx-auto mt-6 p-5 bg-surface-raised border border-border-default rounded-xl shadow-lg shadow-black/20"
                   >
                     <!-- Header -->
                     <div class="flex items-center gap-2 border-b border-border-default pb-3">
@@ -227,11 +229,10 @@ import { TranslateModule } from '@ngx-translate/core';
                         (checkedChange)="newChatUseCrypto.set($event)"
                       />
                     </div>
-
                     <!-- Crypto key input -->
                     @if (newChatUseCrypto()) {
                       <div>
-                        <ui-label class="mb-1.5">{{
+                        <ui-label class="mb-1.5 ">{{
                           'chatSettings.encryptionKey' | translate
                         }}</ui-label>
                         <ui-text-input
@@ -241,6 +242,53 @@ import { TranslateModule } from '@ngx-translate/core';
                           [(ngModel)]="newChatCryptoKey"
                           [placeholder]="'chatSettings.encryptionKeyPlaceholder' | translate"
                         />
+                      </div>
+                    }
+                    <!-- Invoke AI toggle -->
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <ui-label>{{ 'chatSettings.invoke' | translate }}</ui-label>
+                        <span class="text-[10px] text-text-muted mt-0.5 block">{{
+                          'chatSettings.invokeHint' | translate
+                        }}</span>
+                      </div>
+                      <ui-toggle
+                        [(ngModel)]="newChatUseInvokeFeature"
+                        activeColor="bg-amber-500"
+                        (checkedChange)="newChatUseInvoke.set($event)"
+                      />
+                    </div>
+                    @if (newChatUseInvoke()) {
+                      <div class="self-center w-full">
+                        <ui-label class="mb-1.5 {{ !newChatUseInvoke() ? 'opacity-0.5' : '' }}">{{
+                          'toolbar.model' | translate
+                        }}</ui-label>
+                        <div class="flex w-full gap-2">
+                          <ui-button
+                            [disabled]="!newChatUseInvoke()"
+                            class="flex-1"
+                            size="md"
+                            variant="secondary"
+                            [active]="invokeAiModelPreference() === 'Juggernaut XL v9'"
+                            (clicked)="invokeAiModelPreference.set('Juggernaut XL v9')"
+                            ><p class="p-1.5">Juggernaut XL v9</p>
+                            <div class="absolute top-0 right-1 text-[10px] text-warn">
+                              sdxl
+                            </div></ui-button
+                          >
+                          <ui-button
+                            class="flex-1"
+                            size="md"
+                            variant="secondary"
+                            [disabled]="!newChatUseInvoke()"
+                            [active]="invokeAiModelPreference() === 'Dreamshaper 8'"
+                            (clicked)="invokeAiModelPreference.set('Dreamshaper 8')"
+                            ><p class="p-1.5">Dreamshaper 8</p>
+                            <div class="absolute top-0 right-1 text-[10px] text-warn">
+                              sd 1.5
+                            </div></ui-button
+                          >
+                        </div>
                       </div>
                     }
                   </div>
@@ -326,10 +374,13 @@ export class OpenAiApi implements OnDestroy, OnInit {
   readonly newChatEndpointPreference =
     signal<CreateChatMetadataDto.OpenAiEndpointPreferenceEnum>('RESPONSES');
   readonly newChatUseCrypto = signal(false);
+  readonly newChatUseInvoke = signal(true);
+  readonly invokeAiModelPreference = signal<InvokeAiModelToUseEnum>('Dreamshaper 8');
   newChatCryptoKey = '';
   newChatName = '';
   /** Two-way ngModel bridge for ui-toggle — kept in sync with newChatUseCrypto signal. */
   newChatUseCryptoModel = false;
+  newChatUseInvokeFeature = true;
 
   readonly models = signal<ModelOpenAiDto[]>([]);
   readonly modelsLoading = signal(false);
@@ -668,6 +719,8 @@ export class OpenAiApi implements OnDestroy, OnInit {
         useCrypto: this.newChatUseCrypto(),
         cryptoKey: this.newChatCryptoKey || undefined,
         openAiEndpointPreference: this.newChatEndpointPreference(),
+        invokeAiModelToUse: this.invokeAiModelPreference(),
+        useInvoke: this.newChatUseInvoke()
       },
     );
 
@@ -708,10 +761,18 @@ export class OpenAiApi implements OnDestroy, OnInit {
           chat.name ?? '',
           chat.useCrypto ?? false,
           chat.cryptoKey ?? '',
+          chat.useInvoke ?? false,
+          chat.invokeAiModelToUse ?? undefined,
         );
       },
       error: () => {
-        this.chatSidebarRef?.loadSettingsData('', false, '');
+        this.chatSidebarRef?.loadSettingsData(
+          '',
+          false,
+          '',
+           false,
+          undefined,
+        );
       },
     });
   }
@@ -721,13 +782,17 @@ export class OpenAiApi implements OnDestroy, OnInit {
     name,
     useCrypto,
     cryptoKey,
+    useInvoke,
+    invokeAiModelToUse
   }: {
     chatId: string;
     name: string;
     useCrypto: boolean;
     cryptoKey: string;
+    useInvoke: boolean;
+    invokeAiModelToUse?: InvokeAiModelToUseEnum;
   }): void {
-    this.chatMetaService.updateChatMetadata(chatId, { name, useCrypto, cryptoKey }).subscribe({
+    this.chatMetaService.updateChatMetadata(chatId, { name, useCrypto, cryptoKey, invokeAiModelToUse,useInvoke }).subscribe({
       next: () => {
         this.chatList.update((list) =>
           list.map((c) => (c._id === chatId ? { ...c, name, useCrypto } : c)),

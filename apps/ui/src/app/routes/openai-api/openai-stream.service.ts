@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable, ReplaySubject } from 'rxjs';
 import { Router } from '@angular/router';
 import {
+  ChatMetadataDto,
   ChatStreamOpenAiRequest,
   CreateChatMetadataDto,
   ResponseAudioDeltaEventDto,
@@ -58,6 +59,7 @@ import {
   ResponseWebSearchCallInProgressEventDto,
   ResponseWebSearchCallSearchingEventDto,
 } from '../../client';
+import InvokeAiModelToUseEnum = ChatMetadataDto.InvokeAiModelToUseEnum;
 
 // ---------------------------------------------------------------------------
 // OpenAI Responses API SSE event interfaces
@@ -328,6 +330,8 @@ export class OpenAiStreamService {
       useCrypto?: boolean;
       cryptoKey?: string;
       openAiEndpointPreference?: CreateChatMetadataDto.OpenAiEndpointPreferenceEnum;
+      useInvoke?: boolean;
+      invokeAiModelToUse?: InvokeAiModelToUseEnum;
     },
   ): Promise<void> {
     try {
@@ -335,6 +339,12 @@ export class OpenAiStreamService {
       const params = new URLSearchParams();
       if (chatId) params.set('internalChatId', chatId);
       if (!chatId && newChatOptions) {
+
+        if (newChatOptions.useInvoke && newChatOptions.invokeAiModelToUse) {
+          params.set('useInvoke', String(newChatOptions.useInvoke));
+          params.set('invokeModel', newChatOptions.invokeAiModelToUse);
+
+        }
         if (newChatOptions.name) params.set('chatName', newChatOptions.name);
         if (newChatOptions.useCrypto != null)
           params.set('useCrypto', String(newChatOptions.useCrypto));

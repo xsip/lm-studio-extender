@@ -37,6 +37,9 @@
     "encryptionHint": "Encrypt messages with a key",
     "encryptionKey": "Encryption Key",
     "encryptionKeyPlaceholder": "Enter encryption key…",
+    "invokeHint": "Image generator",
+    "invoke": "InvokeAI",
+    "invokeModel": "Invoke Model To Use",
     "save": "Save",
     "cancel": "Cancel"
   },
@@ -124,6 +127,8 @@
     "newChatOptions": "New Chat Options",
     "optionalName": "Optional name…",
     "endpoint": "Endpoint",
+    "model": "Model",
+
     "responsesApi": "Responses API",
     "chatCompletions": "Chat Completions",
     "endpointResponsesDesc": "/responses endpoint — supports reasoning & file inputs.",
