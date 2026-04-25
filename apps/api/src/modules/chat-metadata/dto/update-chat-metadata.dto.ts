@@ -10,6 +10,7 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { EphemeralMcpIntegrationDto } from '../../lm-studio/dto/chat.dto';
 import { OpenAiEndpointPreference } from '../chat-metadata.schema';
+import { InvokeAiModel } from '../../invoke/invoke.service';
 
 export class UpdateChatMetadataDto {
   @ApiPropertyOptional()
@@ -54,4 +55,14 @@ export class UpdateChatMetadataDto {
   })
   @IsOptional()
   openAiEndpointPreference?: OpenAiEndpointPreference;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  useInvoke?: boolean;
+
+  @ApiPropertyOptional({
+    enum: InvokeAiModel,
+  })
+  @IsOptional()
+  invokeAiModelToUse?: InvokeAiModel;
 }

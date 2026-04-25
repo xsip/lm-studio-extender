@@ -31,6 +31,8 @@ export interface CreateChatMetadataDto {
     useCrypto?: boolean;
     cryptoKey?: string;
     openAiEndpointPreference?: CreateChatMetadataDto.OpenAiEndpointPreferenceEnum;
+    useInvoke?: boolean;
+    invokeAiModelToUse?: CreateChatMetadataDto.InvokeAiModelToUseEnum;
     lastMessageSentAt?: string;
 }
 export namespace CreateChatMetadataDto {
@@ -44,6 +46,11 @@ export namespace CreateChatMetadataDto {
         Completion: 'COMPLETION'
     } as const;
     export type OpenAiEndpointPreferenceEnum = typeof OpenAiEndpointPreferenceEnum[keyof typeof OpenAiEndpointPreferenceEnum];
+    export const InvokeAiModelToUseEnum = {
+        Dreamshaper8: 'Dreamshaper 8',
+        JuggernautXlV9: 'Juggernaut XL v9'
+    } as const;
+    export type InvokeAiModelToUseEnum = typeof InvokeAiModelToUseEnum[keyof typeof InvokeAiModelToUseEnum];
 }
 
 

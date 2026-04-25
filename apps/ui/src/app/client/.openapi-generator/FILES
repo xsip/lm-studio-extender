@@ -3,9 +3,11 @@ README.md
 api.base.service.ts
 api.module.ts
 api/api.ts
+api/assets.service.ts
 api/auth.service.ts
 api/chatMetadata.service.ts
 api/chats.service.ts
+api/invoke.service.ts
 api/lMStudio.service.ts
 api/openAI.service.ts
 api/sse.service.ts

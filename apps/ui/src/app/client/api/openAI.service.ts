@@ -158,19 +158,19 @@ export class OpenAIService extends BaseService {
      * Returns the LM Studio response as Server-Sent Events. Each exchange is persisted in MongoDB under the given &#x60;internalChatId&#x60;. If &#x60;internalChatId&#x60; is supplied, the latest &#x60;response_id&#x60; for that session is fetched from the DB and set as &#x60;previous_response_id&#x60; on the request so LM Studio maintains conversation context. If &#x60;internalChatId&#x60; is omitted a new session is created and its generated ID is returned via a &#x60;created_chat&#x60; SSE event before the stream closes.
      * @endpoint post /openai/completions
      * @param completionsStreamOpenAiRequest 
-     * @param internalChatId MD5 hex string identifying an existing chat session. Omit to start a new session.
+     * @param openAiEndpointPreference openAiEndpointPreference for new chat
+     * @param cryptoKey Key for new chat encryption
      * @param chatName Name for new chat
      * @param useCrypto Use crypto for new chat
-     * @param cryptoKey Key for new chat encryption
-     * @param openAiEndpointPreference openAiEndpointPreference for new chat
+     * @param internalChatId MD5 hex string identifying an existing chat session. Omit to start a new session.
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public completionsOpenAi(completionsStreamOpenAiRequest: CompletionsStreamOpenAiRequest, internalChatId?: string, chatName?: string, useCrypto?: boolean, cryptoKey?: string, openAiEndpointPreference?: 'RESPONSES' | 'COMPLETION', observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<ChatCompletionDto>;
-    public completionsOpenAi(completionsStreamOpenAiRequest: CompletionsStreamOpenAiRequest, internalChatId?: string, chatName?: string, useCrypto?: boolean, cryptoKey?: string, openAiEndpointPreference?: 'RESPONSES' | 'COMPLETION', observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ChatCompletionDto>>;
-    public completionsOpenAi(completionsStreamOpenAiRequest: CompletionsStreamOpenAiRequest, internalChatId?: string, chatName?: string, useCrypto?: boolean, cryptoKey?: string, openAiEndpointPreference?: 'RESPONSES' | 'COMPLETION', observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ChatCompletionDto>>;
-    public completionsOpenAi(completionsStreamOpenAiRequest: CompletionsStreamOpenAiRequest, internalChatId?: string, chatName?: string, useCrypto?: boolean, cryptoKey?: string, openAiEndpointPreference?: 'RESPONSES' | 'COMPLETION', observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public completionsOpenAi(completionsStreamOpenAiRequest: CompletionsStreamOpenAiRequest, openAiEndpointPreference?: 'RESPONSES' | 'COMPLETION', cryptoKey?: string, chatName?: string, useCrypto?: boolean, internalChatId?: any, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<ChatCompletionDto>;
+    public completionsOpenAi(completionsStreamOpenAiRequest: CompletionsStreamOpenAiRequest, openAiEndpointPreference?: 'RESPONSES' | 'COMPLETION', cryptoKey?: string, chatName?: string, useCrypto?: boolean, internalChatId?: any, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ChatCompletionDto>>;
+    public completionsOpenAi(completionsStreamOpenAiRequest: CompletionsStreamOpenAiRequest, openAiEndpointPreference?: 'RESPONSES' | 'COMPLETION', cryptoKey?: string, chatName?: string, useCrypto?: boolean, internalChatId?: any, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ChatCompletionDto>>;
+    public completionsOpenAi(completionsStreamOpenAiRequest: CompletionsStreamOpenAiRequest, openAiEndpointPreference?: 'RESPONSES' | 'COMPLETION', cryptoKey?: string, chatName?: string, useCrypto?: boolean, internalChatId?: any, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (completionsStreamOpenAiRequest === null || completionsStreamOpenAiRequest === undefined) {
             throw new Error('Required parameter completionsStreamOpenAiRequest was null or undefined when calling completionsOpenAi.');
         }
@@ -179,8 +179,17 @@ export class OpenAIService extends BaseService {
 
         localVarQueryParameters = this.addToHttpParams(
             localVarQueryParameters,
-            'internalChatId',
-            <any>internalChatId,
+            'openAiEndpointPreference',
+            <any>openAiEndpointPreference,
+            QueryParamStyle.Form,
+            true,
+        );
+
+
+        localVarQueryParameters = this.addToHttpParams(
+            localVarQueryParameters,
+            'cryptoKey',
+            <any>cryptoKey,
             QueryParamStyle.Form,
             true,
         );
@@ -206,17 +215,8 @@ export class OpenAIService extends BaseService {
 
         localVarQueryParameters = this.addToHttpParams(
             localVarQueryParameters,
-            'cryptoKey',
-            <any>cryptoKey,
-            QueryParamStyle.Form,
-            true,
-        );
-
-
-        localVarQueryParameters = this.addToHttpParams(
-            localVarQueryParameters,
-            'openAiEndpointPreference',
-            <any>openAiEndpointPreference,
+            'internalChatId',
+            <any>internalChatId,
             QueryParamStyle.Form,
             true,
         );
@@ -281,19 +281,19 @@ export class OpenAIService extends BaseService {
      * Streams the LM Studio response as Server-Sent Events. Each exchange is persisted in MongoDB under the given &#x60;internalChatId&#x60;. If &#x60;internalChatId&#x60; is supplied, the latest &#x60;response_id&#x60; for that session is fetched from the DB and set as &#x60;previous_response_id&#x60; on the request so LM Studio maintains conversation context. If &#x60;internalChatId&#x60; is omitted a new session is created and its generated ID is returned via a &#x60;created_chat&#x60; SSE event before the stream closes.
      * @endpoint post /openai/completions-stream
      * @param completionsStreamOpenAiRequest 
-     * @param internalChatId MD5 hex string identifying an existing chat session. Omit to start a new session.
+     * @param openAiEndpointPreference openAiEndpointPreference for new chat
+     * @param cryptoKey Key for new chat encryption
      * @param chatName Name for new chat
      * @param useCrypto Use crypto for new chat
-     * @param cryptoKey Key for new chat encryption
-     * @param openAiEndpointPreference openAiEndpointPreference for new chat
+     * @param internalChatId MD5 hex string identifying an existing chat session. Omit to start a new session.
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public completionsStreamOpenAi(completionsStreamOpenAiRequest: CompletionsStreamOpenAiRequest, internalChatId?: string, chatName?: string, useCrypto?: boolean, cryptoKey?: string, openAiEndpointPreference?: 'RESPONSES' | 'COMPLETION', observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/event-stream', context?: HttpContext, transferCache?: boolean}): Observable<Blob>;
-    public completionsStreamOpenAi(completionsStreamOpenAiRequest: CompletionsStreamOpenAiRequest, internalChatId?: string, chatName?: string, useCrypto?: boolean, cryptoKey?: string, openAiEndpointPreference?: 'RESPONSES' | 'COMPLETION', observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/event-stream', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<Blob>>;
-    public completionsStreamOpenAi(completionsStreamOpenAiRequest: CompletionsStreamOpenAiRequest, internalChatId?: string, chatName?: string, useCrypto?: boolean, cryptoKey?: string, openAiEndpointPreference?: 'RESPONSES' | 'COMPLETION', observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/event-stream', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<Blob>>;
-    public completionsStreamOpenAi(completionsStreamOpenAiRequest: CompletionsStreamOpenAiRequest, internalChatId?: string, chatName?: string, useCrypto?: boolean, cryptoKey?: string, openAiEndpointPreference?: 'RESPONSES' | 'COMPLETION', observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'text/event-stream', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public completionsStreamOpenAi(completionsStreamOpenAiRequest: CompletionsStreamOpenAiRequest, openAiEndpointPreference?: 'RESPONSES' | 'COMPLETION', cryptoKey?: string, chatName?: string, useCrypto?: boolean, internalChatId?: any, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/event-stream', context?: HttpContext, transferCache?: boolean}): Observable<Blob>;
+    public completionsStreamOpenAi(completionsStreamOpenAiRequest: CompletionsStreamOpenAiRequest, openAiEndpointPreference?: 'RESPONSES' | 'COMPLETION', cryptoKey?: string, chatName?: string, useCrypto?: boolean, internalChatId?: any, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/event-stream', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<Blob>>;
+    public completionsStreamOpenAi(completionsStreamOpenAiRequest: CompletionsStreamOpenAiRequest, openAiEndpointPreference?: 'RESPONSES' | 'COMPLETION', cryptoKey?: string, chatName?: string, useCrypto?: boolean, internalChatId?: any, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/event-stream', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<Blob>>;
+    public completionsStreamOpenAi(completionsStreamOpenAiRequest: CompletionsStreamOpenAiRequest, openAiEndpointPreference?: 'RESPONSES' | 'COMPLETION', cryptoKey?: string, chatName?: string, useCrypto?: boolean, internalChatId?: any, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'text/event-stream', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (completionsStreamOpenAiRequest === null || completionsStreamOpenAiRequest === undefined) {
             throw new Error('Required parameter completionsStreamOpenAiRequest was null or undefined when calling completionsStreamOpenAi.');
         }
@@ -302,8 +302,17 @@ export class OpenAIService extends BaseService {
 
         localVarQueryParameters = this.addToHttpParams(
             localVarQueryParameters,
-            'internalChatId',
-            <any>internalChatId,
+            'openAiEndpointPreference',
+            <any>openAiEndpointPreference,
+            QueryParamStyle.Form,
+            true,
+        );
+
+
+        localVarQueryParameters = this.addToHttpParams(
+            localVarQueryParameters,
+            'cryptoKey',
+            <any>cryptoKey,
             QueryParamStyle.Form,
             true,
         );
@@ -329,17 +338,8 @@ export class OpenAIService extends BaseService {
 
         localVarQueryParameters = this.addToHttpParams(
             localVarQueryParameters,
-            'cryptoKey',
-            <any>cryptoKey,
-            QueryParamStyle.Form,
-            true,
-        );
-
-
-        localVarQueryParameters = this.addToHttpParams(
-            localVarQueryParameters,
-            'openAiEndpointPreference',
-            <any>openAiEndpointPreference,
+            'internalChatId',
+            <any>internalChatId,
             QueryParamStyle.Form,
             true,
         );

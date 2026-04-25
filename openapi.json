@@ -2041,6 +2041,16 @@
               "COMPLETION"
             ]
           },
+          "useInvoke": {
+            "type": "boolean"
+          },
+          "invokeAiModelToUse": {
+            "type": "string",
+            "enum": [
+              "Dreamshaper 8",
+              "Juggernaut XL v9"
+            ]
+          },
           "lastMessageSentAt": {
             "format": "date-time",
             "type": "string"
@@ -2110,6 +2120,16 @@
           "lastMessageSentAt": {
             "format": "date-time",
             "type": "string"
+          },
+          "useInvoke": {
+            "type": "boolean"
+          },
+          "invokeAiModelToUse": {
+            "type": "string",
+            "enum": [
+              "Dreamshaper 8",
+              "Juggernaut XL v9"
+            ]
           }
         },
         "required": [
@@ -2157,6 +2177,16 @@
             "enum": [
               "RESPONSES",
               "COMPLETION"
+            ]
+          },
+          "useInvoke": {
+            "type": "boolean"
+          },
+          "invokeAiModelToUse": {
+            "type": "string",
+            "enum": [
+              "Dreamshaper 8",
+              "Juggernaut XL v9"
             ]
           }
         }

@@ -11,6 +11,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { EphemeralMcpIntegrationDto } from '../../lm-studio/dto/chat.dto';
 import { OpenAiEndpointPreference } from '../chat-metadata.schema';
+import { InvokeAiModel } from '../../invoke/invoke.service';
 
 export class CreateChatMetadataDto {
   @ApiProperty({ description: 'Human-readable name for this chat session' })
@@ -56,6 +57,16 @@ export class CreateChatMetadataDto {
   })
   @IsOptional()
   openAiEndpointPreference?: OpenAiEndpointPreference;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  useInvoke?: boolean;
+
+  @ApiPropertyOptional({
+    enum: InvokeAiModel,
+  })
+  @IsOptional()
+  invokeAiModelToUse?: InvokeAiModel;
 
   @ApiPropertyOptional({ type: Date })
   @IsOptional()

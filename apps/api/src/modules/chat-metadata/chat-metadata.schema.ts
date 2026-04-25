@@ -2,8 +2,9 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { EphemeralMcpIntegrationDto } from '../lm-studio/dto/chat.dto';
-import { IsIn } from 'class-validator';
+import { IsIn, IsOptional } from 'class-validator';
 import { SubscriptionType } from '../auth/user.schema';
+import { InvokeAiModel } from '../invoke/invoke.service';
 
 export type ChatMetadataDocument = ChatMetadata & Document;
 
@@ -65,6 +66,16 @@ export class ChatMetadata {
   })
   openAiEndpointPreference?: OpenAiEndpointPreference;
 
+  @Prop({ required: false, type: Boolean })
+  useInvoke?: boolean;
+
+  @Prop({
+    required: false,
+    enum: Object.values(InvokeAiModel),
+    default: InvokeAiModel.DREAMSHAPER_8,
+  })
+  invokeAiModelToUse?: InvokeAiModel;
+
   // `createdAt` / `updatedAt` injected automatically
 }
 
@@ -117,4 +128,12 @@ export class ChatMetadataDto {
 
   @ApiProperty()
   lastMessageSentAt?: Date;
+
+  @ApiPropertyOptional()
+  useInvoke?: boolean;
+
+  @ApiPropertyOptional({
+    enum: InvokeAiModel,
+  })
+  invokeAiModelToUse?: InvokeAiModel;
 }
