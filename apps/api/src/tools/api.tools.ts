@@ -14,6 +14,7 @@ import { firstValueFrom } from 'rxjs';
 import * as fs from 'node:fs';
 import { join } from 'node:path';
 import { AssetsService } from '../modules/assets/assets.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ApiTools {
@@ -23,6 +24,7 @@ export class ApiTools {
     private readonly invokeService: InvokeService,
     private readonly httpService: HttpService,
     private readonly assetsService: AssetsService,
+    private readonly configService: ConfigService
   ) {}
 
   @Tool({
@@ -139,6 +141,10 @@ export class ApiTools {
     context: Context,
     request: Request,
   ) {
+    const useInvoke = this.configService.get<string>('INVOKE_INTEGRATION') === 'true';
+    if (!useInvoke) {
+      return 'Invoke integration is not enabled. Tell the user to Make sure to set "INVOKE_INTEGRATION" to true in .env when starting LMStudio Extender!';
+    }
     const user = (request as any).user as User & { _id?: Types.ObjectId };
     const chatId = request.headers['chatid'] as string;
 
