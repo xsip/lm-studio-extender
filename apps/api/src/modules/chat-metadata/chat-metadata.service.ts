@@ -14,6 +14,7 @@ import {
 import { Chat, ChatDocument } from '../chats/chat.schema';
 import { CreateChatMetadataDto } from './dto/create-chat-metadata.dto';
 import { UpdateChatMetadataDto } from './dto/update-chat-metadata.dto';
+import { ImageBlob, ImageBlobDocument } from '../assets/image-blob.schema';
 
 @Injectable()
 export class ChatMetadataService {
@@ -24,6 +25,8 @@ export class ChatMetadataService {
     private readonly metaModel: Model<ChatMetadataDocument>,
     @InjectModel(Chat.name)
     private readonly chatModel: Model<ChatDocument>,
+    @InjectModel(ImageBlob.name)
+    private readonly imageBlobModel: Model<ImageBlobDocument>,
   ) {}
 
   // ── Create ────────────────────────────────────────────────────────────────
@@ -97,6 +100,13 @@ export class ChatMetadataService {
       .exec();
     this.logger.log(
       `Cascade-deleted ${deletedCount} chats for ChatMetadata id=${id}`,
+    );
+    // Cascade: delete all images that reference this meta id
+    const { deletedCount: deletedImages } = await this.imageBlobModel
+      .deleteMany({ chatId: id })
+      .exec();
+    this.logger.log(
+      `Cascade-deleted ${deletedImages} images for ChatMetadata id=${id}`,
     );
 
     await doc.deleteOne();
