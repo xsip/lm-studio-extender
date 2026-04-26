@@ -33,6 +33,7 @@ export class InvokeService {
   async generateImage(
     prompt: string,
     modelName: InvokeAiModel = InvokeAiModel.DREAMSHAPER_8,
+    reportProgress?: (progress?: number) => void,
   ): Promise<{
     fullPath: string;
     thumbPath: string;
@@ -80,11 +81,20 @@ export class InvokeService {
           transports: ['polling'],
         });
 
+        let batchId: string = '';
         socket.on('connect', () => {
           socket.emit('subscribe_queue', { queue_id: 'default' });
         });
+        socket.on('invocation_progress', (data) => {
+          if (data?.batch_id === batchId) reportProgress?.(data?.percentage);
+        });
+        socket.on('batch_enqueued', (data) => {
+          batchId = data?.batch_id;
+        });
 
         socket.on('invocation_complete', (data) => {
+          if (data?.batch_id !== batchId) return;
+
           const imageName = data?.result?.image?.image_name;
           if (!imageName) return;
 

@@ -126,7 +126,53 @@ export class ApiTools {
       return `There was an error decrypting your message!!`;
     }
   }
+  @Tool({
+    name: 'get-image-tool',
+    description:
+      'Returns a image by url. You can use that to view and/or describe the image',
+    parameters: z.object({
+      url: z.string().default(''),
+    }),
+  })
+  async getImageTool(
+    { url }: { url: string },
+    context: Context,
+    request: Request,
+  ) {
+    const mimeTypeMap: Record<string, string> = {
+      png: 'image/png',
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      gif: 'image/gif',
+      webp: 'image/webp',
+      svg: 'image/svg+xml',
+      bmp: 'image/bmp',
+      ico: 'image/x-icon',
+    };
 
+    const pathname = new URL(url).pathname;
+    const ext = pathname.split('.').pop()?.toLowerCase() ?? '';
+    const mimeType = mimeTypeMap[ext] ?? 'image/png';
+
+    const imageResponse = await firstValueFrom(
+      this.httpService.get<ArrayBuffer>(url, {
+        responseType: 'arraybuffer',
+        headers: {
+          Authorization: `Bearer ${request.headers['authorization']}`,
+        },
+      }),
+    );
+
+    const base64 = Buffer.from(imageResponse.data).toString('base64');
+
+    return [
+      {
+        type: 'image',
+        mimeType,
+        data: base64,
+      },
+    ];
+  }
   @Tool({
     name: 'generate-image-tool',
     description: 'Generates an image with the users prompt',
@@ -151,7 +197,6 @@ export class ApiTools {
     if (!chatId) return `chatId not defined!!`;
     if (!prompt) return `Didn't receive any prompt!`;
 
-
     const chatMetaData = await this.chatMetaDataService.findOne(
       (user as any)._id as Types.ObjectId,
       chatId,
@@ -161,13 +206,23 @@ export class ApiTools {
       return `Sorry, but chat with id ${chatId} not found.`;
     }
 
-
-    if (!chatMetaData.useInvoke || chatMetaData.useInvoke && !chatMetaData.invokeAiModelToUse) {
+    if (
+      !chatMetaData.useInvoke ||
+      (chatMetaData.useInvoke && !chatMetaData.invokeAiModelToUse)
+    ) {
       return 'Invoke integration is not enabledFor this session!';
     }
     const img = await this.invokeService.generateImage(
       prompt,
       chatMetaData.invokeAiModelToUse,
+      (progress) => {
+        if (progress !== undefined) {
+          context.reportProgress({
+            progress: progress * 100,
+            total: 100,
+          });
+        }
+      },
     );
 
     const fileName =
@@ -203,7 +258,8 @@ export class ApiTools {
         type: 'image',
         source: {
           type: 'url',
-          url: `${process.env.SELF_URL}/assets/filequery/${filename}?userId=${user._id + ''}&chatId=${chatId}`,
+          url: `api/assets/${chatId}/${filename}`,
+          // url: `${process.env.SELF_URL}/assets/filequery/${filename}?userId=${user._id + ''}&chatId=${chatId}`,
         },
       },
       {

@@ -366,8 +366,7 @@ The final response must be a direct answer to the decrypted message, not a repet
           },
           allowed_tools: [
             'greeting-tool',
-            'get-token-usage-tool',
-            'generate-image-tool',
+            'get-token-usage-tool'
           ],
         } as any,
       ],

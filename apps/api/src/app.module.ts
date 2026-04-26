@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AppService } from './app.service';
 import { McpModule, McpTransportType } from '@rekog/mcp-nest';
 import { ApiTools } from './tools/api.tools';
@@ -16,6 +16,7 @@ import { OpenaiModule } from './modules/openai/openai.module';
 import { InvokeModule } from './modules/invoke/invoke.module';
 import { HttpModule } from '@nestjs/axios';
 import { AssetsModule } from './modules/assets/assets.module';
+import { toolsTimeoutMiddleware } from './tools/tools-timeout.middleware';
 
 @Module({
   imports: [
@@ -57,4 +58,8 @@ import { AssetsModule } from './modules/assets/assets.module';
     { provide: APP_GUARD, useClass: RolesGuard },
   ],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(toolsTimeoutMiddleware).forRoutes('tools');
+  }
+}
