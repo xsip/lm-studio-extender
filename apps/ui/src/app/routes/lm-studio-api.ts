@@ -1,3 +1,4 @@
+import { animate, style, transition, trigger } from '@angular/animations';
 import {
   Component,
   computed,
@@ -45,16 +46,36 @@ import { TranslateModule } from '@ngx-translate/core';
     ButtonComponent,
     TranslateModule,
   ],
+  animations: [
+    trigger('sidebarAnim', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateX(-100%)' }),
+        animate('240ms cubic-bezier(0.16, 1, 0.3, 1)', style({ opacity: 1, transform: 'translateX(0)' })),
+      ]),
+      transition(':leave', [
+        animate('180ms cubic-bezier(0.4, 0, 1, 1)', style({ opacity: 0, transform: 'translateX(-100%)' })),
+      ]),
+    ]),
+    trigger('infoPanelAnim', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateX(100%)' }),
+        animate('240ms cubic-bezier(0.16, 1, 0.3, 1)', style({ opacity: 1, transform: 'translateX(0)' })),
+      ]),
+      transition(':leave', [
+        animate('180ms cubic-bezier(0.4, 0, 1, 1)', style({ opacity: 0, transform: 'translateX(100%)' })),
+      ]),
+    ]),
+  ],
   providers: [ChatService],
   template: `
-    <div
-      class="h-screen bg-surface-base text-text-primary flex flex-col overflow-hidden transition-colors duration-200"
-    >
+    <div class="h-screen bg-surface-base text-text-primary flex flex-col overflow-hidden transition-colors duration-300">
+
       <!-- ── Top bar ── -->
       <div
-        class="flex items-center gap-3 border-b border-border-default px-3 py-2.5 shrink-0 bg-surface-raised"
-        style="box-shadow: var(--shadow-sm);"
+        class="flex items-center gap-2 border-b border-border-default px-3 py-2 shrink-0 bg-surface-raised relative z-10 animate-slide-down"
+        style="box-shadow: 0 1px 0 var(--color-border-subtle), var(--shadow-sm);"
       >
+        <!-- Sidebar toggle -->
         <ui-button
           variant="secondary"
           size="xs"
@@ -62,28 +83,24 @@ import { TranslateModule } from '@ngx-translate/core';
           (clicked)="showChatsSidebar.set(!showChatsSidebar())"
           [title]="'toolbar.toggleChats' | translate"
         >
-          <svg
-            class="w-3.5 h-3.5"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M3 12h18M3 18h18" />
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M3 12h18M3 18h18"/>
           </svg>
           <span class="hidden sm:inline">{{ 'toolbar.chats' | translate }}</span>
         </ui-button>
 
-        <div class="flex items-center gap-1.5 ml-1">
-          <div
-            class="w-1.5 h-1.5 rounded-full bg-success-muted animate-pulse"
-            style="box-shadow: 0 0 6px var(--color-success-muted);"
-          ></div>
-          <span class="text-xs text-text-muted tracking-wide font-medium hidden md:block">{{
-            'login.appName' | translate
-          }}</span>
+        <!-- Brand / status -->
+        <div class="flex items-center gap-2 ml-1">
+          <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-overlay border border-border-subtle">
+            <div class="w-1.5 h-1.5 rounded-full bg-success-muted animate-glow-pulse shrink-0"
+                 style="box-shadow: 0 0 6px var(--color-success-muted);"></div>
+            <span class="text-[10px] text-text-muted tracking-wider font-medium uppercase hidden md:block">
+              {{ 'login.appName' | translate }}
+            </span>
+          </div>
         </div>
 
+        <!-- Model selector -->
         <div class="relative ml-auto">
           <app-model-selector
             [models]="models()"
@@ -94,48 +111,22 @@ import { TranslateModule } from '@ngx-translate/core';
           />
         </div>
 
-        <!--<button
-          type="button"
-          (click)="showEventPanel.set(!showEventPanel())"
-          class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs border rounded-lg transition-colors"
-          [class]="showEventPanel() ? 'border-tool-border text-tool-text bg-tool-bg' : 'border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary'"
-          title="Toggle event log"
-        >
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-3-3v6M4.5 12a7.5 7.5 0 1115 0 7.5 7.5 0 01-15 0z" />
-          </svg>
-          <span class="hidden sm:inline">Events</span>
-          @if (events().length > 0) {
-            <span class="text-text-muted">{{ events().length }}</span>
-          }
-        </button>!-->
-
+        <!-- Info panel toggle -->
         <ui-icon-button
           [active]="showInfoPanel()"
           [title]="'toolbar.userInfo' | translate"
           (clicked)="showInfoPanel.set(!showInfoPanel())"
         >
-          <svg
-            class="w-3.5 h-3.5"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-            />
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
           </svg>
         </ui-icon-button>
       </div>
 
       <!-- ── Body ── -->
-      <div
-        class="flex flex-1 overflow-hidden relative min-h-0"
-        style="background: var(--color-surface-base);"
-      >
+      <div class="flex flex-1 overflow-hidden relative min-h-0">
+
+        <!-- Sidebar -->
         @if (showChatsSidebar()) {
           <app-chat-sidebar
             #chatSidebar
@@ -149,13 +140,17 @@ import { TranslateModule } from '@ngx-translate/core';
             (chatDeleted)="deleteChat($event)"
             (openChatSettings)="onOpenChatSettings($event)"
             (saveCryptoSettings)="onSaveCryptoSettings($event)"
+            @sidebarAnim
           />
         }
 
         <!-- CENTER: Chat window -->
-        <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
-          <div class="flex flex-col flex-1 min-h-0 overflow-hidden max-w-3xl w-full mx-auto">
-            <div #messageContainer class="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3">
+        <div class="flex flex-col flex-1 min-w-0 overflow-hidden relative">
+          <!-- Subtle dot bg -->
+          <div class="absolute inset-0 bg-dot-grid opacity-20 pointer-events-none"></div>
+
+          <div class="flex flex-col flex-1 min-h-0 overflow-hidden max-w-3xl w-full mx-auto relative">
+            <div #messageContainer class="flex-1 overflow-y-auto px-4 py-6 flex flex-col gap-4">
               <app-chat-messages
                 client="LMSTUDIO"
                 [isLoadingMessages]="this.isLoadingMessages()"
@@ -185,27 +180,17 @@ import { TranslateModule } from '@ngx-translate/core';
 
         @if (showInfoPanel()) {
           <div
-            class="w-72 shrink-0 border-l border-border-default bg-surface-raised flex flex-col overflow-hidden"
+            class="w-72 shrink-0 border-l border-border-default bg-surface-raised flex flex-col overflow-hidden" style="box-shadow: -4px 0 20px rgba(0,0,0,0.08);" @infoPanelAnim
           >
-            <div
-              class="flex items-center justify-between px-3 py-2 border-b border-border-default shrink-0"
-            >
-              <span class="text-xs font-semibold text-text-primary">{{
-                'info.info' | translate
-              }}</span>
+            <div class="flex items-center justify-between px-4 py-2.5 border-b border-border-default shrink-0">
+              <span class="text-xs font-semibold text-text-primary tracking-wide">{{ 'info.info' | translate }}</span>
               <ui-icon-button
                 size="sm"
                 [title]="'common.close' | translate"
                 (clicked)="showInfoPanel.set(false)"
               >
-                <svg
-                  class="w-3.5 h-3.5"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
               </ui-icon-button>
             </div>

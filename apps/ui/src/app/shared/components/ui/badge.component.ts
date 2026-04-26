@@ -22,7 +22,7 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   template: `
     <span
-      class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-medium"
+      class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide animate-scale-in"
       [class]="variantClass()"
     >
       <ng-content />

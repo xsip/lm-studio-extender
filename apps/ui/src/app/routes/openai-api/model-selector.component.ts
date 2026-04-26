@@ -1,3 +1,4 @@
+import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, computed, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
@@ -6,6 +7,17 @@ import { SpinnerComponent } from '../../shared/components/spinner.component';
 
 @Component({
   selector: 'app-openai-model-selector',
+  animations: [
+    trigger('dropdownAnim', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'scale(0.94) translateY(-6px)', transformOrigin: 'top right' }),
+        animate('220ms cubic-bezier(0.34, 1.56, 0.64, 1)', style({ opacity: 1, transform: 'scale(1) translateY(0)' })),
+      ]),
+      transition(':leave', [
+        animate('140ms ease-in', style({ opacity: 0, transform: 'scale(0.95) translateY(-4px)', transformOrigin: 'top right' })),
+      ]),
+    ]),
+  ],
   imports: [CommonModule, TranslateModule, SpinnerComponent],
   template: `
     <div class="group/model-btn relative">
@@ -53,8 +65,7 @@ import { SpinnerComponent } from '../../shared/components/spinner.component';
 
       @if (dropdownOpen()) {
         <div class="fixed inset-0 z-10" (click)="dropdownOpen.set(false)"></div>
-        <div
-          class="absolute top-full mt-1.5 right-0 z-20 min-w-[280px] max-w-[360px] bg-surface-raised border border-border-default rounded-lg shadow-2xl shadow-black/70 overflow-hidden py-1"
+        <div @dropdownAnim class="absolute top-full mt-2 right-0 z-20 min-w-[280px] max-w-[360px] bg-surface-raised border border-border-default rounded-lg shadow-2xl shadow-black/70 overflow-hidden py-1"
         >
           <div
             class="px-3 py-1.5 text-[10px] text-text-muted uppercase tracking-widest border-b border-border-default"

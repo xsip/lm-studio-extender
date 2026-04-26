@@ -1,3 +1,4 @@
+import { animate, style, transition, trigger, query, stagger } from '@angular/animations';
 import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { CommonModule } from '@angular/common';
@@ -10,6 +11,20 @@ import { ButtonComponent } from '../../shared/components/ui/button.component';
 
 @Component({
   selector: 'app-info',
+  animations: [
+    trigger('sectionAnim', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(8px)' }),
+        animate('260ms cubic-bezier(0.16, 1, 0.3, 1)', style({ opacity: 1, transform: 'translateY(0)' })),
+      ]),
+    ]),
+    trigger('rowAnim', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateX(-6px)' }),
+        animate('200ms cubic-bezier(0.16, 1, 0.3, 1)', style({ opacity: 1, transform: 'translateX(0)' })),
+      ]),
+    ]),
+  ],
   imports: [
     CommonModule,
     RouterLink,
@@ -22,119 +37,79 @@ import { ButtonComponent } from '../../shared/components/ui/button.component';
   ],
   template: `
     <div class="flex flex-col h-full overflow-y-auto p-4 gap-4 text-xs">
-      <!-- ── Theme ── -->
-      <div class="flex items-center justify-between">
-        <span class="text-text-primary font-semibold text-sm">{{ 'info.theme' | translate }}</span>
+
+      <!-- Theme row -->
+      <div class="flex items-center justify-between" @rowAnim>
+        <span class="text-sm font-semibold text-text-primary">{{ 'info.theme' | translate }}</span>
         <ui-dark-mode-toggle />
       </div>
 
-      <!-- ── Navigation links ── -->
-      <div class="flex items-center justify-between">
-        <span class="text-text-primary font-semibold text-sm">{{ 'info.documentation' | translate }}</span>
-        <a
-          routerLink="/"
-          routerLinkActive="border-accent text-accent bg-accent/10"
-          [routerLinkActiveOptions]="{ exact: true }"
-          class="px-2.5 py-1 text-[11px] rounded-md font-medium border border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors"
-          >{{ 'info.viewReadme' | translate }}</a
-        >
-      </div>
-
-      <div class="flex items-center justify-between">
-        <span class="text-text-primary font-semibold text-sm">{{ 'info.client' | translate }}</span>
-        <div class="flex items-center gap-1 ml-1">
+      <!-- Navigation -->
+      <div class="flex items-center justify-between" @rowAnim>
+        <span class="text-sm font-semibold text-text-primary">{{ 'info.client' | translate }}</span>
+        <div class="flex items-center gap-1">
           <a
             routerLink="/chat-lm-studio"
-            routerLinkActive="border-accent text-accent bg-accent/10"
+            routerLinkActive="!border-accent !text-accent !bg-accent-subtle"
             [routerLinkActiveOptions]="{ exact: false }"
-            class="px-2.5 py-1 text-[11px] rounded-md font-medium border border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors"
-            >{{ 'info.lmStudio' | translate }}</a
-          >
+            class="px-2.5 py-1 text-[11px] rounded-lg font-medium border border-border-default text-text-secondary hover:border-accent/50 hover:text-accent hover:bg-accent-subtle active:scale-95 transition-all duration-150"
+          >{{ 'info.lmStudio' | translate }}</a>
           <a
             routerLink="/chat-openai"
-            routerLinkActive="border-accent text-accent bg-accent/10"
+            routerLinkActive="!border-accent !text-accent !bg-accent-subtle"
             [routerLinkActiveOptions]="{ exact: false }"
-            class="px-2.5 py-1 text-[11px] rounded-md font-medium border border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary transition-colors"
-            >{{ 'info.openAI' | translate }}</a
-          >
+            class="px-2.5 py-1 text-[11px] rounded-lg font-medium border border-border-default text-text-secondary hover:border-accent/50 hover:text-accent hover:bg-accent-subtle active:scale-95 transition-all duration-150"
+          >{{ 'info.openAI' | translate }}</a>
         </div>
       </div>
 
-      <!-- ── Refresh ── -->
-      <div class="flex items-center justify-between">
-        <span class="text-text-primary font-semibold text-sm">{{ 'info.info' | translate }}</span>
+      <!-- Refresh -->
+      <div class="flex items-center justify-between" @rowAnim>
+        <span class="text-sm font-semibold text-text-primary">{{ 'info.info' | translate }}</span>
         <ui-button variant="secondary" size="xs" [disabled]="loading()" (clicked)="refresh()">
-          <svg
-            class="w-3 h-3 transition-transform"
-            [class.animate-spin]="loading()"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-            />
+          <svg class="w-3 h-3 transition-transform" [class.animate-spin]="loading()" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
           </svg>
           <span>{{ 'info.refresh' | translate }}</span>
         </ui-button>
       </div>
 
-      <!-- ── User card ── -->
-      <section class="rounded-xl border border-border-default bg-surface-raised overflow-hidden">
-        <div
-          class="flex items-center gap-2 px-3 py-2 border-b border-border-subtle bg-surface-overlay"
-        >
-          <svg
-            class="w-3.5 h-3.5 text-text-muted"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-            />
+      <!-- User card -->
+      <section class="rounded-2xl border border-border-default bg-surface-raised overflow-hidden shadow-depth-sm hover-lift" @sectionAnim>
+        <div class="flex items-center gap-2 px-3 py-2.5 border-b border-border-subtle bg-surface-overlay/50">
+          <svg class="w-3.5 h-3.5 text-text-muted" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
           </svg>
-          <span
-            class="font-medium text-text-secondary tracking-wide uppercase"
-            style="font-size:10px"
-            >{{ 'info.user' | translate }}</span
-          >
+          <span class="font-semibold text-text-secondary tracking-wider uppercase" style="font-size:10px">{{ 'info.user' | translate }}</span>
         </div>
 
         @if (userLoading()) {
-          <div class="px-3 py-4 flex justify-center"><app-spinner size="md" /></div>
+          <div class="px-3 py-5 flex justify-center"><app-spinner size="md" /></div>
         } @else if (userError()) {
-          <p class="px-3 py-3 text-red-400">{{ 'info.failedLoadUser' | translate }}</p>
+          <p class="px-3 py-3 text-error-text text-xs">{{ 'info.failedLoadUser' | translate }}</p>
         } @else if (user()) {
           <div class="divide-y divide-border-subtle">
-            <div class="flex justify-between items-center px-3 py-2">
+            <div class="flex justify-between items-center px-3 py-2.5">
               <span class="text-text-muted">{{ 'info.username' | translate }}</span>
-              <span class="font-medium text-text-primary font-mono">{{ user()!.username }}</span>
+              <span class="font-semibold text-text-primary font-mono">{{ user()!.username }}</span>
             </div>
-            <div class="flex justify-between items-center px-3 py-2">
+            <div class="flex justify-between items-center px-3 py-2.5">
               <span class="text-text-muted">{{ 'info.role' | translate }}</span>
-              <ui-badge [variant]="user()!.role === 'admin' ? 'warn' : 'default'">{{
-                user()!.role
-              }}</ui-badge>
+              <ui-badge [variant]="user()!.role === 'admin' ? 'warn' : 'default'">{{ user()!.role }}</ui-badge>
             </div>
-            <div class="flex justify-between items-center px-3 py-2">
+            <div class="flex justify-between items-center px-3 py-2.5">
               <span class="text-text-muted">{{ 'info.subscription' | translate }}</span>
               <ui-badge variant="accent">{{ user()!.subscription }}</ui-badge>
             </div>
-            <div class="flex justify-between items-center px-3 py-2">
+            <div class="flex justify-between items-center px-3 py-2.5">
               <span class="text-text-muted">{{ 'info.status' | translate }}</span>
               <span class="flex items-center gap-1.5">
                 <span
                   class="w-1.5 h-1.5 rounded-full"
-                  [class]="user()!.isActivated ? 'bg-success-muted' : 'bg-red-400'"
+                  [class]="user()!.isActivated ? 'bg-success-muted' : 'bg-error-muted'"
+                  [style]="user()!.isActivated ? 'box-shadow: 0 0 6px var(--color-success-muted);' : ''"
                 ></span>
-                <span [class]="user()!.isActivated ? 'text-success-muted' : 'text-red-400'">
+                <span [class]="user()!.isActivated ? 'text-success-text' : 'text-error-text'">
                   {{ (user()!.isActivated ? 'info.active' : 'info.inactive') | translate }}
                 </span>
               </span>
@@ -143,55 +118,32 @@ import { ButtonComponent } from '../../shared/components/ui/button.component';
         }
       </section>
 
-      <!-- ── Token usage card ── -->
-      <section class="rounded-xl border border-border-default bg-surface-raised overflow-hidden">
-        <div
-          class="flex items-center gap-2 px-3 py-2 border-b border-border-subtle bg-surface-overlay"
-        >
-          <svg
-            class="w-3.5 h-3.5 text-text-muted"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-            />
+      <!-- Token usage card -->
+      <section class="rounded-2xl border border-border-default bg-surface-raised overflow-hidden shadow-depth-sm hover-lift" @sectionAnim>
+        <div class="flex items-center gap-2 px-3 py-2.5 border-b border-border-subtle bg-surface-overlay/50">
+          <svg class="w-3.5 h-3.5 text-text-muted" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
           </svg>
-          <span
-            class="font-medium text-text-secondary tracking-wide uppercase"
-            style="font-size:10px"
-            >{{ 'info.tokenUsage' | translate }}</span
-          >
+          <span class="font-semibold text-text-secondary tracking-wider uppercase" style="font-size:10px">{{ 'info.tokenUsage' | translate }}</span>
         </div>
 
         @if (userLoading()) {
-          <div class="px-3 py-4 flex justify-center"><app-spinner size="md" /></div>
+          <div class="px-3 py-5 flex justify-center"><app-spinner size="md" /></div>
         } @else if (user()) {
-          <div class="px-3 pt-3 pb-2 flex flex-col gap-2">
-            <div class="flex justify-between text-[10px] mb-0.5">
+          <div class="px-3 pt-3 pb-3 flex flex-col gap-2.5">
+            <div class="flex justify-between text-[10px]">
               <span class="text-text-muted">{{ 'info.used' | translate }}</span>
-              <span class="font-mono text-text-secondary"
-                >{{ user()!.usedTokens | number }} / {{ user()!.tokenLimit | number }}</span
-              >
+              <span class="font-mono text-text-secondary font-medium">{{ user()!.usedTokens | number }} / {{ user()!.tokenLimit | number }}</span>
             </div>
-            <div class="h-1.5 rounded-full bg-surface-sunken overflow-hidden">
+            <div class="h-2 rounded-full bg-surface-sunken overflow-hidden">
               <div
-                class="h-full rounded-full transition-all duration-500"
+                class="h-full rounded-full transition-all duration-700"
                 [style.width.%]="tokenPercent()"
-                [class]="
-                  tokenPercent() > 85
-                    ? 'bg-red-400'
-                    : tokenPercent() > 60
-                      ? 'bg-amber-400'
-                      : 'bg-accent'
-                "
+                [class]="tokenPercent() > 85 ? 'bg-error-muted' : tokenPercent() > 60 ? 'bg-warn-muted' : 'bg-accent'"
+                [style]="tokenPercent() <= 85 ? 'box-shadow: 2px 0 8px var(--color-accent-glow);' : ''"
               ></div>
             </div>
-            <div class="flex justify-between text-[10px] text-text-muted mt-0.5">
+            <div class="flex justify-between text-[10px] text-text-muted">
               <span>{{ 'info.percentUsed' | translate: { percent: (tokenPercent() | number: '1.0-1') } }}</span>
               @if (user()!.tokenCountResetDate) {
                 <span>{{ 'info.resets' | translate }} {{ user()!.tokenCountResetDate | date: 'short' }}</span>
@@ -201,58 +153,35 @@ import { ButtonComponent } from '../../shared/components/ui/button.component';
         }
       </section>
 
-      <!-- ── Models card ── -->
-      <section class="rounded-xl border border-border-default bg-surface-raised overflow-hidden">
-        <div
-          class="flex items-center gap-2 px-3 py-2 border-b border-border-subtle bg-surface-overlay"
-        >
-          <svg
-            class="w-3.5 h-3.5 text-text-muted"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-            />
+      <!-- Models card -->
+      <section class="rounded-2xl border border-border-default bg-surface-raised overflow-hidden shadow-depth-sm hover-lift" @sectionAnim>
+        <div class="flex items-center gap-2 px-3 py-2.5 border-b border-border-subtle bg-surface-overlay/50">
+          <svg class="w-3.5 h-3.5 text-text-muted" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
           </svg>
-          <span
-            class="font-medium text-text-secondary tracking-wide uppercase"
-            style="font-size:10px"
-            >{{ 'info.availableModels' | translate }}</span
-          >
+          <span class="font-semibold text-text-secondary tracking-wider uppercase" style="font-size:10px">{{ 'info.availableModels' | translate }}</span>
           @if (!modelsLoading() && models().length > 0) {
-            <span
-              class="ml-auto px-1.5 py-0.5 rounded-full bg-surface-sunken text-text-muted text-[10px]"
-              >{{ models().length }}</span
-            >
+            <span class="ml-auto px-1.5 py-0.5 rounded-full bg-surface-sunken text-text-muted text-[10px] font-mono">{{ models().length }}</span>
           }
         </div>
 
         @if (modelsLoading()) {
-          <div class="px-3 py-4 flex justify-center"><app-spinner size="md" /></div>
+          <div class="px-3 py-5 flex justify-center"><app-spinner size="md" /></div>
         } @else if (modelsError()) {
-          <p class="px-3 py-3 text-red-400">{{ 'info.failedLoadModels' | translate }}</p>
+          <p class="px-3 py-3 text-error-text text-xs">{{ 'info.failedLoadModels' | translate }}</p>
         } @else if (models().length === 0) {
-          <p class="px-3 py-3 text-text-muted">{{ 'info.noModelsLoaded' | translate }}</p>
+          <p class="px-3 py-3 text-text-muted text-center">{{ 'info.noModelsLoaded' | translate }}</p>
         } @else {
           <div class="divide-y divide-border-subtle">
             @for (model of models(); track model.key) {
-              <div class="px-3 py-2.5 flex flex-col gap-0.5">
-                <div class="flex items-center gap-2">
-                  <span
-                    class="font-medium text-text-primary truncate flex-1 font-mono"
-                    style="font-size:11px"
-                    >{{ model.key }}</span
-                  >
-                  <ui-badge>{{ model.type }}</ui-badge>
+              <div class="px-3 py-2.5 flex items-center gap-2">
+                <div class="flex flex-col gap-0.5 flex-1 min-w-0">
+                  <span class="font-medium text-text-primary truncate font-mono" style="font-size:11px">{{ model.key }}</span>
+                  @if (model.publisher) {
+                    <span class="text-text-muted" style="font-size:10px">{{ model.publisher }}</span>
+                  }
                 </div>
-                @if (model.publisher) {
-                  <span class="text-text-muted" style="font-size:10px">{{ model.publisher }}</span>
-                }
+                <ui-badge>{{ model.type }}</ui-badge>
               </div>
             }
           </div>

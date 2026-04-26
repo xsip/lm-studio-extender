@@ -23,7 +23,7 @@ import { CommonModule } from '@angular/common';
       [disabled]="disabled()"
       [title]="title()"
       (click)="clicked.emit()"
-      class="inline-flex items-center justify-center rounded-lg border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+      class="inline-flex items-center justify-center border focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:opacity-50 disabled:cursor-not-allowed shrink-0 active:scale-90 select-none transition-all duration-150"
       [class]="classes()"
     >
       <ng-content />
@@ -40,9 +40,9 @@ export class IconButtonComponent {
   readonly clicked = output<void>();
 
   classes(): string {
-    const s = this.size() === 'sm' ? 'w-6 h-6' : 'w-8 h-8';
+    const s = this.size() === 'sm' ? 'w-6 h-6' : 'w-7 h-7';
     return this.active()
-      ? `${s} border-accent text-accent bg-accent-subtle shadow-depth-sm`
-      : `${s} border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary shadow-depth-sm`;
+      ? `${s} border-accent text-accent bg-accent-subtle shadow-depth-sm rounded-xl`
+      : `${s} border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary shadow-depth-sm rounded-xl`;
   }
 }

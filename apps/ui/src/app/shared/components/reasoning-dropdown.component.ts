@@ -1,3 +1,4 @@
+import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, computed, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
@@ -37,6 +38,17 @@ export const ALL_REASONING_OPTIONS: ReasoningOption[] = [
  */
 @Component({
   selector: 'app-reasoning-dropdown',
+  animations: [
+    trigger('dropdownAnim', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'scale(0.92) translateY(6px)', transformOrigin: 'bottom left' }),
+        animate('200ms cubic-bezier(0.34, 1.56, 0.64, 1)', style({ opacity: 1, transform: 'scale(1) translateY(0)' })),
+      ]),
+      transition(':leave', [
+        animate('130ms ease-in', style({ opacity: 0, transform: 'scale(0.94) translateY(4px)', transformOrigin: 'bottom left' })),
+      ]),
+    ]),
+  ],
   standalone: true,
   imports: [CommonModule, TranslateModule],
   template: `
@@ -45,47 +57,45 @@ export const ALL_REASONING_OPTIONS: ReasoningOption[] = [
         <button
           type="button"
           (click)="dropdownOpen.set(!dropdownOpen())"
-          class="flex items-center gap-1.5 px-3 py-1.5 text-xs border rounded-lg transition-colors select-none"
-          [class]="
-            reasoning()
-              ? 'border-reasoning-border text-reasoning-text bg-reasoning-bg hover:border-reasoning-muted'
-              : 'border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary'
-          "
+          class="flex items-center gap-1.5 px-3 py-2 text-xs border rounded-xl select-none active:scale-[0.97] transition-all duration-150"
+          [class]="reasoning()
+            ? 'border-reasoning-border text-reasoning-text bg-reasoning-bg hover:border-reasoning-muted/60'
+            : 'border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary bg-surface-raised'"
+          style="box-shadow: var(--shadow-sm);"
           [title]="'reasoning.label' | translate"
         >
           <span class="font-mono text-[11px] shrink-0">{{ currentReasoningOption()?.icon ?? '◈' }}</span>
-          <span class="tracking-widest uppercase">{{ reasoningLabel() ? ('reasoning.label' | translate) + ': ' + reasoningLabel() : '' }}</span>
-          <svg
-            class="w-3 h-3 opacity-50 transition-transform"
-            [class.rotate-180]="dropdownOpen()"
-            fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+          @if (reasoningLabel()) {
+            <span class="tracking-wide font-medium text-[10px] uppercase">{{ reasoningLabel() }}</span>
+          }
+          <svg class="w-3 h-3 opacity-40 transition-transform duration-200" [class.rotate-180]="dropdownOpen()" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
           </svg>
         </button>
 
         @if (dropdownOpen()) {
           <div class="fixed inset-0 z-10" (click)="dropdownOpen.set(false)"></div>
-          <div class="absolute bottom-full mb-1.5 left-0 z-20 min-w-[150px] bg-surface-raised border border-border-default rounded-lg shadow-2xl shadow-black/60 overflow-hidden py-1">
-<div class="px-3 py-1.5 text-[10px] text-text-muted uppercase tracking-widest border-b border-border-default">{{ 'reasoning.label' | translate }}</div>
+          <div class="absolute bottom-full mb-2 left-0 z-20 min-w-[160px] bg-surface-raised border border-border-default rounded-2xl overflow-hidden py-1" @dropdownAnim
+               style="box-shadow: var(--shadow-xl);">
+            <div class="px-3 py-2 text-[10px] text-text-muted uppercase tracking-widest border-b border-border-subtle font-semibold">{{ 'reasoning.label' | translate }}</div>
             @for (opt of reasoningOptions(); track opt.value) {
               <button
                 type="button"
                 (click)="selectReasoning(opt.value)"
-                class="w-full flex items-center gap-2.5 px-3 py-2 text-xs transition-colors"
-                [class]="
-                  reasoning() === opt.value
-                    ? 'bg-reasoning-bg text-reasoning-text font-medium'
-                    : 'text-text-secondary hover:bg-surface-overlay hover:text-text-primary'
-                "
+                class="w-full flex items-center gap-2.5 px-3 py-2 text-xs animate-slide-up active:scale-[0.98] transition-colors duration-100"
+                [class]="reasoning() === opt.value
+                  ? 'bg-reasoning-bg text-reasoning-text font-medium'
+                  : 'text-text-secondary hover:bg-surface-overlay hover:text-text-primary'"
               >
-                <span class="font-mono text-[11px] w-3 text-center shrink-0">{{ opt.icon }}</span>
+                <span class="font-mono text-[11px] w-4 text-center shrink-0">{{ opt.icon }}</span>
                 <span class="tracking-wide">{{ opt.label }}</span>
                 @if (modelReasoningCap()?.default === opt.value) {
-                  <span class="ml-1 text-[10px] text-text-muted italic">{{ 'reasoning.default' | translate }}</span>
+                  <span class="ml-1 text-[10px] text-text-disabled italic">{{ 'reasoning.default' | translate }}</span>
                 }
                 @if (reasoning() === opt.value) {
-                  <span class="ml-auto text-reasoning-text">✓</span>
+                  <svg class="ml-auto w-3 h-3 text-reasoning-text" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+                  </svg>
                 }
               </button>
             }

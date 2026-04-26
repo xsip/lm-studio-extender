@@ -1,3 +1,4 @@
+import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, input, output } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
@@ -12,15 +13,35 @@ export interface EventEntry {
 
 @Component({
   selector: 'app-event-log',
+  animations: [
+    trigger('panelAnim', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateX(100%)' }),
+        animate('240ms cubic-bezier(0.16, 1, 0.3, 1)', style({ opacity: 1, transform: 'translateX(0)' })),
+      ]),
+      transition(':leave', [
+        animate('180ms cubic-bezier(0.4, 0, 1, 1)', style({ opacity: 0, transform: 'translateX(100%)' })),
+      ]),
+    ]),
+    trigger('backdropAnim', [
+      transition(':enter', [
+        style({ opacity: 0 }),
+        animate('200ms ease-out', style({ opacity: 1 })),
+      ]),
+      transition(':leave', [
+        animate('150ms ease-in', style({ opacity: 0 })),
+      ]),
+    ]),
+  ],
   imports: [CommonModule, DatePipe, TranslateModule],
   template: `
     <!-- Backdrop -->
     <div
-      class="absolute inset-0 z-10 bg-surface-raised/60 backdrop-blur-sm"
+      class="absolute inset-0 z-10 bg-surface-raised/60 backdrop-blur-sm" @backdropAnim
       (click)="closed.emit()"
     ></div>
     <!-- Panel -->
-    <div class="absolute right-0 top-0 bottom-0 z-20 flex flex-col w-80 border-l border-border-default bg-surface-raised shadow-2xl">
+    <div class="absolute right-0 top-0 bottom-0 z-20 flex flex-col w-80 border-l border-border-default bg-surface-raised shadow-2xl" @panelAnim>
       <div class="flex items-center justify-between px-3 py-2.5 border-b border-border-default shrink-0">
 <span class="text-xs text-text-muted uppercase tracking-widest">{{ 'eventLog.title' | translate }}</span>
         <div class="flex items-center gap-2">
@@ -45,7 +66,7 @@ export interface EventEntry {
         }
         @for (entry of events(); track entry.id) {
           <div
-            class="flex items-start gap-2 px-2.5 py-1.5 rounded text-xs border-l-2"
+            class="flex items-start gap-2 px-2.5 py-1.5 rounded-lg text-xs border-l-2 animate-slide-up hover:brightness-105 transition-all duration-150"
             [class]="rowClass(entry.event)"
           >
             <span class="shrink-0 font-semibold w-40 truncate" [class]="typeClass(entry.event)">

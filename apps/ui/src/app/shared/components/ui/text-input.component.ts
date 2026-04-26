@@ -36,7 +36,7 @@ import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/f
         [value]="value"
         (input)="onInput($event)"
         (blur)="onTouched()"
-        class="w-full bg-surface-base border border-border-default focus:border-accent focus:ring-1 focus:ring-accent shadow-inset-depth rounded-md px-2.5 py-1.5 text-xs text-text-primary placeholder-text-muted focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        class="w-full bg-surface-base border border-border-default rounded-xl px-3 py-2 text-xs text-text-primary placeholder-text-disabled focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
         [class]="mono() ? 'font-mono' : ''"
         [class.pr-8]="type() === 'password' && showToggle()"
       />
@@ -45,7 +45,7 @@ import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/f
         <button
           type="button"
           (click)="showPassword = !showPassword"
-          class="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary transition-colors"
+          class="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary active:scale-90 transition-all duration-150"
           tabindex="-1"
         >
           @if (showPassword) {

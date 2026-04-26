@@ -28,7 +28,7 @@ import { CommonModule } from '@angular/common';
       [type]="type()"
       [disabled]="disabled()"
       (click)="clicked.emit()"
-      class="inline-flex relative items-center justify-center gap-1.5 font-medium rounded-lg border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:cursor-not-allowed"
+      class="inline-flex relative items-center justify-center gap-1.5 font-medium border focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:cursor-not-allowed active:scale-[0.97] select-none"
       [class]="classes()"
     >
       <ng-content />
@@ -58,12 +58,12 @@ export class ButtonComponent {
 
     const shadowStyle = 'shadow-depth-sm';
     const variants: Record<string, string> = {
-      primary:   `bg-accent hover:bg-accent-hover border-transparent text-white disabled:bg-surface-sunken disabled:text-text-muted ${shadowStyle}`,
+      primary:   `bg-accent hover:bg-accent-hover active:bg-accent border-transparent text-white disabled:bg-surface-sunken disabled:text-text-muted rounded-xl transition-all duration-150 ${shadowStyle}`,
       secondary: active && !this.disabled()
-        ? 'border-accent text-accent bg-accent-subtle hover:bg-accent/15'
-        : `border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary disabled:opacity-50 ${shadowStyle}`,
-      danger: `border-red-500/50 text-red-400 hover:border-red-500 hover:bg-red-950/30 disabled:opacity-50 ${shadowStyle}`,
-      ghost:  'border-transparent text-text-muted hover:text-text-primary hover:bg-surface-overlay disabled:opacity-50',
+        ? 'border-accent text-accent bg-accent-subtle hover:bg-accent/15 rounded-xl'
+        : `border-border-default text-text-secondary hover:border-border-strong hover:text-text-primary disabled:opacity-50 rounded-xl ${shadowStyle}`,
+      danger: `border-error-border text-error-text hover:border-error-muted hover:bg-error-bg disabled:opacity-50 rounded-xl ${shadowStyle}`,
+      ghost:  'border-transparent text-text-muted hover:text-text-primary hover:bg-surface-overlay disabled:opacity-50 rounded-lg',
     };
 
     return `${sizes[size]} ${variants[variant]}`;

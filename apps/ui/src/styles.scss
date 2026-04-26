@@ -11,3 +11,16 @@ body {
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
+/* Smooth theme switching on all properties */
+*, *::before, *::after {
+  transition: background-color 0.2s ease, border-color 0.15s ease, color 0.15s ease;
+}
+/* But NOT layout-affecting properties by default */
+button, a, [role="button"], input, textarea, select {
+  transition: color 0.16s ease,
+              background-color 0.16s ease,
+              border-color 0.16s ease,
+              box-shadow 0.16s ease,
+              opacity 0.16s ease,
+              transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1);
+}

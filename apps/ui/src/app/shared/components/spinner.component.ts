@@ -16,7 +16,7 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   template: `
     <span
-      class="rounded-full border-2 border-border-default border-t-text-secondary animate-spin shrink-0 inline-block"
+      class="rounded-full border-2 border-surface-sunken border-t-accent animate-spin shrink-0 inline-block"
       [class]="sizeClass()"
     ></span>
   `,
@@ -26,7 +26,7 @@ export class SpinnerComponent {
 
   sizeClass(): string {
     switch (this.size()) {
-      case 'xl': return 'w-12 h-12';
+      case 'xl': return 'w-10 h-10 border-[3px]';
       case 'lg': return 'w-5 h-5';
       case 'md': return 'w-4 h-4';
       default:   return 'w-3 h-3';

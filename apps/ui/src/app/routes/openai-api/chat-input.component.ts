@@ -16,15 +16,19 @@ export type { AppendedFile };
   selector: 'app-openai-chat-input',
   imports: [CommonModule, ReactiveFormsModule, TranslateModule, SendButtonComponent, ResetButtonComponent, ReasoningDropdownComponent],
   template: `
-    <div class="shrink-0 border rounded-t-none md:rounded-t-md border-border-default px-4 py-3 bg-surface-raised">
+    <div class="shrink-0 px-4 py-3 relative" style="background: var(--color-surface-raised); border-top: 1px solid var(--color-border-subtle); box-shadow: 0 -4px 20px rgba(0,0,0,0.06);">
       <form [formGroup]="form()" (ngSubmit)="submitted.emit()" class="flex flex-col gap-2">
-        <textarea
-          formControlName="input"
-          rows="3"
-          [placeholder]="'chatInput.placeholder' | translate"
-          class="w-full bg-surface-base border border-border-default rounded-lg px-4 py-3 text-sm text-text-primary placeholder-text-muted resize-none focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
-          (keydown)="onKeydown($event)"
-        ></textarea>
+        <div class="relative group">
+          <textarea
+            formControlName="input"
+            rows="3"
+            [placeholder]="'chatInput.placeholder' | translate"
+            class="w-full bg-surface-base border border-border-default rounded-2xl px-4 py-3 text-sm text-text-primary placeholder-text-disabled resize-none focus:outline-none transition-all duration-200 leading-relaxed"
+            style="box-shadow: var(--shadow-inset); min-height: 80px;"
+            (keydown)="onKeydown($event)"
+          ></textarea>
+          <div class="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-focus-within:opacity-100 transition-all duration-300" style="box-shadow: 0 0 0 2px var(--color-accent-glow);"></div>
+        </div>
 
         <!-- ── Action row ── -->
         <div class="flex items-center gap-2 flex-wrap">
@@ -43,7 +47,7 @@ export type { AppendedFile };
             type="button"
             (click)="fileInput.click()"
             [disabled]="streaming()"
-            class="flex items-center gap-1.5 px-3 py-1.5 text-xs border rounded-lg transition-colors select-none disabled:opacity-40 disabled:cursor-not-allowed"
+            class="flex items-center gap-1.5 px-3 py-1.5 text-xs border rounded-xl select-none disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-all duration-150"
             [class]="
               appendedFiles().length > 0
                 ? 'border-accent text-accent bg-accent/10 hover:bg-accent/20'
@@ -104,7 +108,7 @@ export type { AppendedFile };
             </div>
             @for (file of appendedFiles(); track file.filename; let i = $index) {
               <div
-                class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-surface-base border border-border-default text-xs group"
+                class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-surface-base border border-border-default text-xs group hover:-translate-y-0.5 hover:shadow-depth-sm animate-slide-up transition-all duration-200"
               >
                 <!-- File type icon -->
                 <svg
@@ -125,7 +129,7 @@ export type { AppendedFile };
                 <button
                   type="button"
                   (click)="removeFile(i)"
-                  class="ml-1 shrink-0 flex items-center justify-center w-4 h-4 rounded text-text-muted hover:text-red-400 hover:bg-red-400/10 transition-colors opacity-0 group-hover:opacity-100"
+                  class="ml-1 shrink-0 flex items-center justify-center w-4 h-4 rounded text-text-muted hover:text-error-text hover:bg-error-bg active:scale-90 opacity-0 group-hover:opacity-100 transition-all duration-150"
                   [title]="'common.remove' | translate"
                 >
                   <svg

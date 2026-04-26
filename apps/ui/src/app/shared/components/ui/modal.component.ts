@@ -1,3 +1,4 @@
+import { animate, style, transition, trigger, state } from '@angular/animations';
 import { Component, output } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 
@@ -16,32 +17,53 @@ import { TranslateModule } from '@ngx-translate/core';
  */
 @Component({
   selector: 'ui-modal',
+  animations: [
+    trigger('backdropAnim', [
+      transition(':enter', [
+        style({ opacity: 0, backdropFilter: 'blur(0px)' }),
+        animate('200ms ease-out', style({ opacity: 1 })),
+      ]),
+      transition(':leave', [
+        animate('150ms ease-in', style({ opacity: 0 })),
+      ]),
+    ]),
+    trigger('cardAnim', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'scale(0.88) translateY(12px)' }),
+        animate('280ms cubic-bezier(0.34, 1.56, 0.64, 1)', style({ opacity: 1, transform: 'scale(1) translateY(0)' })),
+      ]),
+      transition(':leave', [
+        animate('150ms cubic-bezier(0.4, 0, 1, 1)', style({ opacity: 0, transform: 'scale(0.94) translateY(6px)' })),
+      ]),
+    ]),
+  ],
   standalone: true,
   imports: [TranslateModule],
   template: `
     <!-- backdrop -->
     <div
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" @backdropAnim
       (click)="closed.emit()"
     >
-      <!-- card — stop propagation so clicks inside don't close the modal -->
+      <!-- card -->
       <div
-        class="relative w-80 bg-surface-raised border border-border-default rounded-xl shadow-depth-xl shadow-black/50 p-5"
+        class="relative w-88 bg-surface-raised border border-border-default rounded-2xl shadow-depth-xl p-6" @cardAnim
+        style="box-shadow: var(--shadow-xl);"
         (click)="$event.stopPropagation()"
       >
         <!-- header row -->
-        <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center justify-between mb-5">
           <h3 class="text-sm font-semibold text-text-primary tracking-wide">
             <ng-content select="[slot=header]" />
           </h3>
           <button
             type="button"
             (click)="closed.emit()"
-            class="text-text-muted hover:text-text-primary transition-colors"
+            class="w-7 h-7 flex items-center justify-center rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-overlay active:scale-90"
             [title]="'common.close' | translate"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
             </svg>
           </button>
         </div>

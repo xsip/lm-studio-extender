@@ -1,3 +1,4 @@
+import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, computed, effect, ElementRef, inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -57,14 +58,34 @@ import InvokeAiModelToUseEnum = ChatMetadataDto.InvokeAiModelToUseEnum;
     ToggleComponent,
     TranslateModule,
   ],
+  animations: [
+    trigger('sidebarAnim', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateX(-100%)' }),
+        animate('240ms cubic-bezier(0.16, 1, 0.3, 1)', style({ opacity: 1, transform: 'translateX(0)' })),
+      ]),
+      transition(':leave', [
+        animate('180ms cubic-bezier(0.4, 0, 1, 1)', style({ opacity: 0, transform: 'translateX(-100%)' })),
+      ]),
+    ]),
+    trigger('infoPanelAnim', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateX(100%)' }),
+        animate('240ms cubic-bezier(0.16, 1, 0.3, 1)', style({ opacity: 1, transform: 'translateX(0)' })),
+      ]),
+      transition(':leave', [
+        animate('180ms cubic-bezier(0.4, 0, 1, 1)', style({ opacity: 0, transform: 'translateX(100%)' })),
+      ]),
+    ]),
+  ],
   providers: [ChatService],
   template: `
     <div
-      class="h-screen bg-surface-base text-text-primary flex flex-col overflow-hidden transition-colors duration-200"
+      class="h-screen bg-surface-base text-text-primary flex flex-col overflow-hidden transition-colors duration-300"
     >
       <!-- ── Top bar ── -->
       <div
-        class="flex items-center gap-3 border-b border-border-default px-3 py-2.5 shrink-0 bg-surface-raised"
+        class="flex items-center gap-2 border-b border-border-default px-3 py-2 shrink-0 bg-surface-raised" style="box-shadow: 0 1px 0 var(--color-border-subtle), var(--shadow-sm);"
       >
         <ui-button
           variant="secondary"
@@ -85,10 +106,8 @@ import InvokeAiModelToUseEnum = ChatMetadataDto.InvokeAiModelToUseEnum;
           <span class="hidden sm:inline">{{ 'toolbar.chats' | translate }}</span>
         </ui-button>
 
-        <div class="w-1.5 h-1.5 rounded-full bg-success-muted animate-pulse ml-1"></div>
-        <span class="text-xs text-text-muted tracking-wide font-medium hidden md:block"
-          >{{ 'login.appName' | translate }} Open AI</span
-        >
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-overlay border border-border-subtle ml-1"><div class="w-1.5 h-1.5 rounded-full bg-success-muted animate-pulse shrink-0" style="box-shadow: 0 0 6px var(--color-success-muted);"></div>
+        <span class="text-[10px] text-text-muted tracking-wider font-medium uppercase hidden md:block">{{ 'login.appName' | translate }} · OpenAI</span></div>
 
         <!-- Provider tabs -->
 
@@ -139,11 +158,12 @@ import InvokeAiModelToUseEnum = ChatMetadataDto.InvokeAiModelToUseEnum;
             (chatDeleted)="deleteChat($event)"
             (openChatSettings)="onOpenChatSettings($event)"
             (saveCryptoSettings)="onSaveCryptoSettings($event)"
+            @sidebarAnim
           />
         }
 
         <!-- CENTER: Chat window -->
-        <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
+        <div class="flex flex-col flex-1 min-w-0 overflow-hidden relative">
           <div class="flex flex-col flex-1 min-h-0 overflow-hidden max-w-3xl w-full mx-auto">
             <div #messageContainer class="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3">
               <app-chat-messages
@@ -312,7 +332,7 @@ import InvokeAiModelToUseEnum = ChatMetadataDto.InvokeAiModelToUseEnum;
 
         @if (showInfoPanel()) {
           <div
-            class="w-72 shrink-0 border-l border-border-default bg-surface-raised md:relative fixed md:h-auto h-full top-0 right-0 flex flex-col overflow-hidden"
+            class="w-72 shrink-0 border-l border-border-default bg-surface-raised md:relative fixed md:h-auto h-full top-0 right-0 flex flex-col overflow-hidden" @infoPanelAnim
           >
             <div
               class="flex items-center justify-between px-3 py-2 border-b border-border-default shrink-0"
