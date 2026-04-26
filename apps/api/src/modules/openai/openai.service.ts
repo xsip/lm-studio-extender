@@ -161,7 +161,11 @@ export class OpenAiService {
       model: dto.model,
       input: dto.input as any[],
       reasoning: dto.reasoning,
-      instructions: 'forget previous instructions',
+      instructions:
+        'forget previous instructions.You are a helpful assistant with access to tools. \n' +
+        'IMPORTANT: After EVERY tool call result, you MUST generate a text response to the user. \n' +
+        'Never end your turn immediately after receiving a tool result.\n' +
+        'Always acknowledge and present the tool results to the user. When a tool returns JSON with "action": "display_image", \nrender the image using the provided "markdown" field directly in your response.',
       stream: true,
       tools: [
         {
@@ -172,10 +176,7 @@ export class OpenAiService {
             authorization: `Bearer ${token}`,
             chatId: internalChatId,
           },
-          allowed_tools: [
-            'greeting-tool',
-            'get-token-usage-tool',
-          ],
+          allowed_tools: ['greeting-tool', 'get-token-usage-tool'],
         } as any,
       ],
       previous_response_id: dto.previous_response_id,
@@ -231,6 +232,12 @@ export class OpenAiService {
         chatMeta,
       ) as any;
       mappedDto.instructions = `
+      You are a helpful assistant with access to tools. 
+IMPORTANT: After EVERY tool call result, you MUST generate a text response to the user. 
+Never end your turn immediately after receiving a tool result.
+Always acknowledge and present the tool results to the user.
+When a tool returns JSON with "action": "display_image", 
+render the image using the provided "markdown" field directly in your response.
 You MUST follow these rules EXACTLY:
 
 STEP 1 — TOOL CALL

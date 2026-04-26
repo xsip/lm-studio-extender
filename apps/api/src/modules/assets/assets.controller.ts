@@ -48,7 +48,6 @@ const IMAGE_FILTER = (_req: any, file: Express.Multer.File, cb: any) => {
 export class AssetsController {
   constructor(private readonly assetService: AssetsService) {}
 
-  @Public()
   @Get('filequery/:filename')
   @ApiOperation({
     operationId: 'getImageQuery',
@@ -103,6 +102,12 @@ export class AssetsController {
     name: 'chatId',
     description: 'ChatId the file belongs to',
   })
+  @ApiQuery({
+    name: 'thumbnail',
+    type: 'boolean',
+    required: false,
+    description: `Only return thumbnail if true`,
+  })
   @ApiOkResponse({ description: 'Binary image data with correct Content-Type' })
   @ApiNotFoundResponse({ description: 'File not found' })
   async image(
@@ -111,12 +116,15 @@ export class AssetsController {
     filename: string,
     @Param('chatId')
     chatId: string,
+    @Query('thumbnail')
+    thumbnail: boolean,
     @Res() res: Response,
   ) {
     const blob = await this.assetService.getAsset(
       user._id + '',
       chatId,
       filename,
+      thumbnail,
     );
 
     // Validate stored MIME type
@@ -127,7 +135,7 @@ export class AssetsController {
 
     res.setHeader('Content-Type', blob.mimeType);
     res.setHeader('Cache-Control', 'public, max-age=86400'); // 1 day
-    res.send(blob.data);
+    res.send(thumbnail ? blob.thumbnailData : blob.data);
   }
 
   @Post(':chatId')

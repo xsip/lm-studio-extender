@@ -2,7 +2,7 @@ import { Component, input, OnInit, output } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { ChatMessage } from './chat.service';
-import { MarkdownPipe, StripMarkdownPipe } from './markdown.pipe';
+import { AuthImagesDirective, MarkdownPipe, StripMarkdownPipe } from './markdown.pipe';
 import ClientEnum = CreateChatMetadataDto.ClientEnum;
 import { CreateChatMetadataDto } from '../../client';
 import { SpinnerComponent } from '../../shared';
@@ -13,6 +13,7 @@ import { SpinnerComponent } from '../../shared';
     DatePipe,
     TranslateModule,
     MarkdownPipe,
+    AuthImagesDirective,
     StripMarkdownPipe,
     SpinnerComponent,
   ],
@@ -157,6 +158,7 @@ import { SpinnerComponent } from '../../shared';
                     }}
                   </span>
                   <pre
+                    authImages
                     class="mt-1 whitespace-pre-wrap break-all leading-relaxed"
                     [class]="msg.toolFailed ? 'text-red-600' : 'text-emerald-600'"
                     [innerHTML]="msg.toolOutput | markdown"
@@ -285,6 +287,7 @@ import { SpinnerComponent } from '../../shared';
             >
               @if (msg.streaming) {
                 <div
+                  authImages
                   class="markdown-body markdown-body--violet"
                   [innerHTML]="msg.text | markdown"
                 ></div>
@@ -295,6 +298,7 @@ import { SpinnerComponent } from '../../shared';
                 ></span>
               } @else {
                 <div
+                  authImages
                   class="markdown-body markdown-body--violet"
                   [innerHTML]="msg.text | markdown"
                 ></div>
@@ -313,14 +317,14 @@ import { SpinnerComponent } from '../../shared';
             style="background: var(--color-surface-raised); border: 1px solid var(--color-border-default); box-shadow: var(--shadow-md);"
           >
             @if (msg.streaming) {
-              <div class="markdown-body" [innerHTML]="msg.text | markdown"></div>
+              <div class="markdown-body" authImages [innerHTML]="msg.text | markdown"></div>
               <span class="whitespace-pre-wrap break-words"
                 ><span
                   class="inline-block w-1.5 h-4 bg-accent animate-pulse ml-0.5 align-middle rounded-sm"
                 ></span
               ></span>
             } @else {
-              <div class="markdown-body" [innerHTML]="msg.text | markdown"></div>
+              <div class="markdown-body" authImages [innerHTML]="msg.text | markdown"></div>
             }
           </div>
           @if (msg.stats) {

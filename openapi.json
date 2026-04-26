@@ -361,6 +361,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "thumbnail",
+            "required": false,
+            "in": "query",
+            "description": "Only return thumbnail if true",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {

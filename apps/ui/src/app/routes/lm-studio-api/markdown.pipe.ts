@@ -1,16 +1,26 @@
-import { inject, Pipe, PipeTransform } from '@angular/core';
+import {
+  inject,
+  Pipe,
+  PipeTransform,
+  Directive,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { HttpClient } from '@angular/common/http';
 import { marked, type TokenizerExtension, type RendererExtension } from 'marked';
 import katex from 'katex';
 
 // ── KaTeX extensions for marked ─────────────────────────────────────────────
-// Must be registered before any parse call.
 
 /** Block math: $$...$$ on its own line(s). */
 const blockMathExtension: TokenizerExtension & RendererExtension = {
   name: 'blockMath',
   level: 'block',
-  start(src: string) { return src.indexOf('$$'); },
+  start(src: string) {
+    return src.indexOf('$$');
+  },
   tokenizer(src: string) {
     const match = src.match(/^\$\$([\s\S]+?)\$\$/);
     if (match) {
@@ -31,9 +41,10 @@ const blockMathExtension: TokenizerExtension & RendererExtension = {
 const inlineMathExtension: TokenizerExtension & RendererExtension = {
   name: 'inlineMath',
   level: 'inline',
-  start(src: string) { return src.indexOf('$'); },
+  start(src: string) {
+    return src.indexOf('$');
+  },
   tokenizer(src: string) {
-    // Match $...$ but not $$
     const match = src.match(/^\$(?!\$)((?:[^$\\]|\\[\s\S])+?)\$/);
     if (match) {
       return { type: 'inlineMath', raw: match[0], text: match[1].trim() };
@@ -51,9 +62,21 @@ const inlineMathExtension: TokenizerExtension & RendererExtension = {
 
 // ── Link renderer: open in new tab ──────────────────────────────────────────
 const renderer = new marked.Renderer();
+
 renderer.link = ({ href, title, text }) => {
   const titleAttr = title ? ` title="${title}"` : '';
   return `<a href="${href}"${titleAttr} target="_blank" rel="noopener noreferrer">${text}</a>`;
+};
+
+// ── Image renderer: defer auth images via data-auth-src ──────────────────────
+// Instead of setting src directly (which would 401), we store the real URL in
+// data-auth-src and leave src empty. AuthImagesDirective picks these up and
+// replaces src with an authenticated blob URL.
+renderer.image = ({ href, title, text }) => {
+  if (!href) return '';
+  const titleAttr = title ? ` title="${title}"` : '';
+  const altAttr = text ? ` alt="${text}"` : '';
+  return `<img data-auth-src="${href}"${altAttr}${titleAttr} src="" class="rounded-md max-w-full" />`;
 };
 
 marked.use({
@@ -69,10 +92,85 @@ export class MarkdownPipe implements PipeTransform {
   transform(value: string | null | undefined): SafeHtml {
     if (!value) return '';
     const html = marked.parse(value, { async: false }) as string;
-    // KaTeX output contains inline styles and SVG which Angular's sanitizer
-    // would strip. The content here is LLM output, not user-supplied HTML,
-    // so bypassing is safe. marked itself never introduces script tags.
     return this.sanitizer.bypassSecurityTrustHtml(html);
+  }
+}
+
+// ── AuthImagesDirective ───────────────────────────────────────────────────────
+// Apply to any element that contains markdown-rendered HTML.
+// It watches for new <img data-auth-src="..."> elements (including during
+// streaming) and fetches them with the Authorization header, swapping in a
+// blob URL so the browser can display them.
+@Directive({ selector: '[authImages]', standalone: true })
+export class AuthImagesDirective implements OnInit, OnDestroy {
+  private readonly el = inject(ElementRef<HTMLElement>);
+  private readonly http = inject(HttpClient);
+  private observer: MutationObserver | null = null;
+  private readonly blobUrls: string[] = [];
+
+  ngOnInit() {
+    // Process any images already in the DOM
+    this.processImages(this.el.nativeElement);
+
+    // Watch for new images added during streaming
+    this.observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        mutation.addedNodes.forEach((node) => {
+          if (node instanceof HTMLElement) {
+            this.processImages(node);
+          }
+        });
+        // Also handle attribute changes in case src gets reset
+        if (
+          mutation.type === 'attributes' &&
+          mutation.target instanceof HTMLImageElement &&
+          (mutation.target as HTMLImageElement).dataset['authSrc']
+        ) {
+          this.loadImage(mutation.target as HTMLImageElement);
+        }
+      }
+    });
+
+    this.observer.observe(this.el.nativeElement, {
+      childList: true,
+      subtree: true,
+    });
+  }
+
+  ngOnDestroy() {
+    this.observer?.disconnect();
+    // Revoke blob URLs to free memory
+    this.blobUrls.forEach((url) => URL.revokeObjectURL(url));
+  }
+
+  private processImages(root: HTMLElement) {
+    const imgs = root.querySelectorAll<HTMLImageElement>('img[data-auth-src]');
+    imgs.forEach((img) => this.loadImage(img));
+  }
+
+  private loadImage(img: HTMLImageElement) {
+    const src = img.dataset['authSrc'];
+    // Skip if already loaded (blob URL set) or no src
+    if (!src || img.src.startsWith('blob:')) return;
+
+    // Get token however your app stores it
+    const token = localStorage.getItem('jwt_token') ?? '';
+
+    this.http
+      .get(src, {
+        responseType: 'blob',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .subscribe({
+        next: (blob) => {
+          const blobUrl = URL.createObjectURL(blob);
+          this.blobUrls.push(blobUrl);
+          img.src = blobUrl;
+        },
+        error: () => {
+          img.alt = `Failed to load image: ${src}`;
+        },
+      });
   }
 }
 
@@ -82,16 +180,16 @@ export class StripMarkdownPipe implements PipeTransform {
   transform(value: string | null | undefined): string {
     if (!value) return '';
     return value
-      .replace(/\$\$[\s\S]*?\$\$/g, '')            // block math
-      .replace(/\$(?!\$)((?:[^$\\]|\\[\s\S])+?)\$/g, '') // inline math
-      .replace(/```[\s\S]*?```/g, '')               // fenced code blocks
-      .replace(/`[^`]*`/g, '')                      // inline code
-      .replace(/^#{1,6}\s+/gm, '')                  // headings
-      .replace(/[*_]{1,3}([^*_]+)[*_]{1,3}/g, '$1') // bold/italic
-      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')      // links → label
-      .replace(/^[-*+]\s+/gm, '')                   // unordered list markers
-      .replace(/^\d+\.\s+/gm, '')                   // ordered list markers
-      .replace(/^>\s+/gm, '')                        // blockquotes
+      .replace(/\$\$[\s\S]*?\$\$/g, '')
+      .replace(/\$(?!\$)((?:[^$\\]|\\[\s\S])+?)\$/g, '')
+      .replace(/```[\s\S]*?```/g, '')
+      .replace(/`[^`]*`/g, '')
+      .replace(/^#{1,6}\s+/gm, '')
+      .replace(/[*_]{1,3}([^*_]+)[*_]{1,3}/g, '$1')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .replace(/^[-*+]\s+/gm, '')
+      .replace(/^\d+\.\s+/gm, '')
+      .replace(/^>\s+/gm, '')
       .replace(/\n{2,}/g, ' ')
       .replace(/\n/g, ' ')
       .trim();

@@ -237,6 +237,12 @@ export class ApiTools {
       }),
     );
 
+    const thumbImageResponse = await firstValueFrom(
+      this.httpService.get<ArrayBuffer>(img.thumbPath, {
+        responseType: 'arraybuffer',
+      }),
+    );
+
     const mimeType =
       (imageResponse.headers['content-type'] as string)?.split(';')[0].trim() ??
       (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')
@@ -244,6 +250,7 @@ export class ApiTools {
         : 'image/png');
 
     const buffer = Buffer.from(imageResponse.data);
+    const thumbnailBuffer = Buffer.from(thumbImageResponse.data);
 
     // Upload via assetsService, same as the REST endpoint
     const { url, filename } = await this.assetsService.uploadFile(
@@ -252,20 +259,18 @@ export class ApiTools {
       fileName,
       buffer,
       mimeType,
+      thumbnailBuffer,
     );
     return [
       {
-        type: 'image',
-        source: {
-          type: 'url',
-          url: `api/assets/${chatId}/${filename}`,
-          // url: `${process.env.SELF_URL}/assets/filequery/${filename}?userId=${user._id + ''}&chatId=${chatId}`,
-        },
-      },
-      {
-        role: 'ai',
-        type: 'text',
-        text: 'Please show the image url in form of markdown and describe this generated image to me.',
+        content: JSON.stringify({
+          action: 'display_image',
+          instruction:
+            'You MUST respond to the user by displaying this image as HTML. Do not stop.',
+          markdown: `![image](api/assets/${chatId}/${filename}?thumbnail=true)`,
+          html: `<img data-auth-src="api/assets/${chatId}/${filename}?thumbnail=true" src="" alt="${filename}"/>`,
+          url: `api/assets/${chatId}/${filename}?thumbnail=true`,
+        }),
       },
     ];
   }

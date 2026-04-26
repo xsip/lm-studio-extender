@@ -22,6 +22,9 @@ export class ImageBlob {
   /** Raw binary data stored as a Buffer in MongoDB */
   @Prop({ required: true, type: Buffer })
   data: Buffer;
+  /** Raw binary data stored as a Buffer in MongoDB */
+  @Prop({ required: false, type: Buffer })
+  thumbnailData: Buffer;
 }
 
 export const ImageBlobSchema = SchemaFactory.createForClass(ImageBlob);

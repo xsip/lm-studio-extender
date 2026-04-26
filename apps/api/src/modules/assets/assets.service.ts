@@ -14,32 +14,34 @@ export class AssetsService {
     userId: string,
     chatId: string,
     filename: string,
+    thumbnail?: boolean,
   ): Promise<ImageBlobDocument> {
     // Prevent path traversal
     if (filename.includes('..')) {
       throw new NotFoundException();
     }
 
+    const projection = thumbnail
+      ? { data: 0 } // exclude full image
+      : {};
+
     const blob = await this.imageBlobModel
-      .findOne({
-        userId,
-        chatId,
-        filename,
-      })
+      .findOne({ userId, chatId, filename }, projection)
       .exec();
 
     if (!blob) {
       throw new NotFoundException('Image not found');
     }
+
     return blob;
   }
-
   async uploadFile(
     userId: string,
     chatId: string,
     originalFilename: string,
     data: Buffer,
     mimeType: string,
+    thumbnailData?: Buffer,
   ) {
     const ext = originalFilename.split('.').pop()?.toLowerCase() ?? 'bin';
     const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
@@ -50,6 +52,7 @@ export class AssetsService {
       filename,
       mimeType,
       data,
+      thumbnailData,
     });
 
     return { url: `assets/${chatId}/${filename}`, filename };
