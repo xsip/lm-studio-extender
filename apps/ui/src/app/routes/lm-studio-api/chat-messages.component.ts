@@ -482,7 +482,7 @@ import { SpinnerComponent } from '../../shared';
             >
               @if (msg.streaming) {
                 <div
-                  class="markdown-body break-words"
+                  class="markdown-body break-all "
                   authImages
                   [innerHTML]="msg.text | markdown"
                 ></div>
@@ -491,7 +491,7 @@ import { SpinnerComponent } from '../../shared';
                 ></span>
               } @else {
                 <div
-                  class="markdown-body break-words"
+                  class="markdown-body break-all"
                   authImages
                   [innerHTML]="msg.text | markdown"
                 ></div>
