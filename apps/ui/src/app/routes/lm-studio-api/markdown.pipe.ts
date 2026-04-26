@@ -102,6 +102,8 @@ export class MarkdownPipe implements PipeTransform {
 export class ImageLightbox {
   private static overlay: HTMLElement | null = null;
   private static blobUrl: string | null = null;
+  private static ctxMenu: HTMLElement | null = null;
+  private static ctxMenuBlobUrl: string | null = null;
 
   static open(fullUrl: string, http: HttpClient): void {
     // Build the overlay lazily
@@ -147,6 +149,8 @@ export class ImageLightbox {
           img.onload = () => {
             spinner.style.display = 'none';
             img.style.opacity = '1';
+            // Store the current full-res blob URL for context-menu download
+            ImageLightbox.ctxMenuBlobUrl = blobUrl;
           };
         },
         error: () => {
@@ -163,6 +167,26 @@ export class ImageLightbox {
     if (this.blobUrl) {
       URL.revokeObjectURL(this.blobUrl);
       this.blobUrl = null;
+    }
+    ImageLightbox.closeCtxMenu();
+    this.ctxMenuBlobUrl = null;
+  }
+
+  /**
+   * Show the context menu for any image element — used by both the lightbox
+   * image and by AuthImagesDirective for inline auth images.
+   */
+  static showCtxMenu(blobUrl: string, clientX: number, clientY: number): void {
+    this.ctxMenuBlobUrl = blobUrl;
+    this.closeCtxMenu();
+    this.ctxMenu = this.buildCtxMenu(clientX, clientY);
+    document.body.appendChild(this.ctxMenu);
+  }
+
+  private static closeCtxMenu(): void {
+    if (this.ctxMenu) {
+      this.ctxMenu.remove();
+      this.ctxMenu = null;
     }
   }
 
@@ -284,6 +308,20 @@ export class ImageLightbox {
       if (e.target === overlay) ImageLightbox.close();
     });
 
+    // Right-click on the image → show download context menu
+    img.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      ImageLightbox.closeCtxMenu();
+      ImageLightbox.ctxMenu = ImageLightbox.buildCtxMenu(e.clientX, e.clientY);
+      document.body.appendChild(ImageLightbox.ctxMenu);
+    });
+
+    // Left-click anywhere outside the context menu closes it
+    overlay.addEventListener('mousedown', () => {
+      ImageLightbox.closeCtxMenu();
+    });
+
     // Escape key closes
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') ImageLightbox.close();
@@ -295,6 +333,123 @@ export class ImageLightbox {
     overlay.appendChild(img);
 
     return overlay;
+  }
+
+  private static buildCtxMenu(clientX: number, clientY: number): HTMLElement {
+    // Inject context-menu styles once
+    if (!document.getElementById('lightbox-ctx-styles')) {
+      const style = document.createElement('style');
+      style.id = 'lightbox-ctx-styles';
+      style.textContent = `
+        .lightbox-ctx-menu {
+          position: fixed;
+          z-index: 10000;
+          width: 208px;
+          background: var(--color-surface-raised, #1c1c1e);
+          border: 1px solid var(--color-border-default, rgba(255,255,255,0.1));
+          border-radius: 12px;
+          overflow: hidden;
+          padding: 4px 0;
+          box-shadow: var(--shadow-xl, 0 20px 60px rgba(0,0,0,0.7));
+          animation: ctx-fade-in 0.12s ease;
+        }
+        @keyframes ctx-fade-in {
+          from { opacity: 0; transform: scale(0.96); }
+          to   { opacity: 1; transform: scale(1); }
+        }
+        .lightbox-ctx-menu .ctx-header {
+          padding: 6px 12px;
+          font-size: 10px;
+          text-transform: uppercase;
+          letter-spacing: 0.12em;
+          color: var(--color-text-muted, rgba(255,255,255,0.4));
+          border-bottom: 1px solid var(--color-border-default, rgba(255,255,255,0.08));
+        }
+        .lightbox-ctx-menu .ctx-btn {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 7px 12px;
+          font-size: 12px;
+          color: var(--color-text-secondary, rgba(255,255,255,0.65));
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          text-align: left;
+          transition: background 0.12s ease, color 0.12s ease;
+        }
+        .lightbox-ctx-menu .ctx-btn:hover {
+          background: var(--color-surface-overlay, rgba(255,255,255,0.07));
+          color: var(--color-text-primary, #fff);
+        }
+        .lightbox-ctx-menu .ctx-btn svg {
+          flex-shrink: 0;
+          opacity: 0.6;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    const menu = document.createElement('div');
+    menu.className = 'lightbox-ctx-menu';
+
+    // Position — keep inside viewport
+    const menuW = 208,
+      menuH = 72;
+    const x = Math.min(clientX, window.innerWidth - menuW - 8);
+    const y = Math.min(clientY, window.innerHeight - menuH - 8);
+    menu.style.left = `${x}px`;
+    menu.style.top = `${y}px`;
+
+    // Header label
+    const header = document.createElement('div');
+    header.className = 'ctx-header';
+    header.textContent = 'Image';
+    menu.appendChild(header);
+
+    // ── Download image ──────────────────────────────────────────────────────
+    const downloadBtn = document.createElement('button');
+    downloadBtn.type = 'button';
+    downloadBtn.className = 'ctx-btn';
+    downloadBtn.innerHTML = `
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 3v12" />
+      </svg>
+      Download image
+    `;
+    downloadBtn.addEventListener('click', () => {
+      const blobUrl = ImageLightbox.ctxMenuBlobUrl;
+      if (!blobUrl) return;
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = 'image';
+      a.click();
+      ImageLightbox.closeCtxMenu();
+    });
+    menu.appendChild(downloadBtn);
+
+    // Clicking outside closes the menu
+    const outsideClick = (e: MouseEvent) => {
+      if (!menu.contains(e.target as Node)) {
+        ImageLightbox.closeCtxMenu();
+        document.removeEventListener('mousedown', outsideClick);
+      }
+    };
+    // Use setTimeout so this listener doesn't fire for the same click that opened the menu
+    setTimeout(() => document.addEventListener('mousedown', outsideClick), 0);
+
+    // Escape key closes
+    const escClose = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        ImageLightbox.closeCtxMenu();
+        document.removeEventListener('keydown', escClose);
+      }
+    };
+    document.addEventListener('keydown', escClose);
+
+    return menu;
   }
 }
 
@@ -311,6 +466,7 @@ export class AuthImagesDirective implements OnInit, OnDestroy {
   private observer: MutationObserver | null = null;
   private readonly blobUrls: string[] = [];
   private readonly clickListeners = new Map<HTMLImageElement, () => void>();
+  private readonly ctxMenuListeners = new Map<HTMLImageElement, (e: MouseEvent) => void>();
 
   ngOnInit() {
     // Process any images already in the DOM
@@ -350,6 +506,11 @@ export class AuthImagesDirective implements OnInit, OnDestroy {
       img.removeEventListener('click', listener);
     });
     this.clickListeners.clear();
+    // Remove context-menu listeners
+    this.ctxMenuListeners.forEach((listener, img) => {
+      img.removeEventListener('contextmenu', listener);
+    });
+    this.ctxMenuListeners.clear();
   }
 
   private processImages(root: HTMLElement) {
@@ -381,6 +542,21 @@ export class AuthImagesDirective implements OnInit, OnDestroy {
             const listener = () => ImageLightbox.open(src, this.http);
             img.addEventListener('click', listener);
             this.clickListeners.set(img, listener);
+          }
+
+          // Add right-click context-menu listener (only once per image)
+          if (!this.ctxMenuListeners.has(img)) {
+            const ctxListener = (e: MouseEvent) => {
+              e.preventDefault();
+              e.stopPropagation();
+              // Use the current blob src so the download reflects the loaded image
+              const currentBlobUrl = img.src.startsWith('blob:') ? img.src : null;
+              if (currentBlobUrl) {
+                ImageLightbox.showCtxMenu(currentBlobUrl, e.clientX, e.clientY);
+              }
+            };
+            img.addEventListener('contextmenu', ctxListener);
+            this.ctxMenuListeners.set(img, ctxListener);
           }
         },
         error: () => {
