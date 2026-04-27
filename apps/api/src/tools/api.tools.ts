@@ -25,7 +25,7 @@ export class ApiTools {
     private readonly httpService: HttpService,
     private readonly assetsService: AssetsService,
     private readonly configService: ConfigService,
-    private readonly openAiRequestService: OpenaiRequestService
+    private readonly openAiRequestService: OpenaiRequestService,
   ) {}
 
   @Tool({
@@ -211,6 +211,9 @@ export class ApiTools {
     context: Context,
     request: Request,
   ) {
+    const requestId = request.headers['requestid'] as string;
+    const req = this.openAiRequestService.get(requestId);
+
     const useInvoke =
       this.configService.get<string>('INVOKE_INTEGRATION') === 'true';
     if (!useInvoke) {
@@ -243,10 +246,18 @@ export class ApiTools {
       chatMetaData.invokeAiModelToUse,
       (progress) => {
         if (progress !== undefined) {
-          context.reportProgress({
-            progress: progress * 100,
-            total: 100,
-          });
+          req.write(
+            `event: report_mcp_progress\ndata: ${JSON.stringify({
+              type: 'report_mcp_progress',
+              progressToken: requestId,
+              progress: progress*100,
+              total: 100,
+              message: crypto
+                .createHash('md5')
+                .update(crypto.randomBytes(32))
+                .digest('hex'),
+            })}\n\n`,
+          );
         }
       },
     );
