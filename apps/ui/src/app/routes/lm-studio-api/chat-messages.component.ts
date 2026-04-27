@@ -112,8 +112,8 @@ import { SpinnerComponent } from '../../shared';
             </div>
             @if (msg.date) {
               <span class="text-[10px] text-text-disabled mr-1">{{
-                msg.date | date: 'HH:mm'
-              }}</span>
+                  msg.date | date: 'HH:mm'
+                }}</span>
             }
           </div>
         } @else if (msg.text) {
@@ -126,8 +126,8 @@ import { SpinnerComponent } from '../../shared';
             </div>
             @if (msg.date) {
               <span class="text-[10px] text-text-disabled mr-1">{{
-                msg.date | date: 'HH:mm'
-              }}</span>
+                  msg.date | date: 'HH:mm'
+                }}</span>
             }
           </div>
         }
@@ -196,7 +196,7 @@ import { SpinnerComponent } from '../../shared';
           <button
             type="button"
             (click)="toggleCollapsed.emit($index)"
-            class="flex items-center gap-2 w-full px-3 py-2 rounded-xl rounded-bl-sm text-xs transition-all duration-200 group"
+            class="flex flex-col px-3 py-2 rounded-xl rounded-bl-sm text-xs transition-all duration-200 group w-full"
             [class]="
               msg.toolFailed
                 ? 'bg-error-bg border border-error-border text-error-text'
@@ -205,56 +205,67 @@ import { SpinnerComponent } from '../../shared';
                   : 'bg-tool-bg border border-tool-border/40 text-tool-text hover:border-tool-border'
             "
           >
-            @if (msg.streaming) {
-              <span
-                class="shrink-0 w-3 h-3 rounded-full border-2 border-secondary-accent border-t-transparent animate-spin"
-              ></span>
-            } @else if (msg.toolFailed) {
-              <svg
-                class="w-3 h-3 text-error-muted shrink-0"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-              >
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            } @else {
-              <svg
-                class="w-3 h-3 text-tool-muted shrink-0"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l5.654-4.654m5.292-8.914a2.25 2.25 0 00-3.182 0l-1.83 1.83a2.25 2.25 0 000 3.182l.182.182"
-                />
-              </svg>
-            }
-            <span class="font-semibold truncate">{{ msg.toolName ?? '…' }}</span>
-            @if (msg.providerLabel) {
-              <span class="text-tool-muted/60 shrink-0 text-[10px]"
+            <div class="flex  items-center gap-2 w-full">
+              @if (msg.streaming) {
+                <span
+                  class="shrink-0 w-3 h-3 rounded-full border-2 border-secondary-accent border-t-transparent animate-spin"
+                ></span>
+              } @else if (msg.toolFailed) {
+                <svg
+                  class="w-3 h-3 text-error-muted shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              } @else {
+                <svg
+                  class="w-3 h-3 text-tool-muted shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l5.654-4.654m5.292-8.914a2.25 2.25 0 00-3.182 0l-1.83 1.83a2.25 2.25 0 000 3.182l.182.182"
+                  />
+                </svg>
+              }
+              <span class="font-semibold truncate">{{ msg.toolName ?? '…' }}</span>
+              @if (msg.providerLabel) {
+                <span class="text-tool-muted/60 shrink-0 text-[10px]"
                 >via {{ msg.providerLabel }}</span
+                >
+              }
+              @if (msg.progress) {
+                <span class="text-tool-muted/60 shrink-0 text-[10px]">{{ msg.progress }} %</span>
+              }
+
+              <svg
+                class="ml-auto w-3 h-3 opacity-40 shrink-0 transition-transform"
+                [class.rotate-180]="!msg.collapsed"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                viewBox="0 0 24 24"
               >
-            }
-            @if (msg.progress) {
-              <span class="text-tool-muted/60 shrink-0 text-[10px]"
-                >{{ msg.progress }} %</span
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+
+            @if (msg.progressMessage) {
+              <div
+                class="flex  px-3 py-2 rounded-xl rounded-bl-sm text-xs transition-all duration-200 group w-full"
               >
+                <span class="text-tool-muted/60 shrink-0 text-[10px]">{{
+                    msg.progressMessage
+                  }}</span>
+              </div>
             }
-            <svg
-              class="ml-auto w-3 h-3 opacity-40 shrink-0 transition-transform"
-              [class.rotate-180]="!msg.collapsed"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              viewBox="0 0 24 24"
-            >
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
           </button>
           @if (!msg.collapsed) {
             <div
@@ -265,11 +276,11 @@ import { SpinnerComponent } from '../../shared';
                 <div class="px-3 py-2 border-b border-tool-border/20">
                   <span
                     class="text-tool-muted/70 uppercase tracking-widest text-[10px] font-semibold"
-                    >{{ 'messages.toolArguments' | translate }}</span
+                  >{{ 'messages.toolArguments' | translate }}</span
                   >
                   <pre
                     class="mt-1.5 text-tool-text whitespace-pre-wrap break-all leading-relaxed font-mono text-[11px]"
-                    >{{ msg.toolArguments | json }}</pre
+                  >{{ msg.toolArguments | json }}</pre
                   >
                 </div>
               }
@@ -353,11 +364,11 @@ import { SpinnerComponent } from '../../shared';
               </svg>
             }
             <span class="font-semibold">{{
-              (msg.streaming ? 'messages.processingPrompt' : 'messages.promptProcessed') | translate
-            }}</span>
+                (msg.streaming ? 'messages.processingPrompt' : 'messages.promptProcessed') | translate
+              }}</span>
             @if (msg.streaming && (msg.progress ?? 0) > 0) {
               <span class="text-warn-muted/80 tabular-nums font-mono text-[10px]"
-                >{{ (msg.progress! * 100).toFixed(0) }}%</span
+              >{{ (msg.progress! * 100).toFixed(0) }}%</span
               >
             }
             @if (msg.streaming) {
@@ -397,7 +408,7 @@ import { SpinnerComponent } from '../../shared';
             <span class="font-semibold">{{ 'messages.reasoning' | translate }}</span>
             @if (msg.collapsed) {
               <span class="text-reasoning-muted/50 truncate flex-1 text-left text-[11px]"
-                >{{ msg.text | stripMarkdown | slice: 0 : 60 }}…</span
+              >{{ msg.text | stripMarkdown | slice: 0 : 60 }}…</span
               >
             }
             <svg
