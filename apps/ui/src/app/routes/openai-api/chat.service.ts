@@ -11,6 +11,7 @@ import {
   ResponseOutputItemDoneEvent,
   ResponseReasoningTextDeltaEvent,
   McpItemTracking,
+  CustomReportMcpProgressEvent,
 } from './openai-stream.service';
 import {
   ChatMetadataDto,
@@ -94,6 +95,9 @@ export class ChatService {
     this.chatMessages.update((msgs) => patchByItemId(msgs, itemId, patch));
   }
 
+
+  lastCreatedMcpCallItem: any;
+
   submit(
     selectedModelId: string,
     reasoning: ReasoningDto.EffortEnum | undefined,
@@ -109,6 +113,7 @@ export class ChatService {
       invokeAiModelToUse?: InvokeAiModelToUseEnum
     },
   ): void {
+    this.lastCreatedMcpCallItem = undefined;
     if (this.form.invalid || this.streaming()) return;
     let input = this.form.getRawValue().input!.trim();
 
@@ -165,6 +170,7 @@ export class ChatService {
                 toolName: item.name ?? undefined,
                 outputIndex: e.output_index,
               });
+              this.lastCreatedMcpCallItem = item;
               this.chatMessages.update((msgs) => [
                 ...msgs,
                 {
@@ -200,7 +206,9 @@ export class ChatService {
                   if (Array.isArray(parsed) && parsed[0]?.text != null) outputText = parsed[0].text;
                   else if (typeof parsed === 'object' && parsed !== null)
                     outputText = JSON.stringify(parsed, null, 2);
-                } catch { /* leave as-is */ }
+                } catch {
+                  /* leave as-is */
+                }
                 this.patchByItemId(item.id, {
                   toolOutput: outputText || undefined,
                   toolName: tracking?.toolName ?? item.name ?? '…',
@@ -229,13 +237,57 @@ export class ChatService {
               const item = e.item;
               const tracking = this.mcpTracking.get(e.item_id ?? item.id);
               if (tracking) {
-                tracking.toolName    = item.name ?? tracking.toolName;
+                tracking.toolName = item.name ?? tracking.toolName;
                 tracking.serverLabel = item.server_label ?? tracking.serverLabel;
               }
               this.patchByItemId(e.item_id ?? item.id, {
-                toolName:      item.name ?? undefined,
+                toolName: item.name ?? undefined,
                 providerLabel: item.server_label ?? undefined,
               });
+            }
+            break;
+          }
+
+          case 'report_mcp_progress': {
+            const e = event as CustomReportMcpProgressEvent;
+            const tracking = this.mcpTracking.get(
+              this.lastCreatedMcpCallItem.item_id ?? this.lastCreatedMcpCallItem.id,
+            );
+            if(tracking) {
+
+              this.chatMessages.update((msgs) => [
+
+                ...msgs.map(msg => {
+
+                  if(msg.itemId === tracking.itemId) {
+                    return {
+                      role: 'tool_call' as any,
+                        text: '',
+                      streaming: true,
+                      collapsed: false,
+                      date: new Date(),
+                      progress: parseInt(e.progress),
+                      total: parseInt(e.total),
+                      progressMessage: e.message,
+                      itemId: tracking.itemId,
+                      toolName: tracking.toolName ?? '…',
+                      providerLabel: tracking.serverLabel,
+                    };
+                  }
+                  return msg;
+                }),
+
+              ]);
+
+              this.patchByItemId(
+                this.lastCreatedMcpCallItem.item_id ?? this.lastCreatedMcpCallItem.id,
+                {
+                  ...tracking,
+                  progress: parseInt(e.progress),
+                  total: parseInt(e.total),
+                  progressMessage: e.message,
+                },
+              );
             }
             break;
           }

@@ -1,5 +1,5 @@
 import { animate, style, transition, trigger } from '@angular/animations';
-import { Component, input, OnInit, output } from '@angular/core';
+import { Component, inject, input, OnInit, output } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { ChatMessage } from './chat.service';
@@ -240,6 +240,11 @@ import { SpinnerComponent } from '../../shared';
                 >via {{ msg.providerLabel }}</span
               >
             }
+            @if (msg.progress) {
+              <span class="text-tool-muted/60 shrink-0 text-[10px]"
+                >via {{ msg.progress }} %</span
+              >
+            }
             <svg
               class="ml-auto w-3 h-3 opacity-40 shrink-0 transition-transform"
               [class.rotate-180]="!msg.collapsed"
@@ -439,13 +444,12 @@ import { SpinnerComponent } from '../../shared';
         <div class="flex flex-col items-start gap-1.5" @msgAnim>
           <!-- Avatar -->
           <div class="flex items-start gap-2.5">
-
-              <div
-                class="w-6 h-6 rounded-lg shrink-0 mt-0.5 flex items-center justify-center animate-scale-in"
-                style="border: 1px solid var(--color-border-default); box-shadow: 0 2px 8px var(--color-accent-glow);"
-              >
-                <img src="logo-cropped.png" class="w-full h-full text-white" alt="logo" />
-              </div>
+            <div
+              class="w-6 h-6 rounded-lg shrink-0 mt-0.5 flex items-center justify-center animate-scale-in"
+              style="border: 1px solid var(--color-border-default); box-shadow: 0 2px 8px var(--color-accent-glow);"
+            >
+              <img src="logo-cropped.png" class="w-full h-full text-white" alt="logo" />
+            </div>
             <div
               class="max-w-[80%] text-text-primary rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed"
               style="background: var(--color-surface-raised); border: 1px solid var(--color-border-default); box-shadow: var(--shadow-md);"

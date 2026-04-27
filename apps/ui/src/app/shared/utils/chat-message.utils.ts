@@ -4,7 +4,15 @@
  */
 
 export interface ChatMessage {
-  role: 'user' | 'ai' | 'error' | 'info' | 'tool_call' | 'reasoning' | 'prompt_processing' | 'mcp_list_tools';
+  role:
+    | 'user'
+    | 'ai'
+    | 'error'
+    | 'info'
+    | 'tool_call'
+    | 'reasoning'
+    | 'prompt_processing'
+    | 'mcp_list_tools';
   text?: string;
   image?: string;
   file?: string;
@@ -17,8 +25,10 @@ export interface ChatMessage {
   toolFailed?: boolean;
   providerLabel?: string;
   collapsed?: boolean;
+  total?: number;
+  progressMessage?: string;
   progress?: number; // 0–1, used by prompt_processing
-  itemId?: string;  // track by OpenAI item id
+  itemId?: string; // track by OpenAI item id
 }
 
 /**

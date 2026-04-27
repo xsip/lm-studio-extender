@@ -189,6 +189,14 @@ export interface OpenAiStreamApiInfoEvent {
   message: string;
 }
 
+export interface CustomReportMcpProgressEvent {
+  type: 'report_mcp_progress';
+  progressToken: string;
+  progress: string;
+  total: string;
+  message?: string
+}
+
 export interface OpenAiStreamErrorEvent {
   type: 'error';
   message?: string;
@@ -280,7 +288,8 @@ export type OpenAiEvent =
   | ResponseCustomToolCallInputDoneEventDto
   // custom
   | OpenAiStreamCreatedChatEvent
-  | OpenAiStreamApiInfoEvent;
+  | OpenAiStreamApiInfoEvent
+  | CustomReportMcpProgressEvent;
 
 export interface OpenAiChatEnd {
   responseId: string;

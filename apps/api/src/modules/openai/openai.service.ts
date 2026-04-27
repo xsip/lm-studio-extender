@@ -7,11 +7,10 @@ import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { Response } from 'express';
 import { Types } from 'mongoose';
-import * as crypto from 'crypto';
 import { ChatsService } from '../chats/chats.service';
 import { ChatMetadataService } from '../chat-metadata/chat-metadata.service';
 import { TokenLimitService } from '../token-limit/token-limit.service';
-
+import * as crypto from 'crypto';
 // ---------------------------------------------------------------------------
 // SSE event shapes we care about
 // ---------------------------------------------------------------------------
@@ -66,6 +65,7 @@ import { ChatCompletionDto } from './dto/completions-dtos/ChatCompletionDto';
 import { ChatCompletionCustomToolDto } from './dto/completions-dtos/ChatCompletionCustomToolDto';
 import { ChatCompletionFunctionToolDto } from './dto/completions-dtos/ChatCompletionFunctionToolDto';
 import { InvokeAiModel } from '../invoke/invoke.service';
+import { OpenaiRequestService } from './openai.request.service';
 
 interface ChatEndEvent {
   type: 'chat.end';
@@ -87,6 +87,7 @@ export class OpenAiService {
     private readonly chatsService: ChatsService,
     private readonly chatMetadataService: ChatMetadataService,
     private readonly tokenLimitService: TokenLimitService,
+    private readonly openaiRequestService: OpenaiRequestService,
   ) {
     this.baseUrl = this.configService.get<string>(
       'LM_STUDIO_BASE_URL',
@@ -155,6 +156,10 @@ export class OpenAiService {
       invokeModel?: InvokeAiModel;
     },
   ): Promise<void> {
+    const requestId = crypto
+      .createHash('md5')
+      .update(crypto.randomBytes(32))
+      .digest('hex');
     const mappedDto:
       | ResponseCreateParamsNonStreamingDto
       | ResponseCreateParamsStreamingDto = {
@@ -174,6 +179,7 @@ export class OpenAiService {
           server_url: this.selfMcpUrl,
           headers: {
             authorization: `Bearer ${token}`,
+            requestId,
             chatId: internalChatId,
           },
           allowed_tools: ['greeting-tool', 'get-token-usage-tool'],
@@ -270,7 +276,7 @@ The final response must be a direct answer to the decrypted message, not a repet
       (mappedDto.tools![0] as any).allowed_tools.push('decrypt-message-tool');
     }
 
-    if(chatMeta.useInvoke && chatMeta.invokeAiModelToUse) {
+    if (chatMeta.useInvoke && chatMeta.invokeAiModelToUse) {
       (mappedDto.tools![0] as any).allowed_tools.push('generate-image-tool');
     }
 
@@ -279,6 +285,7 @@ The final response must be a direct answer to the decrypted message, not a repet
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders();
 
+    this.openaiRequestService.create(requestId, res);
     try {
       const stream: Stream<ResponseStreamEvent> =
         (await this.openAi.responses.create(mappedDto as any)) as any;
@@ -327,11 +334,13 @@ The final response must be a direct answer to the decrypted message, not a repet
         }
       }
     } catch (error: any) {
+      this.openaiRequestService.destroy(requestId);
       this.writeSseEvent(res, 'error', {
         type: 'error',
         error: error.error,
       });
     }
+    this.openaiRequestService.destroy(requestId);
 
     res.write('data: [DONE]\n\n');
     res.end();
@@ -371,10 +380,7 @@ The final response must be a direct answer to the decrypted message, not a repet
             authorization: `Bearer ${token}`,
             chatId: internalChatId,
           },
-          allowed_tools: [
-            'greeting-tool',
-            'get-token-usage-tool'
-          ],
+          allowed_tools: ['greeting-tool', 'get-token-usage-tool'],
         } as any,
       ],
       store: true,

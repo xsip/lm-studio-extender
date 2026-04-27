@@ -13,6 +13,8 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { AssetsService } from '../modules/assets/assets.service';
 import { ConfigService } from '@nestjs/config';
+import { OpenaiRequestService } from '../modules/openai/openai.request.service';
+import crypto from 'crypto';
 
 @Injectable()
 export class ApiTools {
@@ -23,6 +25,7 @@ export class ApiTools {
     private readonly httpService: HttpService,
     private readonly assetsService: AssetsService,
     private readonly configService: ConfigService,
+    private readonly openAiRequestService: OpenaiRequestService
   ) {}
 
   @Tool({
@@ -32,9 +35,32 @@ export class ApiTools {
       name: z.string().default('World'),
     }),
   })
-  async sayHello({ name }, context: Context) {
+  async sayHello({ name }, context: Context, request: Request) {
     console.log(context);
-    await context.reportProgress({ progress: 50, total: 100 });
+    const requestId = request.headers['requestid'] as string;
+    const req = this.openAiRequestService.get(requestId);
+    let progress = 0;
+    await new Promise((resolve) => {
+      setInterval(() => {
+        if (progress === 100) {
+          resolve(true);
+          return;
+        }
+        progress++;
+        req.write(
+          `event: report_mcp_progress\ndata: ${JSON.stringify({
+            type: 'report_mcp_progress',
+            progressToken: requestId,
+            progress: progress,
+            total: 100,
+            message: crypto
+              .createHash('md5')
+              .update(crypto.randomBytes(32))
+              .digest('hex'),
+          })}\n\n`,
+        );
+      }, 40);
+    });
     return `Hello2, ${name}!`;
   }
 
