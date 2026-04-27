@@ -242,7 +242,7 @@ import { SpinnerComponent } from '../../shared';
             }
             @if (msg.progress) {
               <span class="text-tool-muted/60 shrink-0 text-[10px]"
-                >via {{ msg.progress }} %</span
+                >{{ msg.progress }} %</span
               >
             }
             <svg
