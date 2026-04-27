@@ -76,7 +76,7 @@ renderer.image = ({ href, title, text }) => {
   if (!href) return '';
   const titleAttr = title ? ` title="${title}"` : '';
   const altAttr = text ? ` alt="${text}"` : '';
-  return `<img data-auth-src="${href}"${altAttr}${titleAttr} src="" class="rounded-md max-w-full cursor-pointer transition-all ease-in-out duration-500 hover:scale-105" />`;
+  return `<img data-auth-src="${href}"${altAttr}${titleAttr} src="" class="rounded-md max-w-full cursor-pointer transition-all ease-in-out duration-500" />`;
 };
 
 marked.use({
