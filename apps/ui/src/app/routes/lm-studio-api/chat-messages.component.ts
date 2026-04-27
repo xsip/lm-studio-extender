@@ -78,21 +78,9 @@ import { SpinnerComponent } from '../../shared';
         >
           <div
             class="w-16 h-16 rounded-2xl flex items-center justify-center mb-2 animate-float"
-            style="background: linear-gradient(135deg, var(--color-accent-subtle), var(--color-surface-overlay)); border: 1px solid var(--color-border-default);"
+            style="border: 1px solid var(--color-border-default);"
           >
-            <svg
-              class="w-7 h-7 text-accent opacity-60"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.5"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"
-              />
-            </svg>
+            <img src="logo-cropped.png" class="w-full h-full text-white" alt="logo" />
           </div>
           <p class="text-sm text-text-muted">{{ 'messages.noMessages' | translate }}</p>
           <p class="text-xs text-text-disabled max-w-xs">
@@ -394,19 +382,12 @@ import { SpinnerComponent } from '../../shared';
                 class="shrink-0 w-3 h-3 rounded-full border-2 border-reasoning-muted border-t-transparent animate-spin"
               ></span>
             } @else {
-              <svg
+              <div
                 class="w-3 h-3 text-reasoning-muted shrink-0"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                viewBox="0 0 24 24"
+                style="border: 1px solid var(--color-border-default);"
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"
-                />
-              </svg>
+                <img src="logo-cropped.png" class="w-full h-full text-white" alt="logo" />
+              </div>
             }
             <span class="font-semibold">{{ 'messages.reasoning' | translate }}</span>
             @if (msg.collapsed) {
@@ -458,24 +439,13 @@ import { SpinnerComponent } from '../../shared';
         <div class="flex flex-col items-start gap-1.5" @msgAnim>
           <!-- Avatar -->
           <div class="flex items-start gap-2.5">
-            <div
-              class="w-6 h-6 rounded-lg shrink-0 mt-0.5 flex items-center justify-center animate-scale-in"
-              style="background: linear-gradient(135deg, var(--color-accent), var(--color-secondary-accent)); box-shadow: 0 2px 8px var(--color-accent-glow);"
-            >
-              <svg
-                class="w-3.5 h-3.5 text-white"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                viewBox="0 0 24 24"
+
+              <div
+                class="w-6 h-6 rounded-lg shrink-0 mt-0.5 flex items-center justify-center animate-scale-in"
+                style="border: 1px solid var(--color-border-default); box-shadow: 0 2px 8px var(--color-accent-glow);"
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"
-                />
-              </svg>
-            </div>
+                <img src="logo-cropped.png" class="w-full h-full text-white" alt="logo" />
+              </div>
             <div
               class="max-w-[80%] text-text-primary rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed"
               style="background: var(--color-surface-raised); border: 1px solid var(--color-border-default); box-shadow: var(--shadow-md);"

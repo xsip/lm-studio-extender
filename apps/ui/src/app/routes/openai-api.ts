@@ -62,19 +62,31 @@ import InvokeAiModelToUseEnum = ChatMetadataDto.InvokeAiModelToUseEnum;
     trigger('sidebarAnim', [
       transition(':enter', [
         style({ opacity: 0, transform: 'translateX(-100%)' }),
-        animate('240ms cubic-bezier(0.16, 1, 0.3, 1)', style({ opacity: 1, transform: 'translateX(0)' })),
+        animate(
+          '240ms cubic-bezier(0.16, 1, 0.3, 1)',
+          style({ opacity: 1, transform: 'translateX(0)' }),
+        ),
       ]),
       transition(':leave', [
-        animate('180ms cubic-bezier(0.4, 0, 1, 1)', style({ opacity: 0, transform: 'translateX(-100%)' })),
+        animate(
+          '180ms cubic-bezier(0.4, 0, 1, 1)',
+          style({ opacity: 0, transform: 'translateX(-100%)' }),
+        ),
       ]),
     ]),
     trigger('infoPanelAnim', [
       transition(':enter', [
         style({ opacity: 0, transform: 'translateX(100%)' }),
-        animate('240ms cubic-bezier(0.16, 1, 0.3, 1)', style({ opacity: 1, transform: 'translateX(0)' })),
+        animate(
+          '240ms cubic-bezier(0.16, 1, 0.3, 1)',
+          style({ opacity: 1, transform: 'translateX(0)' }),
+        ),
       ]),
       transition(':leave', [
-        animate('180ms cubic-bezier(0.4, 0, 1, 1)', style({ opacity: 0, transform: 'translateX(100%)' })),
+        animate(
+          '180ms cubic-bezier(0.4, 0, 1, 1)',
+          style({ opacity: 0, transform: 'translateX(100%)' }),
+        ),
       ]),
     ]),
   ],
@@ -85,8 +97,15 @@ import InvokeAiModelToUseEnum = ChatMetadataDto.InvokeAiModelToUseEnum;
     >
       <!-- ── Top bar ── -->
       <div
-        class="flex items-center gap-2 border-b border-border-default px-3 py-2 shrink-0 bg-surface-raised" style="box-shadow: 0 1px 0 var(--color-border-subtle), var(--shadow-sm);"
+        class="flex items-center gap-2 border-b border-border-default px-3 py-2 shrink-0 bg-surface-raised"
+        style="box-shadow: 0 1px 0 var(--color-border-subtle), var(--shadow-sm);"
       >
+        <div
+          class="w-7 h-7 rounded-2xl flex items-center justify-center"
+          style="box-shadow: 0 8px 32px var(--color-accent-glow);"
+        >
+          <img src="logo-cropped.png" class="w-full h-full text-white" alt="logo" />
+        </div>
         <ui-button
           variant="secondary"
           size="xs"
@@ -106,8 +125,18 @@ import InvokeAiModelToUseEnum = ChatMetadataDto.InvokeAiModelToUseEnum;
           <span class="hidden sm:inline">{{ 'toolbar.chats' | translate }}</span>
         </ui-button>
 
-        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-overlay border border-border-subtle ml-1"><div class="w-1.5 h-1.5 rounded-full bg-success-muted animate-pulse shrink-0" style="box-shadow: 0 0 6px var(--color-success-muted);"></div>
-        <span class="text-[10px] text-text-muted tracking-wider font-medium uppercase hidden md:block">{{ 'login.appName' | translate }} · OpenAI</span></div>
+        <div
+          class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-overlay border border-border-subtle ml-1"
+        >
+          <div
+            class="w-1.5 h-1.5 rounded-full bg-success-muted animate-pulse shrink-0"
+            style="box-shadow: 0 0 6px var(--color-success-muted);"
+          ></div>
+          <span
+            class="text-[10px] text-text-muted tracking-wider font-medium uppercase hidden md:block"
+            >{{ 'login.appName' | translate }} · OpenAI</span
+          >
+        </div>
 
         <!-- Provider tabs -->
 
@@ -332,7 +361,8 @@ import InvokeAiModelToUseEnum = ChatMetadataDto.InvokeAiModelToUseEnum;
 
         @if (showInfoPanel()) {
           <div
-            class="w-72 shrink-0 border-l border-border-default bg-surface-raised md:relative fixed md:h-auto h-full top-0 right-0 flex flex-col overflow-hidden" @infoPanelAnim
+            class="w-72 shrink-0 border-l border-border-default bg-surface-raised md:relative fixed md:h-auto h-full top-0 right-0 flex flex-col overflow-hidden"
+            @infoPanelAnim
           >
             <div
               class="flex items-center justify-between px-3 py-2 border-b border-border-default shrink-0"
@@ -740,7 +770,7 @@ export class OpenAiApi implements OnDestroy, OnInit {
         cryptoKey: this.newChatCryptoKey || undefined,
         openAiEndpointPreference: this.newChatEndpointPreference(),
         invokeAiModelToUse: this.invokeAiModelPreference(),
-        useInvoke: this.newChatUseInvoke()
+        useInvoke: this.newChatUseInvoke(),
       },
     );
 
@@ -786,13 +816,7 @@ export class OpenAiApi implements OnDestroy, OnInit {
         );
       },
       error: () => {
-        this.chatSidebarRef?.loadSettingsData(
-          '',
-          false,
-          '',
-           false,
-          undefined,
-        );
+        this.chatSidebarRef?.loadSettingsData('', false, '', false, undefined);
       },
     });
   }
@@ -803,7 +827,7 @@ export class OpenAiApi implements OnDestroy, OnInit {
     useCrypto,
     cryptoKey,
     useInvoke,
-    invokeAiModelToUse
+    invokeAiModelToUse,
   }: {
     chatId: string;
     name: string;
@@ -812,13 +836,15 @@ export class OpenAiApi implements OnDestroy, OnInit {
     useInvoke: boolean;
     invokeAiModelToUse?: InvokeAiModelToUseEnum;
   }): void {
-    this.chatMetaService.updateChatMetadata(chatId, { name, useCrypto, cryptoKey, invokeAiModelToUse,useInvoke }).subscribe({
-      next: () => {
-        this.chatList.update((list) =>
-          list.map((c) => (c._id === chatId ? { ...c, name, useCrypto } : c)),
-        );
-      },
-    });
+    this.chatMetaService
+      .updateChatMetadata(chatId, { name, useCrypto, cryptoKey, invokeAiModelToUse, useInvoke })
+      .subscribe({
+        next: () => {
+          this.chatList.update((list) =>
+            list.map((c) => (c._id === chatId ? { ...c, name, useCrypto } : c)),
+          );
+        },
+      });
   }
 
   // ── Utilities ─────────────────────────────────────────────────────────────
