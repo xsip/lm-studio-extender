@@ -215,6 +215,8 @@ export class ChatService {
                   toolArguments: item.arguments ? safeParseJson(item.arguments) : undefined,
                   providerLabel: tracking?.serverLabel ?? item.server_label,
                   streaming: false,
+                  progress: undefined,
+                  progressMessage: undefined,
                   collapsed: true,
                 });
               } else if (item.status === 'failed' || item.status === 'incomplete') {
@@ -248,7 +250,7 @@ export class ChatService {
             break;
           }
 
-          case 'report_mcp_progress': {
+          case 'api_report_mcp_progress': {
             const e = event as CustomReportMcpProgressEvent;
             const tracking = this.mcpTracking.get(
               this.lastCreatedMcpCallItem.item_id ?? this.lastCreatedMcpCallItem.id,

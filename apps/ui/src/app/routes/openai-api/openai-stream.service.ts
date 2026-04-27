@@ -190,7 +190,7 @@ export interface OpenAiStreamApiInfoEvent {
 }
 
 export interface CustomReportMcpProgressEvent {
-  type: 'report_mcp_progress';
+  type: 'api_report_mcp_progress';
   progressToken: string;
   progress: string;
   total: string;

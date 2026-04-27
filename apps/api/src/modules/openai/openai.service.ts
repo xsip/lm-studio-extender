@@ -65,7 +65,7 @@ import { ChatCompletionDto } from './dto/completions-dtos/ChatCompletionDto';
 import { ChatCompletionCustomToolDto } from './dto/completions-dtos/ChatCompletionCustomToolDto';
 import { ChatCompletionFunctionToolDto } from './dto/completions-dtos/ChatCompletionFunctionToolDto';
 import { InvokeAiModel } from '../invoke/invoke.service';
-import { OpenaiRequestService } from './openai.request.service';
+import { OpenAiResponseService } from './open-ai-response.service';
 
 interface ChatEndEvent {
   type: 'chat.end';
@@ -87,7 +87,7 @@ export class OpenAiService {
     private readonly chatsService: ChatsService,
     private readonly chatMetadataService: ChatMetadataService,
     private readonly tokenLimitService: TokenLimitService,
-    private readonly openaiRequestService: OpenaiRequestService,
+    private readonly openaiRequestService: OpenAiResponseService,
   ) {
     this.baseUrl = this.configService.get<string>(
       'LM_STUDIO_BASE_URL',

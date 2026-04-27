@@ -8,13 +8,13 @@ import dayjs from 'dayjs';
 import { ChatMetadataService } from '../modules/chat-metadata/chat-metadata.service';
 import { Types } from 'mongoose';
 import * as CryptoJS from 'crypto-js';
-import { InvokeAiModel, InvokeService } from '../modules/invoke/invoke.service';
+import { InvokeService } from '../modules/invoke/invoke.service';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { AssetsService } from '../modules/assets/assets.service';
 import { ConfigService } from '@nestjs/config';
-import { OpenaiRequestService } from '../modules/openai/openai.request.service';
 import crypto from 'crypto';
+import { ApiEvent, ToolsHelperService } from './tools-helper.service';
 
 @Injectable()
 export class ApiTools {
@@ -25,7 +25,7 @@ export class ApiTools {
     private readonly httpService: HttpService,
     private readonly assetsService: AssetsService,
     private readonly configService: ConfigService,
-    private readonly openAiRequestService: OpenaiRequestService,
+    private readonly toolsHelperService: ToolsHelperService,
   ) {}
 
   @Tool({
@@ -36,9 +36,6 @@ export class ApiTools {
     }),
   })
   async sayHello({ name }, context: Context, request: Request) {
-    console.log(context);
-    const requestId = request.headers['requestid'] as string;
-    const req = this.openAiRequestService.get(requestId);
     let progress = 0;
     await new Promise((resolve) => {
       setInterval(() => {
@@ -47,18 +44,13 @@ export class ApiTools {
           return;
         }
         progress++;
-        req.write(
-          `event: report_mcp_progress\ndata: ${JSON.stringify({
-            type: 'report_mcp_progress',
-            progressToken: requestId,
-            progress: progress,
-            total: 100,
-            message: crypto
-              .createHash('md5')
-              .update(crypto.randomBytes(32))
-              .digest('hex'),
-          })}\n\n`,
-        );
+        this.toolsHelperService.emitApiEvent(request, ApiEvent.MCP_PROGRESS, {
+          progress,
+          message: crypto
+            .createHash('md5')
+            .update(crypto.randomBytes(32))
+            .digest('hex'),
+        });
       }, 40);
     });
     return `Hello2, ${name}!`;
@@ -211,9 +203,6 @@ export class ApiTools {
     context: Context,
     request: Request,
   ) {
-    const requestId = request.headers['requestid'] as string;
-    const req = this.openAiRequestService.get(requestId);
-
     const useInvoke =
       this.configService.get<string>('INVOKE_INTEGRATION') === 'true';
     if (!useInvoke) {
@@ -246,18 +235,13 @@ export class ApiTools {
       chatMetaData.invokeAiModelToUse,
       (progress) => {
         if (progress !== undefined) {
-          req.write(
-            `event: report_mcp_progress\ndata: ${JSON.stringify({
-              type: 'report_mcp_progress',
-              progressToken: requestId,
-              progress: progress*100,
-              total: 100,
-              message: crypto
-                .createHash('md5')
-                .update(crypto.randomBytes(32))
-                .digest('hex'),
-            })}\n\n`,
-          );
+          this.toolsHelperService.emitApiEvent(request, ApiEvent.MCP_PROGRESS, {
+            progress: progress*100,
+            message: crypto
+              .createHash('md5')
+              .update(crypto.randomBytes(32))
+              .digest('hex'),
+          });
         }
       },
     );

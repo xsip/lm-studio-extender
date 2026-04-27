@@ -17,6 +17,7 @@ import { InvokeModule } from './modules/invoke/invoke.module';
 import { HttpModule } from '@nestjs/axios';
 import { AssetsModule } from './modules/assets/assets.module';
 import { toolsTimeoutMiddleware } from './tools/tools-timeout.middleware';
+import { ToolsHelperService } from './tools/tools-helper.service';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { toolsTimeoutMiddleware } from './tools/tools-timeout.middleware';
   controllers: [],
   providers: [
     AppService,
+    ToolsHelperService,
     ApiTools,
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
