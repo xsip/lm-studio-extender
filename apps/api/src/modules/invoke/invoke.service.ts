@@ -7,6 +7,7 @@ import { EnqueueBatchResult } from './model/enqueueBatchResult';
 
 import { io, Socket } from 'socket.io-client';
 import { NodesValue } from './model/nodesValue';
+import { InvocationProgressEvent } from './model/invocationProgressEvent';
 
 export enum InvokeAiModel {
   DREAMSHAPER_8 = 'Dreamshaper 8',
@@ -33,7 +34,7 @@ export class InvokeService {
   async generateImage(
     prompt: string,
     modelName: InvokeAiModel = InvokeAiModel.DREAMSHAPER_8,
-    reportProgress?: (progress?: number) => void,
+    reportProgress?: (progress?: InvocationProgressEvent)=> void,
   ): Promise<{
     fullPath: string;
     thumbPath: string;
@@ -86,7 +87,7 @@ export class InvokeService {
           socket.emit('subscribe_queue', { queue_id: 'default' });
         });
         socket.on('invocation_progress', (data) => {
-          if (data?.batch_id === batchId) reportProgress?.(data?.percentage);
+          if (data?.batch_id === batchId) reportProgress?.(data);
         });
         socket.on('batch_enqueued', (data) => {
           batchId = data?.batch_id;

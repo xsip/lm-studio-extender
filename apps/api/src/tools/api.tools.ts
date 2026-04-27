@@ -234,13 +234,10 @@ export class ApiTools {
       prompt,
       chatMetaData.invokeAiModelToUse,
       (progress) => {
-        if (progress !== undefined) {
+        if (progress !== undefined && progress.percentage) {
           this.toolsHelperService.emitApiEvent(request, ApiEvent.MCP_PROGRESS, {
-            progress: progress*100,
-            message: crypto
-              .createHash('md5')
-              .update(crypto.randomBytes(32))
-              .digest('hex'),
+            progress: progress.percentage * 100,
+            message: progress.message
           });
         }
       },
