@@ -16,6 +16,7 @@ import { HttpClient } from '@angular/common/http';
 import { marked, type TokenizerExtension, type RendererExtension } from 'marked';
 import katex from 'katex';
 import Prism from 'prismjs';
+import { map, Observable, publishReplay, refCount } from 'rxjs';
 // ── KaTeX extensions for marked ─────────────────────────────────────────────
 
 /** Block math: $$...$$ on its own line(s). */
@@ -565,35 +566,37 @@ export class ImageLightbox {
     return menu;
   }
 }
-
 // ── AuthImagesDirective ───────────────────────────────────────────────────────
 // Apply to any element that contains markdown-rendered HTML.
 // It watches for new <img data-auth-src="..."> elements (including during
 // streaming) and fetches them with the Authorization header, swapping in a
 // blob URL so the browser can display them.
+// Blob URLs are cached statically across all directive instances so the same
+// remote image is only ever fetched once per page session.
 // Clicking a loaded image opens ImageLightbox with the full (non-thumbnail) URL.
 @Directive({ selector: '[authImages]', standalone: true })
 export class AuthImagesDirective implements OnInit, OnDestroy {
   private readonly el = inject(ElementRef<HTMLElement>);
   private readonly http = inject(HttpClient);
   private observer: MutationObserver | null = null;
-  private readonly blobUrls: string[] = [];
-  private readonly clickListeners = new Map<HTMLImageElement, () => void>();
-  private readonly ctxMenuListeners = new Map<HTMLImageElement, (e: MouseEvent) => void>();
+
+  // ── Static cross-instance cache ──────────────────────────────────────────
+  // Maps remote URL → resolved blob URL (or in-flight Observable while
+  // the request is pending, so concurrent calls share one HTTP request).
+  private static readonly cache = new Map<string, string | Observable<string>>();
+
+  private readonly ownedBlobUrls = new Set<string>();  // only URLs created by THIS instance
+  private readonly clickListeners    = new Map<HTMLImageElement, () => void>();
+  private readonly ctxMenuListeners  = new Map<HTMLImageElement, (e: MouseEvent) => void>();
 
   ngOnInit() {
-    // Process any images already in the DOM
     this.processImages(this.el.nativeElement);
 
-    // Watch for new images added during streaming
     this.observer = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
         mutation.addedNodes.forEach((node) => {
-          if (node instanceof HTMLElement) {
-            this.processImages(node);
-          }
+          if (node instanceof HTMLElement) this.processImages(node);
         });
-        // Also handle attribute changes in case src gets reset
         if (
           mutation.type === 'attributes' &&
           mutation.target instanceof HTMLImageElement &&
@@ -604,81 +607,135 @@ export class AuthImagesDirective implements OnInit, OnDestroy {
       }
     });
 
-    this.observer.observe(this.el.nativeElement, {
-      childList: true,
-      subtree: true,
-    });
+    this.observer.observe(this.el.nativeElement, { childList: true, subtree: true });
   }
 
   ngOnDestroy() {
     this.observer?.disconnect();
-    // Revoke blob URLs to free memory
-    this.blobUrls.forEach((url) => URL.revokeObjectURL(url));
-    // Remove click listeners
-    this.clickListeners.forEach((listener, img) => {
-      img.removeEventListener('click', listener);
+
+    // Only revoke blob URLs that were created by this instance and are no
+    // longer referenced by any other live directive (i.e. not in the cache).
+    // We leave cache entries intact so sibling/future instances can still use them.
+    this.ownedBlobUrls.forEach((blobUrl) => {
+      const stillCached = [...AuthImagesDirective.cache.values()].includes(blobUrl);
+      if (!stillCached) URL.revokeObjectURL(blobUrl);
     });
+    this.ownedBlobUrls.clear();
+
+    this.clickListeners.forEach((listener, img) => img.removeEventListener('click', listener));
     this.clickListeners.clear();
-    // Remove context-menu listeners
-    this.ctxMenuListeners.forEach((listener, img) => {
-      img.removeEventListener('contextmenu', listener);
-    });
+    this.ctxMenuListeners.forEach((listener, img) => img.removeEventListener('contextmenu', listener));
     this.ctxMenuListeners.clear();
   }
 
+  // ── Cache management ─────────────────────────────────────────────────────
+
+  /** Returns a cached blob URL if available, otherwise undefined. */
+  private getCached(src: string): string | undefined {
+    const entry = AuthImagesDirective.cache.get(src);
+    return typeof entry === 'string' ? entry : undefined;
+  }
+
+  /** Stores the resolved blob URL and replaces any in-flight Observable entry. */
+  private setCached(src: string, blobUrl: string): void {
+    AuthImagesDirective.cache.set(src, blobUrl);
+  }
+
+  /** Stores or retrieves the shared in-flight Observable for a pending request. */
+  private getOrSetInflight(src: string, factory: () => Observable<string>): Observable<string> {
+    const entry = AuthImagesDirective.cache.get(src);
+    if (entry instanceof Observable) return entry;
+    const inflight$ = factory();
+    AuthImagesDirective.cache.set(src, inflight$);
+    return inflight$;
+  }
+
+  // ── Image loading ─────────────────────────────────────────────────────────
+
   private processImages(root: HTMLElement) {
-    const imgs = root.querySelectorAll<HTMLImageElement>('img[data-auth-src]');
-    imgs.forEach((img) => this.loadImage(img));
+    root.querySelectorAll<HTMLImageElement>('img[data-auth-src]')
+      .forEach((img) => this.loadImage(img));
   }
 
   private loadImage(img: HTMLImageElement) {
     const src = img.dataset['authSrc'];
-    img.setAttribute('loading', 'true');
-    // Skip if already loaded (blob URL set) or no src
     if (!src || img.src.startsWith('blob:')) return;
 
-    // Get token however your app stores it
+    // ── Cache hit: apply immediately, no HTTP request ─────────────────────
+    const cached = this.getCached(src);
+    if (cached) {
+      this.applyBlobUrl(img, src, cached);
+      return;
+    }
+
+    // ── In-flight or new request ──────────────────────────────────────────
+    img.setAttribute('loading', 'true');
+
     const token = localStorage.getItem('jwt_token') ?? '';
 
-    this.http
-      .get(src, {
+    const blobUrl$ = this.getOrSetInflight(src, () =>
+      this.http.get(src, {
         responseType: 'blob',
         headers: { Authorization: `Bearer ${token}` },
-      })
-      .subscribe({
-        next: (blob) => {
+      }).pipe(
+        map((blob) => {
           const blobUrl = URL.createObjectURL(blob);
-          this.blobUrls.push(blobUrl);
-          img.src = blobUrl;
+          this.setCached(src, blobUrl);
+          return blobUrl;
+        }),
+        // Share the single HTTP request among all concurrent subscribers.
+        // publishReplay(1) + refCount() keeps the result cached in the
+        // Observable layer until the static Map is populated.
+        publishReplay(1),
+        refCount(),
+      )
+    );
 
-          img.removeAttribute('loading');
-          // Add click-to-expand listener (only once per image)
-          if (!this.clickListeners.has(img)) {
-            const listener = () => ImageLightbox.open(src, this.http);
-            img.addEventListener('click', listener);
-            this.clickListeners.set(img, listener);
-          }
+    blobUrl$.subscribe({
+      next: (blobUrl) => {
+        this.ownedBlobUrls.add(blobUrl);
+        img.removeAttribute('loading');
+        this.applyBlobUrl(img, src, blobUrl);
+      },
+      error: () => {
+        // Remove the failed entry so a future load can retry.
+        AuthImagesDirective.cache.delete(src);
+        img.removeAttribute('loading');
+        img.alt = `Failed to load image: ${src}`;
+      },
+    });
+  }
 
-          // Add right-click context-menu listener (only once per image)
-          if (!this.ctxMenuListeners.has(img)) {
-            const ctxListener = (e: MouseEvent) => {
-              e.preventDefault();
-              e.stopPropagation();
-              // Use the current blob src so the download reflects the loaded image
-              const currentBlobUrl = img.src.startsWith('blob:') ? img.src : null;
-              if (currentBlobUrl) {
-                ImageLightbox.showCtxMenu(currentBlobUrl, e.clientX, e.clientY);
-              }
-            };
-            img.addEventListener('contextmenu', ctxListener);
-            this.ctxMenuListeners.set(img, ctxListener);
-          }
-        },
-        error: () => {
-          img.removeAttribute('loading');
-          img.alt = `Failed to load image: ${src}`;
-        },
-      });
+  /** Sets img.src and attaches interaction listeners. */
+  private applyBlobUrl(img: HTMLImageElement, authSrc: string, blobUrl: string) {
+    img.src = blobUrl;
+
+    if (!this.clickListeners.has(img)) {
+      const listener = () => ImageLightbox.open(authSrc, this.http);
+      img.addEventListener('click', listener);
+      this.clickListeners.set(img, listener);
+    }
+
+    if (!this.ctxMenuListeners.has(img)) {
+      const ctxListener = (e: MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const currentBlobUrl = img.src.startsWith('blob:') ? img.src : null;
+        if (currentBlobUrl) ImageLightbox.showCtxMenu(currentBlobUrl, e.clientX, e.clientY);
+      };
+      img.addEventListener('contextmenu', ctxListener);
+      this.ctxMenuListeners.set(img, ctxListener);
+    }
+  }
+
+  // ── Public utility ────────────────────────────────────────────────────────
+
+  /** Call this (e.g. on logout) to purge all cached blob URLs from memory. */
+  static clearCache(): void {
+    AuthImagesDirective.cache.forEach((entry) => {
+      if (typeof entry === 'string') URL.revokeObjectURL(entry);
+    });
+    AuthImagesDirective.cache.clear();
   }
 }
 
