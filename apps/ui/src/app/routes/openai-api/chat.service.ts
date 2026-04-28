@@ -112,6 +112,7 @@ export class ChatService {
       useInvoke?: boolean;
       invokeAiModelToUse?: InvokeAiModelToUseEnum
     },
+    afterPromptProcessing?: () => void
   ): void {
     this.lastCreatedMcpCallItem = undefined;
     if (this.form.invalid || this.streaming()) return;
@@ -346,8 +347,14 @@ export class ChatService {
           }
         }
       },
-      complete: () => this.streaming.set(false),
-      error:    () => this.streaming.set(false),
+      complete: () => {
+        this.streaming.set(false)
+        afterPromptProcessing?.();
+      },
+      error:    () => {
+        this.streaming.set(false)
+        afterPromptProcessing?.();
+      },
     });
 
     // Text deltas arrive through the dedicated subject
@@ -411,11 +418,20 @@ export class ChatService {
     appendedFiles: AppendedFile[] | undefined,
     encryptionKey: string | undefined,
     onChatListRefresh: () => void,
+    afterPromptProcessing?: () => void
   ): void {
     const input = this.lastUserInput();
     if (!input || this.streaming()) return;
     this.form.setValue({ input });
-    this.submit(selectedModelId, reasoning, appendedFiles, encryptionKey, onChatListRefresh);
+    this.submit(
+      selectedModelId,
+      reasoning,
+      appendedFiles,
+      encryptionKey,
+      onChatListRefresh,
+      undefined,
+      afterPromptProcessing,
+    );
   }
 
   reset(): void {

@@ -265,20 +265,31 @@ STEP 3 — FINAL RESPONSE
 
 The final response must be a direct answer to the decrypted message, not a repetition of it.
 `;
-      (mappedDto.input as any[]) = [
-        /*{
-          role: 'developer',
-          content: mappedDto.instructions,
-        },*/
 
-        ...(mappedDto.input as any[]),
-      ];
       (mappedDto.tools![0] as any).allowed_tools.push('decrypt-message-tool');
     }
 
     if (chatMeta.useInvoke && chatMeta.invokeAiModelToUse) {
       (mappedDto.tools![0] as any).allowed_tools.push('generate-image-tool');
     }
+    const now = new Date();
+    const formatted = now.toLocaleString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+      timeZone: 'UTC',
+    });
+    (mappedDto.input as any[]) = [
+      {
+        role: 'system',
+        content: `Current datetime (authoritative): ${formatted}. You MUST use this for any time-related questions.`,
+      },
+      ...(mappedDto.input as any[]),
+    ];
 
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');

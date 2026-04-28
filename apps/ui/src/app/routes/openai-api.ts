@@ -1,5 +1,16 @@
 import { animate, style, transition, trigger } from '@angular/animations';
-import { Component, computed, effect, ElementRef, inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  ElementRef,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+  viewChild,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -413,6 +424,7 @@ export class OpenAiApi implements OnDestroy, OnInit {
   @ViewChild('chatInput') private chatInputRef?: OpenAiChatInputComponent;
   @ViewChild('chatSidebar') private chatSidebarRef?: ChatSidebarComponent;
 
+  readonly infoRef = viewChild(InfoComponent);
   readonly showChatsSidebar = signal(true);
   readonly showInfoPanel = signal(false);
   readonly chatList = signal<any[]>([]);
@@ -452,6 +464,10 @@ export class OpenAiApi implements OnDestroy, OnInit {
           (cap?.allowed_options?.find((e) => e.startsWith(cap?.default)) as any) ?? undefined,
         );
     });
+  }
+
+  triggerUserReload() {
+    this.infoRef()?.loadUser(); // safe, returns undefined if @if is false
   }
 
   selectReasoning(value: ChatRequestDto.ReasoningEnum | ReasoningDto.EffortEnum): void {
@@ -751,6 +767,8 @@ export class OpenAiApi implements OnDestroy, OnInit {
             this.appendedFiles(),
             res.useCrypto && res.cryptoKey ? res.cryptoKey : undefined,
             () => this.loadChatList(),
+            undefined,
+            () => this.infoRef()?.loadUser(),
           );
 
           this.chatInputRef?.clearFiles();
@@ -772,6 +790,7 @@ export class OpenAiApi implements OnDestroy, OnInit {
         invokeAiModelToUse: this.invokeAiModelPreference(),
         useInvoke: this.newChatUseInvoke(),
       },
+      () => this.infoRef()?.loadUser(),
     );
 
     this.chatInputRef?.clearFiles();
