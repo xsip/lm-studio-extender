@@ -12,5 +12,6 @@ import 'prismjs/components/prism-python';
 import 'prismjs/components/prism-markup'; // HTML/XML
 import 'prismjs/components/prism-sql';
 import 'prismjs/components/prism-yaml';
+import 'prismjs/components/prism-clike';
 bootstrapApplication(App, appConfig)
   .catch((err) => console.error(err));

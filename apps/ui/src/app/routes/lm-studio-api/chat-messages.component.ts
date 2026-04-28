@@ -112,8 +112,8 @@ import { SpinnerComponent } from '../../shared';
             </div>
             @if (msg.date) {
               <span class="text-[10px] text-text-disabled mr-1">{{
-                  msg.date | date: 'HH:mm'
-                }}</span>
+                msg.date | date: 'HH:mm'
+              }}</span>
             }
           </div>
         } @else if (msg.text) {
@@ -126,8 +126,8 @@ import { SpinnerComponent } from '../../shared';
             </div>
             @if (msg.date) {
               <span class="text-[10px] text-text-disabled mr-1">{{
-                  msg.date | date: 'HH:mm'
-                }}</span>
+                msg.date | date: 'HH:mm'
+              }}</span>
             }
           </div>
         }
@@ -238,7 +238,7 @@ import { SpinnerComponent } from '../../shared';
               <span class="font-semibold truncate">{{ msg.toolName ?? '…' }}</span>
               @if (msg.providerLabel) {
                 <span class="text-tool-muted/60 shrink-0 text-[10px]"
-                >via {{ msg.providerLabel }}</span
+                  >via {{ msg.providerLabel }}</span
                 >
               }
               @if (msg.progress) {
@@ -262,8 +262,8 @@ import { SpinnerComponent } from '../../shared';
                 class="flex  px-3 py-2 rounded-xl rounded-bl-sm text-xs transition-all duration-200 group w-full"
               >
                 <span class="text-tool-muted/60 shrink-0 text-[10px]">{{
-                    msg.progressMessage
-                  }}</span>
+                  msg.progressMessage
+                }}</span>
               </div>
             }
           </button>
@@ -276,11 +276,11 @@ import { SpinnerComponent } from '../../shared';
                 <div class="px-3 py-2 border-b border-tool-border/20">
                   <span
                     class="text-tool-muted/70 uppercase tracking-widest text-[10px] font-semibold"
-                  >{{ 'messages.toolArguments' | translate }}</span
+                    >{{ 'messages.toolArguments' | translate }}</span
                   >
                   <pre
                     class="mt-1.5 text-tool-text whitespace-pre-wrap break-all leading-relaxed font-mono text-[11px]"
-                  >{{ msg.toolArguments | json }}</pre
+                    >{{ msg.toolArguments | json }}</pre
                   >
                 </div>
               }
@@ -364,11 +364,11 @@ import { SpinnerComponent } from '../../shared';
               </svg>
             }
             <span class="font-semibold">{{
-                (msg.streaming ? 'messages.processingPrompt' : 'messages.promptProcessed') | translate
-              }}</span>
+              (msg.streaming ? 'messages.processingPrompt' : 'messages.promptProcessed') | translate
+            }}</span>
             @if (msg.streaming && (msg.progress ?? 0) > 0) {
               <span class="text-warn-muted/80 tabular-nums font-mono text-[10px]"
-              >{{ (msg.progress! * 100).toFixed(0) }}%</span
+                >{{ (msg.progress! * 100).toFixed(0) }}%</span
               >
             }
             @if (msg.streaming) {
@@ -408,7 +408,7 @@ import { SpinnerComponent } from '../../shared';
             <span class="font-semibold">{{ 'messages.reasoning' | translate }}</span>
             @if (msg.collapsed) {
               <span class="text-reasoning-muted/50 truncate flex-1 text-left text-[11px]"
-              >{{ msg.text | stripMarkdown | slice: 0 : 60 }}…</span
+                >{{ msg.text | stripMarkdown | slice: 0 : 60 }}…</span
               >
             }
             <svg
@@ -469,7 +469,7 @@ import { SpinnerComponent } from '../../shared';
                 <div
                   class="markdown-body break-all "
                   authImages
-                  [innerHTML]="msg.text | markdown"
+                  [innerHTML]="msg.text | markdown: msg.streaming"
                 ></div>
                 <span
                   class="inline-block w-2 h-4 bg-accent animate-typing-blink ml-0.5 align-middle rounded-sm"
@@ -478,7 +478,7 @@ import { SpinnerComponent } from '../../shared';
                 <div
                   class="markdown-body break-all"
                   authImages
-                  [innerHTML]="msg.text | markdown"
+                  [innerHTML]="msg.text | markdown: msg.streaming"
                 ></div>
               }
             </div>

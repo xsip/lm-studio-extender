@@ -60,8 +60,6 @@ const inlineMathExtension: TokenizerExtension & RendererExtension = {
   },
 };
 
-
-
 // ── Code block extension: ```lang ... ``` ────────────────────────────────────
 const fencedCodeExtension: TokenizerExtension & RendererExtension = {
   name: 'fencedCode',
@@ -137,7 +135,6 @@ renderer.link = ({ href, title, text }) => {
   return `<a href="${href}"${titleAttr} target="_blank" rel="noopener noreferrer">${text}</a>`;
 };
 
-
 // ── Image renderer: defer auth images via data-auth-src ──────────────────────
 // Instead of setting src directly (which would 401), we store the real URL in
 // data-auth-src and leave src empty. AuthImagesDirective picks these up and
@@ -154,14 +151,55 @@ marked.use({
   renderer,
 });
 
+// ── closeOpenCodeBlocks ───────────────────────────────────────────────────────
+// During streaming the closing ``` of a fenced code block may not have arrived
+// yet. The fencedCodeExtension tokenizer won't match an unclosed block, so the
+// raw ``` leaks into the output as plain text. This function detects the last
+// unclosed fence and appends a matching closing fence so marked always receives
+// well-formed input. When all blocks are already closed it returns the original
+// string unchanged.
+export function closeOpenCodeBlocks(text: string): string {
+  const lines = text.split('\n');
+
+  let openFenceChar: '`' | '~' | null = null;
+  let openFenceLen = 0;
+
+  for (const line of lines) {
+    const trimmed = line.trimStart();
+    if (!trimmed.startsWith('`') && !trimmed.startsWith('~')) continue;
+
+    const char = trimmed[0] as '`' | '~';
+    let len = 0;
+    while (trimmed[len] === char) len++;
+    if (len < 3) continue; // not a valid fence
+
+    if (openFenceChar === null) {
+      // Opening a new fenced block
+      openFenceChar = char;
+      openFenceLen = len;
+    } else if (char === openFenceChar && len >= openFenceLen) {
+      // Valid closing fence — block is now closed
+      openFenceChar = null;
+      openFenceLen = 0;
+    }
+    // A different fence character inside an open block is just content
+  }
+
+  if (openFenceChar === null) return text; // nothing to fix
+
+  const closingFence = openFenceChar.repeat(openFenceLen);
+  return text.endsWith('\n') ? text + closingFence : text + '\n' + closingFence;
+}
+
 // ── MarkdownPipe ─────────────────────────────────────────────────────────────
 @Pipe({ name: 'markdown', standalone: true })
 export class MarkdownPipe implements PipeTransform {
   private readonly sanitizer = inject(DomSanitizer);
 
-  transform(value: string | null | undefined): SafeHtml {
+  transform(value: string | null | undefined, streaming = false): SafeHtml {
     if (!value) return '';
-    const html = marked.parse(value, { async: false }) as string;
+    const safe = streaming ? closeOpenCodeBlocks(value) : value;
+    const html = marked.parse(safe, { async: false }) as string;
     return this.sanitizer.bypassSecurityTrustHtml(html);
   }
 }
