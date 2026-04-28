@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { ModelDto } from '../../client';
 import { SpinnerComponent } from '../../shared/components/spinner.component';
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { heroCpuChip, heroWrenchScrewdriver, heroChevronDown, heroCheck } from '@ng-icons/heroicons/outline';
 
 export type { ModelReasoningCapability } from '../../shared/components/reasoning-dropdown.component';
 
@@ -20,7 +22,8 @@ export type { ModelReasoningCapability } from '../../shared/components/reasoning
       ]),
     ]),
   ],
-  imports: [CommonModule, TranslateModule, SpinnerComponent],
+  imports: [CommonModule, TranslateModule, SpinnerComponent, NgIconComponent],
+  viewProviders: [provideIcons({ heroCpuChip, heroWrenchScrewdriver, heroChevronDown, heroCheck })],
   template: `
     <div class="group/model-btn relative">
       <button
@@ -37,23 +40,16 @@ export type { ModelReasoningCapability } from '../../shared/components/reasoning
         @if (modelsLoading()) {
           <app-spinner />
         } @else {
-          <svg class="w-3.5 h-3.5 shrink-0 opacity-50" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1 1 .03 2.798-1.414 2.798H4.213c-1.444 0-2.414-1.798-1.414-2.798L4.6 15.3"/>
-          </svg>
+          <ng-icon name="heroCpuChip" class="w-3.5 h-3.5 shrink-0 opacity-50" />
         }
         <span class="truncate text-[11px] tracking-wide font-medium">{{ selectedModel() ? modelLabel() : ('modelSelector.selectModel' | translate) }}</span>
         @if (selectedModel()?.capabilities?.trained_for_tool_use) {
-          <svg class="w-3 h-3 shrink-0 text-tertiary-accent opacity-80" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" [attr.title]="'modelSelector.toolUse' | translate">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l5.654-4.654m5.292-8.914a2.25 2.25 0 00-3.182 0l-1.83 1.83a2.25 2.25 0 000 3.182l.182.182"/>
-          </svg>
+          <ng-icon name="heroWrenchScrewdriver" class="w-3 h-3 shrink-0 text-tertiary-accent opacity-80" [attr.title]="'modelSelector.toolUse' | translate" />
         }
-        <svg
+        <ng-icon name="heroChevronDown"
           class="w-3 h-3 opacity-40 shrink-0 transition-transform duration-200"
           [class.rotate-180]="dropdownOpen()"
-          fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-        </svg>
+        />
       </button>
 
       @if (dropdownOpen()) {
@@ -88,9 +84,7 @@ export type { ModelReasoningCapability } from '../../shared/components/reasoning
                 </span>
               </div>
               @if (selectedModel()?.key === m.key) {
-                <svg class="w-3.5 h-3.5 text-accent shrink-0 mt-0.5 animate-scale-in" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
-                </svg>
+                <ng-icon name="heroCheck" class="w-3.5 h-3.5 text-accent shrink-0 mt-0.5 animate-scale-in" />
               }
             </button>
           }

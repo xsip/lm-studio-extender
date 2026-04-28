@@ -2,11 +2,24 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import {
+  heroCommandLine,
+  heroSun,
+  heroMoon,
+  heroChatBubbleOvalLeft,
+  heroBolt,
+  heroComputerDesktop,
+  heroServer,
+  heroInformationCircle,
+  heroExclamationTriangle,
+} from '@ng-icons/heroicons/outline';
 
 @Component({
   selector: 'app-readme',
   standalone: true,
-  imports: [CommonModule, RouterLink, TranslateModule],
+  imports: [CommonModule, RouterLink, TranslateModule, NgIconComponent],
+  viewProviders: [provideIcons({ heroCommandLine, heroSun, heroMoon, heroChatBubbleOvalLeft, heroBolt, heroComputerDesktop, heroServer, heroInformationCircle, heroExclamationTriangle })],
   styles: [
     `
       :host {
@@ -99,19 +112,7 @@ import { TranslateModule } from '@ngx-translate/core';
             <span
               class="w-7 h-7 rounded-lg bg-accent/20 flex items-center justify-center flex-shrink-0"
             >
-              <svg
-                class="w-4 h-4 text-accent"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
+              <ng-icon name="heroCommandLine" class="w-4 h-4 text-accent" />
             </span>
             <span class="font-semibold text-sm text-text-primary truncate"
               >LM Studio Chat Client</span
@@ -130,47 +131,16 @@ import { TranslateModule } from '@ngx-translate/core';
               [title]="'darkMode.toggle' | translate"
             >
               <!-- Sun shown in dark mode -->
-              <svg
-                class="w-4 h-4 hidden dark:block"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"
-                />
-              </svg>
+              <ng-icon name="heroSun" class="w-4 h-4 hidden dark:block" />
               <!-- Moon shown in light mode -->
-              <svg
-                class="w-4 h-4 block dark:hidden"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-                />
-              </svg>
+              <ng-icon name="heroMoon" class="w-4 h-4 block dark:hidden" />
             </button>
 
             <a
               routerLink="/chat-openai"
               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent hover:bg-accent-hover text-white font-semibold text-xs transition-colors whitespace-nowrap"
             >
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                />
-              </svg>
+              <ng-icon name="heroChatBubbleOvalLeft" class="w-3.5 h-3.5" />
               <span class="hidden sm:inline">Go to Chat</span>
               <span class="sm:hidden">Chat</span>
             </a>
@@ -222,14 +192,7 @@ import { TranslateModule } from '@ngx-translate/core';
               href="#getting-started"
               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent hover:bg-accent-hover text-white font-semibold text-sm transition-colors"
             >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M13 10V3L4 14h7v7l9-11h-7z"
-                />
-              </svg>
+              <ng-icon name="heroBolt" class="w-4 h-4" />
               Get Started
             </a>
             <a
@@ -262,14 +225,7 @@ import { TranslateModule } from '@ngx-translate/core';
                 <span
                   class="w-9 h-9 rounded-lg bg-accent/15 flex items-center justify-center text-accent"
                 >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2h-2"
-                    />
-                  </svg>
+                  <ng-icon name="heroComputerDesktop" class="w-5 h-5" />
                 </span>
                 <div>
                   <p class="font-semibold text-text-primary">UI</p>
@@ -287,14 +243,7 @@ import { TranslateModule } from '@ngx-translate/core';
                 <span
                   class="w-9 h-9 rounded-lg bg-reasoning-bg flex items-center justify-center text-reasoning-text"
                 >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2"
-                    />
-                  </svg>
+                  <ng-icon name="heroServer" class="w-5 h-5" />
                 </span>
                 <div>
                   <p class="font-semibold text-text-primary">API</p>
@@ -487,19 +436,7 @@ import { TranslateModule } from '@ngx-translate/core';
           <div
             class="mt-3 flex gap-2 items-start bg-info-bg border border-info-border rounded-lg px-4 py-3"
           >
-            <svg
-              class="w-4 h-4 text-info-text flex-shrink-0 mt-0.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+            <ng-icon name="heroInformationCircle" class="w-4 h-4 text-info-text flex-shrink-0 mt-0.5" />
             <p class="text-xs text-info-text">
               <strong>SELF_MCP_URL</strong> must be the LAN IP reachable from LM Studio's process —
               not <code class="bg-info-bg px-1 rounded">localhost</code> — so MCP tool callbacks
@@ -613,19 +550,7 @@ import { TranslateModule } from '@ngx-translate/core';
           <div
             class="mt-4 flex gap-2 items-start bg-warn-bg border border-warn-border rounded-lg px-4 py-3"
           >
-            <svg
-              class="w-4 h-4 text-warn-text flex-shrink-0 mt-0.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-              />
-            </svg>
+            <ng-icon name="heroExclamationTriangle" class="w-4 h-4 text-warn-text flex-shrink-0 mt-0.5" />
             <p class="text-xs text-warn-text">
               The <strong>cryptoKey</strong> lives in MongoDB — your NestJS API and database are the
               security boundary. Use HTTPS and restrict DB access in any non-local deployment.

@@ -29,6 +29,8 @@ import { LmStudioEvent } from '../lmstudio-stream.service';
 import { IconButtonComponent } from '../shared/components/ui/icon-button.component';
 import { ButtonComponent } from '../shared/components/ui/button.component';
 import { TranslateModule } from '@ngx-translate/core';
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { heroBars3, heroUser, heroXMark } from '@ng-icons/heroicons/outline';
 
 @Component({
   selector: 'app-debug',
@@ -45,7 +47,9 @@ import { TranslateModule } from '@ngx-translate/core';
     IconButtonComponent,
     ButtonComponent,
     TranslateModule,
+    NgIconComponent,
   ],
+  viewProviders: [provideIcons({ heroBars3, heroUser, heroXMark })],
   animations: [
     trigger('sidebarAnim', [
       transition(':enter', [
@@ -102,15 +106,7 @@ import { TranslateModule } from '@ngx-translate/core';
           (clicked)="showChatsSidebar.set(!showChatsSidebar())"
           [title]="'toolbar.toggleChats' | translate"
         >
-          <svg
-            class="w-3.5 h-3.5"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M3 12h18M3 18h18" />
-          </svg>
+          <ng-icon name="heroBars3" class="w-3.5 h-3.5" />
           <span class="hidden sm:inline">{{ 'toolbar.chats' | translate }}</span>
         </ui-button>
 
@@ -148,19 +144,7 @@ import { TranslateModule } from '@ngx-translate/core';
           [title]="'toolbar.userInfo' | translate"
           (clicked)="showInfoPanel.set(!showInfoPanel())"
         >
-          <svg
-            class="w-3.5 h-3.5"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-            />
-          </svg>
+          <ng-icon name="heroUser" class="w-3.5 h-3.5" />
         </ui-icon-button>
       </div>
 
@@ -237,15 +221,7 @@ import { TranslateModule } from '@ngx-translate/core';
                 [title]="'common.close' | translate"
                 (clicked)="showInfoPanel.set(false)"
               >
-                <svg
-                  class="w-3.5 h-3.5"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <ng-icon name="heroXMark" class="w-3.5 h-3.5" />
               </ui-icon-button>
             </div>
             <div class="flex-1 overflow-hidden">

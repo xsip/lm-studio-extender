@@ -8,6 +8,8 @@ import { SpinnerComponent } from '../../shared/components/spinner.component';
 import { DarkModeToggleComponent } from '../../shared/components/ui/dark-mode-toggle.component';
 import { BadgeComponent } from '../../shared/components/ui/badge.component';
 import { ButtonComponent } from '../../shared/components/ui/button.component';
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { heroArrowPath, heroUser, heroChartBar, heroComputerDesktop } from '@ng-icons/heroicons/outline';
 
 @Component({
   selector: 'app-info',
@@ -40,7 +42,9 @@ import { ButtonComponent } from '../../shared/components/ui/button.component';
     DarkModeToggleComponent,
     BadgeComponent,
     ButtonComponent,
+    NgIconComponent,
   ],
+  viewProviders: [provideIcons({ heroArrowPath, heroUser, heroChartBar, heroComputerDesktop })],
   template: `
     <div class="flex flex-col h-full overflow-y-auto p-4 gap-4 text-xs">
       <!-- Theme row -->
@@ -74,20 +78,7 @@ import { ButtonComponent } from '../../shared/components/ui/button.component';
       <div class="flex items-center justify-between" @rowAnim>
         <span class="text-sm font-semibold text-text-primary">{{ 'info.info' | translate }}</span>
         <ui-button variant="secondary" size="xs" [disabled]="loading()" (clicked)="refresh()">
-          <svg
-            class="w-3 h-3 transition-transform"
-            [class.animate-spin]="loading()"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-            />
-          </svg>
+          <ng-icon name="heroArrowPath" class="w-3 h-3 transition-transform" [class.animate-spin]="loading()" />
           <span>{{ 'info.refresh' | translate }}</span>
         </ui-button>
       </div>
@@ -100,19 +91,7 @@ import { ButtonComponent } from '../../shared/components/ui/button.component';
         <div
           class="flex items-center gap-2 px-3 py-2.5 border-b border-border-subtle bg-surface-overlay/50"
         >
-          <svg
-            class="w-3.5 h-3.5 text-text-muted"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-            />
-          </svg>
+          <ng-icon name="heroUser" class="w-3.5 h-3.5 text-text-muted" />
           <span
             class="font-semibold text-text-secondary tracking-wider uppercase"
             style="font-size:10px"
@@ -167,19 +146,7 @@ import { ButtonComponent } from '../../shared/components/ui/button.component';
         <div
           class="flex items-center gap-2 px-3 py-2.5 border-b border-border-subtle bg-surface-overlay/50"
         >
-          <svg
-            class="w-3.5 h-3.5 text-text-muted"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-            />
-          </svg>
+          <ng-icon name="heroChartBar" class="w-3.5 h-3.5 text-text-muted" />
           <span
             class="font-semibold text-text-secondary tracking-wider uppercase"
             style="font-size:10px"
@@ -236,19 +203,7 @@ import { ButtonComponent } from '../../shared/components/ui/button.component';
         <div
           class="flex items-center gap-2 px-3 py-2.5 border-b border-border-subtle bg-surface-overlay/50"
         >
-          <svg
-            class="w-3.5 h-3.5 text-text-muted"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-            />
-          </svg>
+          <ng-icon name="heroComputerDesktop" class="w-3.5 h-3.5 text-text-muted" />
           <span
             class="font-semibold text-text-secondary tracking-wider uppercase"
             style="font-size:10px"

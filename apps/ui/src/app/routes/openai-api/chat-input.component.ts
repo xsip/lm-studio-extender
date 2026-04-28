@@ -25,6 +25,8 @@ import {
 } from '../../shared/utils/file.utils';
 import { TranslateModule } from '@ngx-translate/core';
 import { MarkdownPipe } from '../lm-studio-api/markdown.pipe';
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { heroPencilSquare, heroEye, heroLink, heroDocument, heroXMark } from '@ng-icons/heroicons/outline';
 
 // Re-export AppendedFile so existing consumers importing from this file keep working.
 export type { AppendedFile };
@@ -39,7 +41,9 @@ export type { AppendedFile };
     ResetButtonComponent,
     ReasoningDropdownComponent,
     MarkdownPipe,
+    NgIconComponent,
   ],
+  viewProviders: [provideIcons({ heroPencilSquare, heroEye, heroLink, heroDocument, heroXMark })],
   styles: [
     `
       .md-editor-wrap {
@@ -171,39 +175,10 @@ export type { AppendedFile };
             [title]="previewMode() ? 'Back to editing' : 'Preview markdown'"
           >
             @if (previewMode()) {
-              <svg
-                class="w-2.5 h-2.5"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487z"
-                />
-              </svg>
+              <ng-icon name="heroPencilSquare" class="w-2.5 h-2.5" />
               Edit
             } @else {
-              <svg
-                class="w-2.5 h-2.5"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z"
-                />
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
+              <ng-icon name="heroEye" class="w-2.5 h-2.5" />
               Preview
             }
           </button>
@@ -231,19 +206,7 @@ export type { AppendedFile };
             "
             [title]="'chatInput.attach' | translate"
           >
-            <svg
-              class="w-3.5 h-3.5 shrink-0"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
-              />
-            </svg>
+            <ng-icon name="heroLink" class="w-3.5 h-3.5 shrink-0" />
             <span>
               @if (appendedFiles().length > 0) {
                 {{ appendedFiles().length }} file{{ appendedFiles().length === 1 ? '' : 's' }}
@@ -284,19 +247,7 @@ export type { AppendedFile };
               <div
                 class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-surface-base border border-border-default text-xs group hover:-translate-y-0.5 hover:shadow-depth-sm animate-slide-up transition-all duration-200"
               >
-                <svg
-                  class="w-3.5 h-3.5 shrink-0 text-text-muted"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
+                <ng-icon name="heroDocument" class="w-3.5 h-3.5 shrink-0 text-text-muted" />
                 <span class="truncate text-text-primary flex-1 max-w-xs">{{ file.filename }}</span>
                 <span class="text-text-muted shrink-0 text-[10px]">{{
                   fileSizeLabel(file.image_url)
@@ -307,15 +258,7 @@ export type { AppendedFile };
                   class="ml-1 shrink-0 flex items-center justify-center w-4 h-4 rounded text-text-muted hover:text-error-text hover:bg-error-bg active:scale-90 opacity-0 group-hover:opacity-100 transition-all duration-150"
                   [title]="'common.remove' | translate"
                 >
-                  <svg
-                    class="w-3 h-3"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2.5"
-                    viewBox="0 0 24 24"
-                  >
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <ng-icon name="heroXMark" class="w-3 h-3" />
                 </button>
               </div>
             }

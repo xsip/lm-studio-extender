@@ -49,6 +49,8 @@ import { LabelComponent } from '../shared/components/ui/label.component';
 import { TextInputComponent } from '../shared/components/ui/text-input.component';
 import { ToggleComponent } from '../shared/components/ui/toggle.component';
 import { TranslateModule } from '@ngx-translate/core';
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { heroBars3, heroUser, heroPlus, heroXMark } from '@ng-icons/heroicons/outline';
 import InvokeAiModelToUseEnum = ChatMetadataDto.InvokeAiModelToUseEnum;
 
 @Component({
@@ -68,7 +70,9 @@ import InvokeAiModelToUseEnum = ChatMetadataDto.InvokeAiModelToUseEnum;
     TextInputComponent,
     ToggleComponent,
     TranslateModule,
+    NgIconComponent,
   ],
+  viewProviders: [provideIcons({ heroBars3, heroUser, heroPlus, heroXMark })],
   animations: [
     trigger('sidebarAnim', [
       transition(':enter', [
@@ -124,15 +128,7 @@ import InvokeAiModelToUseEnum = ChatMetadataDto.InvokeAiModelToUseEnum;
           (clicked)="showChatsSidebar.set(!showChatsSidebar())"
           [title]="'toolbar.toggleChats' | translate"
         >
-          <svg
-            class="w-3.5 h-3.5"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M3 12h18M3 18h18" />
-          </svg>
+          <ng-icon name="heroBars3" class="w-3.5 h-3.5" />
           <span class="hidden sm:inline">{{ 'toolbar.chats' | translate }}</span>
         </ui-button>
 
@@ -167,19 +163,7 @@ import InvokeAiModelToUseEnum = ChatMetadataDto.InvokeAiModelToUseEnum;
           [title]="'toolbar.userInfo' | translate"
           (clicked)="showInfoPanel.set(!showInfoPanel())"
         >
-          <svg
-            class="w-3.5 h-3.5"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-            />
-          </svg>
+          <ng-icon name="heroUser" class="w-3.5 h-3.5" />
         </ui-icon-button>
       </div>
 
@@ -221,15 +205,7 @@ import InvokeAiModelToUseEnum = ChatMetadataDto.InvokeAiModelToUseEnum;
                   >
                     <!-- Header -->
                     <div class="flex items-center gap-2 border-b border-border-default pb-3">
-                      <svg
-                        class="w-4 h-4 text-accent shrink-0"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        viewBox="0 0 24 24"
-                      >
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                      </svg>
+                      <ng-icon name="heroPlus" class="w-4 h-4 text-accent shrink-0" />
                       <span class="text-sm font-semibold text-text-primary tracking-wide">{{
                         'toolbar.newChatOptions' | translate
                       }}</span>
@@ -386,15 +362,7 @@ import InvokeAiModelToUseEnum = ChatMetadataDto.InvokeAiModelToUseEnum;
                 [title]="'common.close' | translate"
                 (clicked)="showInfoPanel.set(false)"
               >
-                <svg
-                  class="w-3.5 h-3.5"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <ng-icon name="heroXMark" class="w-3.5 h-3.5" />
               </ui-icon-button>
             </div>
             <div class="flex-1 overflow-hidden">

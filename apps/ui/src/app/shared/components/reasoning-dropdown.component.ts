@@ -3,6 +3,8 @@ import { Component, computed, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { ChatRequestDto } from '../../client';
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { heroChevronDown, heroCheck } from '@ng-icons/heroicons/outline';
 
 export interface ReasoningOption {
   value: ChatRequestDto.ReasoningEnum;
@@ -50,7 +52,8 @@ export const ALL_REASONING_OPTIONS: ReasoningOption[] = [
     ]),
   ],
   standalone: true,
-  imports: [CommonModule, TranslateModule],
+  imports: [CommonModule, TranslateModule, NgIconComponent],
+  viewProviders: [provideIcons({ heroChevronDown, heroCheck })],
   template: `
     @if (reasoningOptions().length > 0) {
       <div class="relative">
@@ -68,9 +71,7 @@ export const ALL_REASONING_OPTIONS: ReasoningOption[] = [
           @if (reasoningLabel()) {
             <span class="tracking-wide font-medium text-[10px] uppercase">{{ reasoningLabel() }}</span>
           }
-          <svg class="w-3 h-3 opacity-40 transition-transform duration-200" [class.rotate-180]="dropdownOpen()" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-          </svg>
+          <ng-icon name="heroChevronDown" class="w-3 h-3 opacity-40 transition-transform duration-200" [class.rotate-180]="dropdownOpen()" />
         </button>
 
         @if (dropdownOpen()) {
@@ -93,9 +94,7 @@ export const ALL_REASONING_OPTIONS: ReasoningOption[] = [
                   <span class="ml-1 text-[10px] text-text-disabled italic">{{ 'reasoning.default' | translate }}</span>
                 }
                 @if (reasoning() === opt.value) {
-                  <svg class="ml-auto w-3 h-3 text-reasoning-text" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
-                  </svg>
+                  <ng-icon name="heroCheck" class="ml-auto w-3 h-3 text-reasoning-text" />
                 }
               </button>
             }

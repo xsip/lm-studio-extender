@@ -1,6 +1,8 @@
 import { animate, style, transition, trigger, state } from '@angular/animations';
 import { Component, output } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { heroXMark } from '@ng-icons/heroicons/outline';
 
 /**
  * Reusable modal shell — backdrop + centred card.
@@ -38,7 +40,8 @@ import { TranslateModule } from '@ngx-translate/core';
     ]),
   ],
   standalone: true,
-  imports: [TranslateModule],
+  imports: [TranslateModule, NgIconComponent],
+  viewProviders: [provideIcons({ heroXMark })],
   template: `
     <!-- backdrop -->
     <div
@@ -62,9 +65,7 @@ import { TranslateModule } from '@ngx-translate/core';
             class="w-7 h-7 flex items-center justify-center rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-overlay active:scale-90"
             [title]="'common.close' | translate"
           >
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
+            <ng-icon name="heroXMark" class="w-3.5 h-3.5" />
           </button>
         </div>
 

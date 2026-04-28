@@ -1,11 +1,14 @@
 import { Component, input, output } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { ButtonComponent } from './ui/button.component';
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { heroPaperAirplane } from '@ng-icons/heroicons/outline';
 
 @Component({
   selector: 'app-send-button',
   standalone: true,
-  imports: [ButtonComponent, TranslateModule],
+  imports: [ButtonComponent, TranslateModule, NgIconComponent],
+  viewProviders: [provideIcons({ heroPaperAirplane })],
   template: `
     <button
       type="submit"
@@ -19,9 +22,7 @@ import { ButtonComponent } from './ui/button.component';
         <span class="w-3 h-3 rounded-full border-2 border-white/30 border-t-white animate-spin shrink-0"></span>
         <span>{{ 'sendButton.streaming' | translate }}</span>
       } @else {
-        <svg class="w-3.5 h-3.5 transition-all duration-200 group-hover:translate-x-0.5 animate-scale-in" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/>
-        </svg>
+        <ng-icon name="heroPaperAirplane" class="w-3.5 h-3.5 transition-all duration-200 group-hover:translate-x-0.5 animate-scale-in" />
         <span>{{ 'sendButton.send' | translate }}</span>
       }
     </button>

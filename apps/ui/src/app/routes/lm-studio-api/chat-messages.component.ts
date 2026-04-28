@@ -6,6 +6,8 @@ import { ChatMessage } from './chat.service';
 import { AuthImagesDirective, MarkdownPipe, StripMarkdownPipe } from './markdown.pipe';
 import { CreateChatMetadataDto } from '../../client';
 import { SpinnerComponent } from '../../shared';
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { heroExclamationTriangle, heroInformationCircle, heroXMark, heroWrenchScrewdriver, heroChevronDown, heroArrowUturnLeft } from '@ng-icons/heroicons/outline';
 import ClientEnum = CreateChatMetadataDto.ClientEnum;
 
 @Component({
@@ -62,7 +64,9 @@ import ClientEnum = CreateChatMetadataDto.ClientEnum;
     AuthImagesDirective,
     StripMarkdownPipe,
     SpinnerComponent,
+    NgIconComponent,
   ],
+  viewProviders: [provideIcons({ heroExclamationTriangle, heroInformationCircle, heroXMark, heroWrenchScrewdriver, heroChevronDown, heroArrowUturnLeft })],
   template: `
     @if (messages().length === 0 && !streaming()) {
       @if (client() === 'OPENAI') {
@@ -143,19 +147,7 @@ import ClientEnum = CreateChatMetadataDto.ClientEnum;
             class="max-w-[80%] text-error-text rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm leading-relaxed flex items-start gap-2"
             style="background: var(--color-error-bg); border: 1px solid var(--color-error-border); box-shadow: var(--shadow-sm);"
           >
-            <svg
-              class="w-3.5 h-3.5 shrink-0 mt-0.5 text-error-muted"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
-              />
-            </svg>
+            <ng-icon name="heroExclamationTriangle" class="w-3.5 h-3.5 shrink-0 mt-0.5 text-error-muted" />
             <span>{{ msg.text }}</span>
           </div>
           @if (msg.date) {
@@ -167,19 +159,7 @@ import ClientEnum = CreateChatMetadataDto.ClientEnum;
           <div
             class="mt-1 max-w-[80%] bg-info-bg border border-info-border text-info-text rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm leading-relaxed flex items-start gap-2"
           >
-            <svg
-              class="w-3.5 h-3.5 shrink-0 mt-0.5 text-info-muted"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
-              />
-            </svg>
+            <ng-icon name="heroInformationCircle" class="w-3.5 h-3.5 shrink-0 mt-0.5 text-info-muted" />
             <span>{{ msg.text }}</span>
           </div>
           <div class="flex items-center gap-2 ml-1">
@@ -217,29 +197,9 @@ import ClientEnum = CreateChatMetadataDto.ClientEnum;
                   class="shrink-0 w-3 h-3 rounded-full border-2 border-secondary-accent border-t-transparent animate-spin"
                 ></span>
               } @else if (msg.toolFailed) {
-                <svg
-                  class="w-3 h-3 text-error-muted shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <ng-icon name="heroXMark" class="w-3 h-3 text-error-muted shrink-0" />
               } @else {
-                <svg
-                  class="w-3 h-3 text-tool-muted shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l5.654-4.654m5.292-8.914a2.25 2.25 0 00-3.182 0l-1.83 1.83a2.25 2.25 0 000 3.182l.182.182"
-                  />
-                </svg>
+                <ng-icon name="heroWrenchScrewdriver" class="w-3 h-3 text-tool-muted shrink-0" />
               }
               <span class="font-semibold truncate">{{ msg.toolName ?? '…' }}</span>
               @if (msg.providerLabel) {
@@ -251,16 +211,10 @@ import ClientEnum = CreateChatMetadataDto.ClientEnum;
                 <span class="text-tool-muted/60 shrink-0 text-[10px]">{{ msg.progress }} %</span>
               }
 
-              <svg
+              <ng-icon name="heroChevronDown"
                 class="ml-auto w-3 h-3 opacity-40 shrink-0 transition-transform"
                 [class.rotate-180]="!msg.collapsed"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                viewBox="0 0 24 24"
-              >
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
+              />
             </div>
 
             @if (msg.progressMessage) {
@@ -417,16 +371,10 @@ import ClientEnum = CreateChatMetadataDto.ClientEnum;
                 >{{ msg.text | stripMarkdown | slice: 0 : 60 }}…</span
               >
             }
-            <svg
+            <ng-icon name="heroChevronDown"
               class="ml-auto w-3 h-3 opacity-40 shrink-0 transition-transform"
               [class.rotate-180]="!msg.collapsed"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              viewBox="0 0 24 24"
-            >
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
+            />
           </button>
           @if (!msg.collapsed) {
             <div
@@ -499,19 +447,7 @@ import ClientEnum = CreateChatMetadataDto.ClientEnum;
                 (click)="reply.emit($index)"
                 class="flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium text-text-disabled hover:text-accent border border-transparent hover:border-accent/40 rounded-md transition-all duration-150 active:scale-95"
               >
-                <svg
-                  class="w-3 h-3"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
-                  />
-                </svg>
+                <ng-icon name="heroArrowUturnLeft" class="w-3 h-3" />
                 {{ 'messages.reply' | translate }}
               </button>
             }

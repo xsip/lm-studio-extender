@@ -4,6 +4,8 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { LmStudioEvent } from '../../lmstudio-stream.service';
 import { StreamErrorEvent, StreamError2Event } from '../../lmstudio-stream.service';
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { heroXMark } from '@ng-icons/heroicons/outline';
 
 export interface EventEntry {
   id: number;
@@ -33,7 +35,8 @@ export interface EventEntry {
       ]),
     ]),
   ],
-  imports: [CommonModule, DatePipe, TranslateModule],
+  imports: [CommonModule, DatePipe, TranslateModule, NgIconComponent],
+  viewProviders: [provideIcons({ heroXMark })],
   template: `
     <!-- Backdrop -->
     <div
@@ -51,9 +54,7 @@ export interface EventEntry {
             (click)="closed.emit()"
             class="text-text-muted hover:text-zinc-300 transition-colors p-0.5"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <ng-icon name="heroXMark" class="w-4 h-4" />
           </button>
         </div>
       </div>

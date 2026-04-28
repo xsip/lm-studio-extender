@@ -1,6 +1,8 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { readStoredTheme, applyTheme } from '../../utils/theme.utils';
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { heroSun, heroMoon } from '@ng-icons/heroicons/outline';
 
 /**
  * Self-contained dark-mode toggle button.
@@ -12,7 +14,8 @@ import { readStoredTheme, applyTheme } from '../../utils/theme.utils';
 @Component({
   selector: 'ui-dark-mode-toggle',
   standalone: true,
-  imports: [TranslateModule],
+  imports: [TranslateModule, NgIconComponent],
+  viewProviders: [provideIcons({ heroSun, heroMoon })],
   template: `
     <button
       type="button"
@@ -23,15 +26,10 @@ import { readStoredTheme, applyTheme } from '../../utils/theme.utils';
     >
       @if (isDark()) {
         <!-- sun -->
-        <svg class="w-3.5 h-3.5 animate-scale-in" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="5" />
-          <path stroke-linecap="round" d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-        </svg>
+        <ng-icon name="heroSun" class="w-3.5 h-3.5 animate-scale-in" />
       } @else {
         <!-- moon -->
-        <svg class="w-3.5 h-3.5 animate-scale-in" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
-        </svg>
+        <ng-icon name="heroMoon" class="w-3.5 h-3.5 animate-scale-in" />
       }
     </button>
   `,
