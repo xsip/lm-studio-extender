@@ -120,7 +120,7 @@ export interface ChatSettingsSaveEvent {
                   [active]="localInvokeAiModelPreference === 'Juggernaut XL v9'"
                   (clicked)="localInvokeAiModelPreference = 'Juggernaut XL v9'"
                   ><p class="p-1.5">Juggernaut XL v9</p>
-                  <div class="absolute top-0 right-1 text-[10px] text-warn">sdxl</div></ui-button
+                  <div class="absolute top-0 right-2 text-[10px] text-warn">sdxl</div></ui-button
                 >
                 <ui-button
                   class="flex-1"
@@ -130,7 +130,7 @@ export interface ChatSettingsSaveEvent {
                   [active]="localInvokeAiModelPreference === 'Dreamshaper 8'"
                   (clicked)="localInvokeAiModelPreference = 'Dreamshaper 8'"
                   ><p class="p-1.5">Dreamshaper 8</p>
-                  <div class="absolute top-0 right-1 text-[10px] text-warn">sd 1.5</div></ui-button
+                  <div class="absolute top-0 right-2 text-[10px] text-warn">sd 1.5</div></ui-button
                 >
               </div>
             </div>

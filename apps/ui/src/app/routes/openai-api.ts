@@ -308,7 +308,7 @@ import InvokeAiModelToUseEnum = ChatMetadataDto.InvokeAiModelToUseEnum;
                             [active]="invokeAiModelPreference() === 'Juggernaut XL v9'"
                             (clicked)="invokeAiModelPreference.set('Juggernaut XL v9')"
                             ><p class="p-1.5">Juggernaut XL v9</p>
-                            <div class="absolute top-0 right-1 text-[10px] text-warn">
+                            <div class="absolute top-0 right-2 text-[10px] text-warn">
                               sdxl
                             </div></ui-button
                           >
@@ -320,7 +320,7 @@ import InvokeAiModelToUseEnum = ChatMetadataDto.InvokeAiModelToUseEnum;
                             [active]="invokeAiModelPreference() === 'Dreamshaper 8'"
                             (clicked)="invokeAiModelPreference.set('Dreamshaper 8')"
                             ><p class="p-1.5">Dreamshaper 8</p>
-                            <div class="absolute top-0 right-1 text-[10px] text-warn">
+                            <div class="absolute top-0 right-2 text-[10px] text-warn">
                               sd 1.5
                             </div></ui-button
                           >
