@@ -112,6 +112,7 @@ export * from './functionDto';
 export * from './functionShellToolDto';
 export * from './functionShellToolDtoEnvironment';
 export * from './functionToolDto';
+export * from './generatedAssetDto';
 export * from './grammarDto';
 export * from './hybridSearchDto';
 export * from './imageDto';

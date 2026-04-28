@@ -131,6 +131,7 @@ model/functionDto.ts
 model/functionShellToolDto.ts
 model/functionShellToolDtoEnvironment.ts
 model/functionToolDto.ts
+model/generatedAssetDto.ts
 model/grammarDto.ts
 model/hybridSearchDto.ts
 model/imageDto.ts

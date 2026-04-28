@@ -8,6 +8,7 @@
  * Do not edit the class manually.
  */
 import { EphemeralMcpIntegrationDto } from './ephemeralMcpIntegrationDto';
+import { GeneratedAssetDto } from './generatedAssetDto';
 
 
 export interface ChatMetadataDto { 
@@ -29,6 +30,7 @@ export interface ChatMetadataDto {
     useCrypto?: boolean;
     cryptoKey?: string;
     openAiEndpointPreference?: ChatMetadataDto.OpenAiEndpointPreferenceEnum;
+    generatedAssets?: Array<GeneratedAssetDto>;
     lastMessageSentAt: string;
     useInvoke?: boolean;
     invokeAiModelToUse?: ChatMetadataDto.InvokeAiModelToUseEnum;

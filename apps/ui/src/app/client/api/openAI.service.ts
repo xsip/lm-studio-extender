@@ -51,14 +51,16 @@ export class OpenAIService extends BaseService {
      * @param useCrypto Use crypto for new chat
      * @param cryptoKey Key for new chat encryption
      * @param openAiEndpointPreference openAiEndpointPreference for new chat
+     * @param useInvoke Use Invoke MCP in this chat
+     * @param invokeModel Invoke model to use
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public chatStreamOpenAi(chatStreamOpenAiRequest: ChatStreamOpenAiRequest, internalChatId?: string, chatName?: string, useCrypto?: boolean, cryptoKey?: string, openAiEndpointPreference?: 'RESPONSES' | 'COMPLETION', observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/event-stream', context?: HttpContext, transferCache?: boolean}): Observable<Blob>;
-    public chatStreamOpenAi(chatStreamOpenAiRequest: ChatStreamOpenAiRequest, internalChatId?: string, chatName?: string, useCrypto?: boolean, cryptoKey?: string, openAiEndpointPreference?: 'RESPONSES' | 'COMPLETION', observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/event-stream', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<Blob>>;
-    public chatStreamOpenAi(chatStreamOpenAiRequest: ChatStreamOpenAiRequest, internalChatId?: string, chatName?: string, useCrypto?: boolean, cryptoKey?: string, openAiEndpointPreference?: 'RESPONSES' | 'COMPLETION', observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/event-stream', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<Blob>>;
-    public chatStreamOpenAi(chatStreamOpenAiRequest: ChatStreamOpenAiRequest, internalChatId?: string, chatName?: string, useCrypto?: boolean, cryptoKey?: string, openAiEndpointPreference?: 'RESPONSES' | 'COMPLETION', observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'text/event-stream', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public chatStreamOpenAi(chatStreamOpenAiRequest: ChatStreamOpenAiRequest, internalChatId?: string, chatName?: string, useCrypto?: boolean, cryptoKey?: string, openAiEndpointPreference?: 'RESPONSES' | 'COMPLETION', useInvoke?: boolean, invokeModel?: 'Dreamshaper 8' | 'Juggernaut XL v9', observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/event-stream', context?: HttpContext, transferCache?: boolean}): Observable<Blob>;
+    public chatStreamOpenAi(chatStreamOpenAiRequest: ChatStreamOpenAiRequest, internalChatId?: string, chatName?: string, useCrypto?: boolean, cryptoKey?: string, openAiEndpointPreference?: 'RESPONSES' | 'COMPLETION', useInvoke?: boolean, invokeModel?: 'Dreamshaper 8' | 'Juggernaut XL v9', observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/event-stream', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<Blob>>;
+    public chatStreamOpenAi(chatStreamOpenAiRequest: ChatStreamOpenAiRequest, internalChatId?: string, chatName?: string, useCrypto?: boolean, cryptoKey?: string, openAiEndpointPreference?: 'RESPONSES' | 'COMPLETION', useInvoke?: boolean, invokeModel?: 'Dreamshaper 8' | 'Juggernaut XL v9', observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/event-stream', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<Blob>>;
+    public chatStreamOpenAi(chatStreamOpenAiRequest: ChatStreamOpenAiRequest, internalChatId?: string, chatName?: string, useCrypto?: boolean, cryptoKey?: string, openAiEndpointPreference?: 'RESPONSES' | 'COMPLETION', useInvoke?: boolean, invokeModel?: 'Dreamshaper 8' | 'Juggernaut XL v9', observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'text/event-stream', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (chatStreamOpenAiRequest === null || chatStreamOpenAiRequest === undefined) {
             throw new Error('Required parameter chatStreamOpenAiRequest was null or undefined when calling chatStreamOpenAi.');
         }
@@ -105,6 +107,24 @@ export class OpenAIService extends BaseService {
             localVarQueryParameters,
             'openAiEndpointPreference',
             <any>openAiEndpointPreference,
+            QueryParamStyle.Form,
+            true,
+        );
+
+
+        localVarQueryParameters = this.addToHttpParams(
+            localVarQueryParameters,
+            'useInvoke',
+            <any>useInvoke,
+            QueryParamStyle.Form,
+            true,
+        );
+
+
+        localVarQueryParameters = this.addToHttpParams(
+            localVarQueryParameters,
+            'invokeModel',
+            <any>invokeModel,
             QueryParamStyle.Form,
             true,
         );
