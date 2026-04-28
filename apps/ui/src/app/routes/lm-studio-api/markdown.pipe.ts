@@ -11,7 +11,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { HttpClient } from '@angular/common/http';
 import { marked, type TokenizerExtension, type RendererExtension } from 'marked';
 import katex from 'katex';
-
+import Prism from 'prismjs';
 // ── KaTeX extensions for marked ─────────────────────────────────────────────
 
 /** Block math: $$...$$ on its own line(s). */
@@ -60,6 +60,75 @@ const inlineMathExtension: TokenizerExtension & RendererExtension = {
   },
 };
 
+
+
+// ── Code block extension: ```lang ... ``` ────────────────────────────────────
+const fencedCodeExtension: TokenizerExtension & RendererExtension = {
+  name: 'fencedCode',
+  level: 'block',
+  start(src: string) {
+    return src.indexOf('```');
+  },
+  tokenizer(src: string) {
+    const match = src.match(/^```(\w*)\n([\s\S]*?)```/);
+    if (match) {
+      return {
+        type: 'fencedCode',
+        raw: match[0],
+        lang: match[1] || 'plaintext',
+        text: match[2],
+      };
+    }
+    return undefined;
+  },
+  // ── Fenced code block renderer (Tailwind) ───────────────────────────────────
+  renderer(token: any) {
+    const lang = token.lang || 'plaintext';
+    let highlighted: string;
+    try {
+      const grammar = Prism.languages[lang] ?? Prism.languages['plaintext'];
+      highlighted = Prism.highlight(token.text, grammar, lang);
+    } catch {
+      highlighted = token.text;
+    }
+    const id = `code-${Math.random().toString(36).slice(2, 8)}`;
+    return `
+<div class="my-4 rounded-lg overflow-hidden border border-code-border bg-code-bg text-[13.5px]">
+  <div class="flex items-center justify-between px-3.5 py-1.5 bg-code-header border-b border-code-border">
+    <span class="font-mono text-[11px] tracking-wide text-text-muted lowercase">${lang}</span>
+    <button
+      class="text-[11px] px-2.5 py-0.5 rounded border border-border-default text-text-muted hover:bg-surface-overlay hover:text-text-secondary transition-colors duration-150 cursor-pointer font-sans"
+      data-copy-id="${id}"
+    >Copy</button>
+  </div>
+  <pre class="m-0 px-4 py-3.5 overflow-x-auto bg-transparent language-${lang}"><code
+    id="${id}"
+    class="font-mono text-[13.5px] leading-[1.65] bg-transparent language-${lang} text-code-variable"
+    data-raw="${encodeURIComponent(token.text)}"
+  >${highlighted}</code></pre>
+</div>`;
+  },
+};
+
+// ── Inline code extension: `code` ───────────────────────────────────────────
+const inlineCodeExtension: TokenizerExtension & RendererExtension = {
+  name: 'inlineCode',
+  level: 'inline',
+  start(src: string) {
+    return src.indexOf('`');
+  },
+  tokenizer(src: string) {
+    const match = src.match(/^`([^`]+)`/);
+    if (match) {
+      return { type: 'inlineCode', raw: match[0], text: match[1] };
+    }
+    return undefined;
+  },
+  renderer(token: any) {
+    return `<code class="font-mono text-[0.875em] px-1.5 py-px rounded bg-[var(--color-surface-overlay)] text-[var(--color-tertiary-accent-text)] border border-[var(--color-border-subtle)]">${token.text}</code>`;
+  },
+};
+
 // ── Link renderer: open in new tab ──────────────────────────────────────────
 const renderer = new marked.Renderer();
 
@@ -67,6 +136,7 @@ renderer.link = ({ href, title, text }) => {
   const titleAttr = title ? ` title="${title}"` : '';
   return `<a href="${href}"${titleAttr} target="_blank" rel="noopener noreferrer">${text}</a>`;
 };
+
 
 // ── Image renderer: defer auth images via data-auth-src ──────────────────────
 // Instead of setting src directly (which would 401), we store the real URL in
@@ -80,7 +150,7 @@ renderer.image = ({ href, title, text }) => {
 };
 
 marked.use({
-  extensions: [blockMathExtension, inlineMathExtension],
+  extensions: [blockMathExtension, inlineMathExtension, fencedCodeExtension, inlineCodeExtension],
   renderer,
 });
 

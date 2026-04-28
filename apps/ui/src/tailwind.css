@@ -194,6 +194,57 @@ pre, code, kbd, .font-mono {
   --color-error:            #e8a0a0;
 }
 
+
+/* ─────────────────────────────────────────────────────
+   Code block syntax tokens — light
+───────────────────────────────────────────────────── */
+:root {
+  --color-code-bg:          #f0eee8;
+  --color-code-header:      #e8e5de;
+  --color-code-border:      rgba(0, 0, 0, 0.08);
+
+  --color-code-keyword:     #7c3aed;   /* purple  — if, return, const */
+  --color-code-string:      #0f766e;   /* teal    — "hello" */
+  --color-code-number:      #b45309;   /* amber   — 42, 3.14 */
+  --color-code-comment:     #9b9890;   /* muted   — // ... */
+  --color-code-function:    #1d4ed8;   /* blue    — fn names */
+  --color-code-operator:    #be185d;   /* pink    — = + => */
+  --color-code-punctuation: #524f47;   /* secondary */
+  --color-code-class:       #b45309;   /* amber   — MyClass */
+  --color-code-variable:    #1b1916;   /* primary */
+  --color-code-property:    #0e7490;   /* cyan    — obj.prop */
+  --color-code-tag:         #7c3aed;   /* purple  — <div> */
+  --color-code-attr:        #0f766e;   /* teal    — class= */
+  --color-code-regex:       #be185d;   /* pink    — /regex/ */
+  --color-code-deleted:     #b91c1c;
+  --color-code-inserted:    #047857;
+}
+
+/* ─────────────────────────────────────────────────────
+   Code block syntax tokens — dark
+───────────────────────────────────────────────────── */
+.dark {
+  --color-code-bg:          #111113;
+  --color-code-header:      #1a1a1e;
+  --color-code-border:      rgba(255, 255, 255, 0.07);
+
+  --color-code-keyword:     #a78bfa;   /* soft violet */
+  --color-code-string:      #34d399;   /* emerald     */
+  --color-code-number:      #fbbf24;   /* amber       */
+  --color-code-comment:     #4e4e58;   /* muted       */
+  --color-code-function:    #60a5fa;   /* sky blue    */
+  --color-code-operator:    #f472b6;   /* pink        */
+  --color-code-punctuation: #8f8f99;   /* secondary   */
+  --color-code-class:       #fbbf24;   /* amber       */
+  --color-code-variable:    #e4e4e7;   /* primary     */
+  --color-code-property:    #22d3ee;   /* cyan        */
+  --color-code-tag:         #a78bfa;   /* soft violet */
+  --color-code-attr:        #34d399;   /* emerald     */
+  --color-code-regex:       #f472b6;   /* pink        */
+  --color-code-deleted:     #e8a0a0;
+  --color-code-inserted:    #80c8a0;
+}
+
 /* ─────────────────────────────────────────────────────
    Tailwind theme registration
 ───────────────────────────────────────────────────── */
@@ -273,6 +324,25 @@ pre, code, kbd, .font-mono {
   --animate-marquee-slow2:  marquee2 2500s linear infinite;
   --animate-spin-slow:      spin 10s linear infinite;
   --animate-spin-slower:    spin 18s linear infinite;
+
+  --color-code-bg:          var(--color-code-bg);
+  --color-code-header:      var(--color-code-header);
+  --color-code-border:      var(--color-code-border);
+  --color-code-keyword:     var(--color-code-keyword);
+  --color-code-string:      var(--color-code-string);
+  --color-code-number:      var(--color-code-number);
+  --color-code-comment:     var(--color-code-comment);
+  --color-code-function:    var(--color-code-function);
+  --color-code-operator:    var(--color-code-operator);
+  --color-code-punctuation: var(--color-code-punctuation);
+  --color-code-class:       var(--color-code-class);
+  --color-code-variable:    var(--color-code-variable);
+  --color-code-property:    var(--color-code-property);
+  --color-code-tag:         var(--color-code-tag);
+  --color-code-attr:        var(--color-code-attr);
+  --color-code-regex:       var(--color-code-regex);
+  --color-code-deleted:     var(--color-code-deleted);
+  --color-code-inserted:    var(--color-code-inserted);
 
   @keyframes marquee {
     0%, 100% { transform: translateX(0%); }
@@ -540,3 +610,59 @@ input.input-error, textarea.input-error {
   background: var(--color-accent-subtle);
   color: var(--color-accent-text);
 }
+
+
+/* Prism*/
+     /* ─────────────────────────────────────────────────────
+     Prism syntax highlighting — mapped to code tokens
+  ───────────────────────────────────────────────────── */
+   .token.keyword,
+   .token.bold             { color: var(--color-code-keyword); font-weight: 500; }
+
+.token.string,
+.token.char,
+.token.template-string,
+.token.attr-value       { color: var(--color-code-string); }
+
+.token.number,
+.token.boolean,
+.token.constant         { color: var(--color-code-number); }
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata            { color: var(--color-code-comment); font-style: italic; }
+
+.token.function,
+.token.function-name    { color: var(--color-code-function); }
+
+.token.operator,
+.token.arrow            { color: var(--color-code-operator); }
+
+.token.punctuation      { color: var(--color-code-punctuation); }
+
+.token.class-name,
+.token.maybe-class-name { color: var(--color-code-class); }
+
+.token.variable,
+.token.parameter        { color: var(--color-code-variable); }
+
+.token.property,
+.token.method           { color: var(--color-code-property); }
+
+.token.tag              { color: var(--color-code-tag); }
+.token.attr-name        { color: var(--color-code-attr); }
+
+.token.regex,
+.token.important        { color: var(--color-code-regex); }
+
+.token.deleted          { color: var(--color-code-deleted); background: rgba(185, 28, 28, 0.08); }
+.token.inserted         { color: var(--color-code-inserted); background: rgba(4, 120, 87, 0.08); }
+
+.token.url,
+.token.entity,
+.token.symbol           { color: var(--color-code-property); }
+
+/* Strip any background/shadow Prism themes inject */
+code[class*="language-"],
+pre[class*="language-"] { background: transparent !important; text-shadow: none !important; }
