@@ -633,6 +633,7 @@ export class AuthImagesDirective implements OnInit, OnDestroy {
 
   private loadImage(img: HTMLImageElement) {
     const src = img.dataset['authSrc'];
+    img.setAttribute('loading', 'true');
     // Skip if already loaded (blob URL set) or no src
     if (!src || img.src.startsWith('blob:')) return;
 
@@ -650,6 +651,7 @@ export class AuthImagesDirective implements OnInit, OnDestroy {
           this.blobUrls.push(blobUrl);
           img.src = blobUrl;
 
+          img.removeAttribute('loading');
           // Add click-to-expand listener (only once per image)
           if (!this.clickListeners.has(img)) {
             const listener = () => ImageLightbox.open(src, this.http);
@@ -673,6 +675,7 @@ export class AuthImagesDirective implements OnInit, OnDestroy {
           }
         },
         error: () => {
+          img.removeAttribute('loading');
           img.alt = `Failed to load image: ${src}`;
         },
       });

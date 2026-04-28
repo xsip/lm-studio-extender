@@ -235,7 +235,12 @@ import { AuthImagesDirective } from './markdown.pipe';
               >
                 @if (asset.thumbnail) {
                   <div>
-                    <img [attr.data-auth-src]="asset.thumbnail" class="rounded-md" src="" />
+                    <img
+                      #img
+                      [attr.data-auth-src]="asset.thumbnail"
+                      class="rounded-md w-16 h-16"
+                      src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mO89x8AAsEB3+IGkhwAAAAASUVORK5CYII="
+                    />
                   </div>
                 }
                 <div class="flex items-center gap-1.5 pl-1">
