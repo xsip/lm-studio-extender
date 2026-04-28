@@ -15,6 +15,7 @@ import { AssetsService } from '../modules/assets/assets.service';
 import { ConfigService } from '@nestjs/config';
 import crypto from 'crypto';
 import { ApiEvent, ToolsHelperService } from './tools-helper.service';
+import { GeneratedAssetType } from '../modules/chat-metadata/chat-metadata.schema';
 
 @Injectable()
 export class ApiTools {
@@ -237,7 +238,7 @@ export class ApiTools {
         if (progress !== undefined && progress.percentage) {
           this.toolsHelperService.emitApiEvent(request, ApiEvent.MCP_PROGRESS, {
             progress: progress.percentage * 100,
-            message: progress.message
+            message: progress.message,
           });
         }
       },
@@ -271,7 +272,7 @@ export class ApiTools {
     const thumbnailBuffer = Buffer.from(thumbImageResponse.data);
 
     // Upload via assetsService, same as the REST endpoint
-    const { url, filename } = await this.assetsService.uploadFile(
+    const { url, filename, id } = await this.assetsService.uploadFile(
       user._id + '',
       chatId,
       fileName,
@@ -279,6 +280,14 @@ export class ApiTools {
       mimeType,
       thumbnailBuffer,
     );
+
+    await this.chatMetaDataService.addAssetToChat(user._id!, chatId, {
+      url: `api/assets/${chatId}/${filename}`,
+      thumbnail: `api/assets/${chatId}/${filename}?thumbnail=true`,
+      filename,
+      refId: id,
+      type: GeneratedAssetType.IMAGE,
+    });
     return [
       {
         content: JSON.stringify({

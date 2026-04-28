@@ -2094,6 +2094,39 @@
           "reasoningMode"
         ]
       },
+      "GeneratedAssetDto": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "refId": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "IMAGE"
+            ]
+          },
+          "url": {
+            "type": "string"
+          },
+          "thumbnail": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "_id",
+          "filename",
+          "refId",
+          "type",
+          "url"
+        ]
+      },
       "ChatMetadataDto": {
         "type": "object",
         "properties": {
@@ -2147,6 +2180,12 @@
               "RESPONSES",
               "COMPLETION"
             ]
+          },
+          "generatedAssets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GeneratedAssetDto"
+            }
           },
           "lastMessageSentAt": {
             "format": "date-time",

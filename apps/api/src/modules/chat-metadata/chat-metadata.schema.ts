@@ -5,6 +5,8 @@ import { EphemeralMcpIntegrationDto } from '../lm-studio/dto/chat.dto';
 import { IsIn, IsOptional } from 'class-validator';
 import { SubscriptionType } from '../auth/user.schema';
 import { InvokeAiModel } from '../invoke/invoke.service';
+import { Role } from '../auth/roles.decorator';
+import { ImageBlob } from '../assets/image-blob.schema';
 
 export type ChatMetadataDocument = ChatMetadata & Document;
 
@@ -13,11 +15,32 @@ export enum ChatClient {
   LMSTUDIO = 'LMSTUDIO',
 }
 
+export enum GeneratedAssetType {
+  IMAGE = 'IMAGE',
+}
+
 export enum OpenAiEndpointPreference {
   RESPONSES = 'RESPONSES',
   COMPLETION = 'COMPLETION',
 }
 
+@Schema()
+export class GeneratedAsset {
+  @Prop({ required: true })
+  filename: string;
+
+  @Prop({ required: true, type: Types.ObjectId, ref: ImageBlob.name })
+  refId: Types.ObjectId | ImageBlob;
+
+  @Prop({ required: true })
+  url: string;
+
+  @Prop({ required: true, enum: GeneratedAssetType })
+  type: GeneratedAssetType;
+
+  @Prop()
+  thumbnail?: string;
+}
 @Schema({ collection: 'chat_metadata', timestamps: true })
 export class ChatMetadata {
   /** Human-readable name for this chat session */
@@ -66,6 +89,9 @@ export class ChatMetadata {
   })
   openAiEndpointPreference?: OpenAiEndpointPreference;
 
+  @Prop({ required: false, type: [GeneratedAsset] })
+  generatedAssets?: GeneratedAsset[];
+
   @Prop({ required: false, type: Boolean })
   useInvoke?: boolean;
 
@@ -82,6 +108,29 @@ export class ChatMetadata {
 export const ChatMetadataSchema = SchemaFactory.createForClass(ChatMetadata);
 
 // ── Swagger-friendly response DTO ────────────────────────────────────────────
+
+export class GeneratedAssetDto {
+  @ApiProperty()
+  _id?: string;
+
+  @ApiProperty()
+  filename: string;
+
+  @ApiProperty()
+  refId: string;
+
+  @ApiProperty({
+    enum: GeneratedAssetType,
+    type: 'string',
+  })
+  type: GeneratedAssetType;
+
+  @ApiProperty()
+  url: string;
+
+  @ApiPropertyOptional()
+  thumbnail?: string;
+}
 
 export class ChatMetadataDto {
   @ApiProperty({
@@ -125,6 +174,12 @@ export class ChatMetadataDto {
     enum: OpenAiEndpointPreference,
   })
   openAiEndpointPreference?: OpenAiEndpointPreference;
+
+  @ApiPropertyOptional({
+    type: GeneratedAssetDto,
+    isArray: true,
+  })
+  generatedAssets?: GeneratedAssetDto[];
 
   @ApiProperty()
   lastMessageSentAt?: Date;

@@ -10,6 +10,8 @@ import {
   ChatMetadata,
   ChatMetadataDocument,
   ChatMetadataDto,
+  GeneratedAsset,
+  GeneratedAssetDto,
 } from './chat-metadata.schema';
 import { Chat, ChatDocument } from '../chats/chat.schema';
 import { CreateChatMetadataDto } from './dto/create-chat-metadata.dto';
@@ -83,6 +85,37 @@ export class ChatMetadataService {
     Object.assign(doc, dto);
     await doc.save();
     this.logger.log(`Updated ChatMetadata id=${id}`);
+    return doc;
+  }
+
+  async addAssetToChat(
+    userId: Types.ObjectId,
+    id: string,
+    asset: GeneratedAssetDto | GeneratedAsset,
+  ): Promise<ChatMetadataDocument> {
+    this.assertObjectId(id);
+
+    const doc = await this.metaModel.findById(id).exec();
+    if (!doc) throw new NotFoundException(`ChatMetadata ${id} not found`);
+    this.assertOwner(userId, doc);
+
+    const normalizedAsset: GeneratedAsset = (
+      typeof asset.refId === 'string'
+        ? {
+            ...asset,
+            refId: new Types.ObjectId(asset.refId),
+          }
+        : asset
+    ) as GeneratedAsset;
+
+    if (!doc.generatedAssets?.length) {
+      doc.generatedAssets = [normalizedAsset];
+    } else {
+      doc.generatedAssets.push(normalizedAsset);
+    }
+
+    await doc.save();
+    this.logger.log(`Updated Assets for ChatMetadata id=${id}`);
     return doc;
   }
 

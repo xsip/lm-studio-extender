@@ -46,7 +46,7 @@ export class AssetsService {
     const ext = originalFilename.split('.').pop()?.toLowerCase() ?? 'bin';
     const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
-    await this.imageBlobModel.create({
+    const res = await this.imageBlobModel.create({
       userId,
       chatId,
       filename,
@@ -55,6 +55,6 @@ export class AssetsService {
       thumbnailData,
     });
 
-    return { url: `assets/${chatId}/${filename}`, filename };
+    return { url: `assets/${chatId}/${filename}`, filename, id: res._id };
   }
 }
