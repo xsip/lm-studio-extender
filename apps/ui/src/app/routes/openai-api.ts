@@ -663,8 +663,10 @@ export class OpenAiApi implements OnDestroy, OnInit {
             if (
               inputEntry.type === 'message' ||
               (!inputEntry.type && (inputEntry as any).role !== 'developer')
+
             ) {
-              messages.push(...this.fromContentToText(inputEntry.content, entry.createdAt));
+              if ((inputEntry as any).role !== 'system')
+                messages.push(...this.fromContentToText(inputEntry.content, entry.createdAt));
             }
           }
         }
