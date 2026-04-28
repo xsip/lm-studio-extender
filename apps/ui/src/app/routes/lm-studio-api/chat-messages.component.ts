@@ -1,12 +1,13 @@
 import { animate, style, transition, trigger } from '@angular/animations';
-import { Component, inject, input, OnInit, output } from '@angular/core';
+import { Component, input, OnInit, output } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { ChatMessage } from './chat.service';
 import { AuthImagesDirective, MarkdownPipe, StripMarkdownPipe } from './markdown.pipe';
-import ClientEnum = CreateChatMetadataDto.ClientEnum;
 import { CreateChatMetadataDto } from '../../client';
 import { SpinnerComponent } from '../../shared';
+import ClientEnum = CreateChatMetadataDto.ClientEnum;
+
 @Component({
   selector: 'app-chat-messages',
   animations: [
@@ -119,16 +120,26 @@ import { SpinnerComponent } from '../../shared';
         } @else if (msg.text) {
           <div class="flex flex-col items-end gap-1" @userMsgAnim>
             <div
-              class="max-w-[75%] break-words text-text-primary rounded-2xl rounded-br-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap"
-              style="background: var(--color-accent-subtle); border: 1px solid var(--color-accent-glow); box-shadow: var(--shadow-sm);"
+              class="max-w-[80%] text-text-primary rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed"
+              style="background: var(--color-surface-raised); border: 1px solid var(--color-border-default); box-shadow: var(--shadow-md);"
             >
-              {{ msg.text }}
+              @if (msg.streaming) {
+                <div
+                  class="markdown-body break-all "
+                  authImages
+                  [innerHTML]="msg.text | markdown: msg.streaming"
+                ></div>
+                <span
+                  class="inline-block w-2 h-4 bg-accent animate-typing-blink ml-0.5 align-middle rounded-sm"
+                ></span>
+              } @else {
+                <div
+                  class="markdown-body break-all"
+                  authImages
+                  [innerHTML]="msg.text | markdown: msg.streaming"
+                ></div>
+              }
             </div>
-            @if (msg.date) {
-              <span class="text-[10px] text-text-disabled mr-1">{{
-                msg.date | date: 'HH:mm'
-              }}</span>
-            }
           </div>
         }
       } @else if (msg.role === 'error') {

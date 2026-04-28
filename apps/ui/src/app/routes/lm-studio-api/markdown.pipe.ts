@@ -6,6 +6,10 @@ import {
   ElementRef,
   OnDestroy,
   OnInit,
+  OnChanges,
+  AfterViewChecked,
+  input,
+  effect,
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { HttpClient } from '@angular/common/http';
@@ -68,7 +72,8 @@ const fencedCodeExtension: TokenizerExtension & RendererExtension = {
     return src.indexOf('```');
   },
   tokenizer(src: string) {
-    const match = src.match(/^```(\w*)\n([\s\S]*?)```/);
+    // const match = src.match(/^```(\w*)\n([\s\S]*?)```/);
+    const match = src.match(/^`{3}[ \t]*(\w*)[^\n]*\n([\s\S]*?)`{3}/);
     if (match) {
       return {
         type: 'fencedCode',
