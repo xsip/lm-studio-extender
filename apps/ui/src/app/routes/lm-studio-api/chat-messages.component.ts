@@ -118,7 +118,7 @@ import ClientEnum = CreateChatMetadataDto.ClientEnum;
             }
           </div>
         } @else if (msg.text) {
-          <div class="flex flex-col items-end gap-1" @userMsgAnim>
+          <div class="flex flex-col mb-2 items-end gap-1" @userMsgAnim>
             <div
               class="max-w-[80%] text-text-primary rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed"
               style="background: var(--color-surface-raised); border: 1px solid var(--color-border-default); box-shadow: var(--shadow-md);"
