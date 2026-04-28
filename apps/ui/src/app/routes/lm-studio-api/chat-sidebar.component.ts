@@ -229,25 +229,27 @@ import { AuthImagesDirective } from './markdown.pipe';
             @for (asset of generatedFilesModalContent()!.generatedAssets!; track asset._id) {
               <button
                 type="button"
-                class="w-full flex text-left px-2.5 py-2 text-xs rounded-xl group relative active:scale-[0.98] transition-all duration-200"
+                class="w-full flex flex-col gap-2 text-left px-2.5 py-2 text-xs rounded-xl group relative active:scale-[0.98] transition-all duration-200"
                 @chatItemAnim
                 [class]="'text-text-secondary bg-surface-overlay/40 hover:bg-surface-overlay hover:text-text-primary'"
               >
                 @if (asset.thumbnail) {
-                  <div>
+                  <div class="relative">
                     <img
                       #img
                       [attr.data-auth-src]="asset.thumbnail"
-                      class="rounded-md w-16 h-16"
+                      class="rounded-md w-full h-auto"
                       src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mO89x8AAsEB3+IGkhwAAAAASUVORK5CYII="
                     />
+                    <div
+                      class="flex absolute bottom-0 left-0 w-full bg-surface-overlay/80 items-center gap-1.5 pl-1"
+                    >
+                      <div class="truncate font-medium leading-tight">
+                        {{ asset.filename }}
+                      </div>
+                    </div>
                   </div>
                 }
-                <div class="flex items-center gap-1.5 pl-1">
-                  <div class="truncate font-medium leading-tight">
-                    {{ asset.filename }}
-                  </div>
-                </div>
               </button>
             }
           }
