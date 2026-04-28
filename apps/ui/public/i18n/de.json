@@ -16,14 +16,17 @@
     "loginFailed": "Anmeldung fehlgeschlagen. Überprüfen Sie Ihre Anmeldedaten."
   },
   "sidebar": {
+    "back": "Zurück",
     "history": "Verlauf",
     "newChat": "Neuer Chat",
     "newChatSubtitle": "Neuen Chat einrichten",
     "noChats": "Noch keine Chats",
+    "noGeneratedFiles": "Noch keine Dateien",
     "chatNamePlaceholder": "Chatname…",
     "rename": "Umbenennen",
     "settings": "Einstellungen",
     "deleteChat": "Chat löschen",
+    "generatedFiles": "Erstellte Dateien",
     "deleteConfirm": "Diesen Chat löschen?",
     "delete": "Löschen",
     "cancel": "Abbrechen",

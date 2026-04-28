@@ -11,9 +11,20 @@ import {
 import { SpinnerComponent } from '../../shared/components/spinner.component';
 import { TranslateModule } from '@ngx-translate/core';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { heroChatBubbleOvalLeft, heroPlus, heroLockClosed, heroPencilSquare, heroCog6Tooth, heroTrash } from '@ng-icons/heroicons/outline';
+import {
+  heroChatBubbleOvalLeft,
+  heroPlus,
+  heroLockClosed,
+  heroPencilSquare,
+  heroCog6Tooth,
+  heroTrash,
+  heroPaperClip,
+  heroBackspace,
+} from '@ng-icons/heroicons/outline';
 import ClientEnum = CreateChatMetadataDto.ClientEnum;
 import InvokeAiModelToUseEnum = UpdateChatMetadataDto.InvokeAiModelToUseEnum;
+import { BadgeComponent, IconButtonComponent } from '../../shared';
+import { AuthImagesDirective } from './markdown.pipe';
 
 @Component({
   selector: 'app-chat-sidebar',
@@ -21,19 +32,28 @@ import InvokeAiModelToUseEnum = UpdateChatMetadataDto.InvokeAiModelToUseEnum;
     trigger('chatItemAnim', [
       transition(':enter', [
         style({ opacity: 0, transform: 'translateX(-12px)' }),
-        animate('220ms cubic-bezier(0.16, 1, 0.3, 1)', style({ opacity: 1, transform: 'translateX(0)' })),
+        animate(
+          '220ms cubic-bezier(0.16, 1, 0.3, 1)',
+          style({ opacity: 1, transform: 'translateX(0)' }),
+        ),
       ]),
     ]),
     trigger('newChatAnim', [
       transition(':enter', [
         style({ opacity: 0, transform: 'translateY(-8px)' }),
-        animate('200ms cubic-bezier(0.16, 1, 0.3, 1)', style({ opacity: 1, transform: 'translateY(0)' })),
+        animate(
+          '200ms cubic-bezier(0.16, 1, 0.3, 1)',
+          style({ opacity: 1, transform: 'translateY(0)' }),
+        ),
       ]),
     ]),
     trigger('ctxMenuAnim', [
       transition(':enter', [
         style({ opacity: 0, transform: 'scale(0.90)', transformOrigin: 'top left' }),
-        animate('180ms cubic-bezier(0.34, 1.56, 0.64, 1)', style({ opacity: 1, transform: 'scale(1)' })),
+        animate(
+          '180ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+          style({ opacity: 1, transform: 'scale(1)' }),
+        ),
       ]),
       transition(':leave', [
         animate('120ms ease-in', style({ opacity: 0, transform: 'scale(0.94)' })),
@@ -48,108 +68,205 @@ import InvokeAiModelToUseEnum = UpdateChatMetadataDto.InvokeAiModelToUseEnum;
     ChatSettingsDialogComponent,
     SpinnerComponent,
     NgIconComponent,
+    BadgeComponent,
+    IconButtonComponent,
+    AuthImagesDirective,
   ],
-  viewProviders: [provideIcons({ heroChatBubbleOvalLeft, heroPlus, heroLockClosed, heroPencilSquare, heroCog6Tooth, heroTrash })],
+  viewProviders: [
+    provideIcons({
+      heroChatBubbleOvalLeft,
+      heroPlus,
+      heroLockClosed,
+      heroPencilSquare,
+      heroCog6Tooth,
+      heroTrash,
+      heroPaperClip,
+      heroBackspace,
+    }),
+  ],
   template: `
     <div
+      authImages
       class="flex flex-col w-60 border-r border-border-default shrink-0 h-full bg-surface-raised"
       style="box-shadow: 2px 0 12px rgba(0,0,0,0.06);"
     >
       <!-- Header -->
-      <div class="flex items-center justify-between px-4 py-3 border-b border-border-subtle shrink-0">
+      <div
+        class="flex items-center justify-between px-4 py-3 border-b border-border-subtle shrink-0"
+      >
         <div class="flex items-center gap-2">
-          <ng-icon name="heroChatBubbleOvalLeft" class="w-3.5 h-3.5 text-text-muted" />
-          <span class="text-[10px] text-text-muted uppercase tracking-[0.14em] font-semibold">{{ 'sidebar.history' | translate }}</span>
+          @if (generatedFilesModalContent()) {
+            <ui-icon-button (clicked)="closeGeneratedFiles()">
+              <ng-icon name="heroBackspace" class="w-3.5 h-3.5 text-text-muted" />
+            </ui-icon-button>
+          }
+
+          @if (generatedFilesModalContent()) {
+            <ng-icon name="heroPaperClip" class="w-3.5 h-3.5 text-text-muted" />
+          } @else {
+            <ng-icon name="heroChatBubbleOvalLeft" class="w-3.5 h-3.5 text-text-muted" />
+          }
+          <span class="text-[10px] text-text-muted uppercase tracking-[0.14em] font-semibold">{{
+            (generatedFilesModalContent() ? 'sidebar.generatedFiles' : 'sidebar.history')
+              | translate
+          }}</span>
         </div>
         @if (chatsLoading()) {
           <app-spinner />
         }
       </div>
-
-      <!-- New chat button -->
-      <div class="px-2 pt-2 pb-1 shrink-0">
-        <button
-          type="button"
-          (click)="newChat.emit()"
-          class="w-full flex items-center gap-2 px-3 py-2.5 text-xs rounded-xl border group active:scale-[0.98] transition-all duration-200"
-          @newChatAnim
-          [class]="!currentChatId()
-            ? 'bg-accent-subtle border-accent/40 text-accent shadow-depth-sm'
-            : 'border-border-default text-text-secondary hover:bg-surface-overlay hover:border-border-strong hover:text-text-primary'"
-        >
-          <div class="w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-all duration-200"
-               [style]="!currentChatId() ? 'background: var(--color-accent); box-shadow: 0 2px 8px var(--color-accent-glow);' : 'background: var(--color-surface-sunken);'">
-            <ng-icon name="heroPlus" class="w-3 h-3" [class]="!currentChatId() ? 'text-white' : 'text-text-muted'" />
-          </div>
-          <span class="font-medium">{{ 'sidebar.newChat' | translate }}</span>
-        </button>
-      </div>
-
-      <!-- Chat list -->
-      <div class="flex-1 overflow-y-auto py-1 min-h-0 px-2 flex flex-col gap-0.5">
-        @if (filteredChats.length === 0 && !chatsLoading()) {
-          <div class="flex flex-col items-center justify-center h-full gap-2 text-center px-3 py-8">
-            <ng-icon name="heroChatBubbleOvalLeft" class="w-8 h-8 text-text-disabled animate-float" />
-            <span class="text-[10px] text-text-disabled uppercase tracking-wider">{{ 'sidebar.noChats' | translate }}</span>
-          </div>
-        }
-
-        @for (chat of filteredChats; track chat._id) {
-          @if (renamingChatId() === chat._id) {
-            <div class="px-1 py-1">
-              <input
-                #renameInput
-                type="text"
-                [value]="renameValue()"
-                (input)="renameValue.set($any($event.target).value)"
-                (keydown)="onRenameKeydown($event, chat._id!)"
-                (blur)="commitRename.emit({ chatId: chat._id!, name: renameValue() }); renamingChatId.set(null)"
-                class="w-full bg-surface-base border border-accent rounded-lg px-2.5 py-1.5 text-xs text-text-primary focus:outline-none focus:ring-1 focus:ring-accent"
-                [placeholder]="'sidebar.chatNamePlaceholder' | translate"
+      @if (!generatedFilesModalContent()) {
+        <!-- New chat button -->
+        <div class="px-2 pt-2 pb-1 shrink-0">
+          <button
+            type="button"
+            (click)="newChat.emit()"
+            class="w-full flex items-center gap-2 px-3 py-2.5 text-xs rounded-xl border group active:scale-[0.98] transition-all duration-200"
+            @newChatAnim
+            [class]="
+              !currentChatId()
+                ? 'bg-accent-subtle border-accent/40 text-accent shadow-depth-sm'
+                : 'border-border-default text-text-secondary hover:bg-surface-overlay hover:border-border-strong hover:text-text-primary'
+            "
+          >
+            <div
+              class="w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-all duration-200"
+              [style]="
+                !currentChatId()
+                  ? 'background: var(--color-accent); box-shadow: 0 2px 8px var(--color-accent-glow);'
+                  : 'background: var(--color-surface-sunken);'
+              "
+            >
+              <ng-icon
+                name="heroPlus"
+                class="w-3 h-3"
+                [class]="!currentChatId() ? 'text-white' : 'text-text-muted'"
               />
             </div>
-          } @else {
-            <button
-              type="button"
-              (click)="chatOpened.emit(chat._id!)"
-              (contextmenu)="onContextMenu($event, chat)"
-              class="w-full text-left px-2.5 py-2 text-xs rounded-xl group relative active:scale-[0.98] transition-all duration-200"
-              @chatItemAnim
-              [class]="currentChatId() === chat._id
-                ? 'bg-accent-subtle text-text-primary shadow-depth-sm'
-                : 'text-text-secondary hover:bg-surface-overlay hover:text-text-primary'"
+            <span class="font-medium">{{ 'sidebar.newChat' | translate }}</span>
+          </button>
+        </div>
+
+        <!-- Chat list -->
+        <div class="flex-1 overflow-y-auto py-1 min-h-0 px-2 flex flex-col gap-0.5">
+          @if (filteredChats.length === 0 && !chatsLoading()) {
+            <div
+              class="flex flex-col items-center justify-center h-full gap-2 text-center px-3 py-8"
             >
-              <!-- Active indicator -->
-              @if (currentChatId() === chat._id) {
-                <div class="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-r-full bg-accent"></div>
-              }
-              <div class="flex items-center gap-1.5 pl-1">
-                @if (chat.useCrypto) {
-                  <ng-icon name="heroLockClosed" class="w-2.5 h-2.5 shrink-0 text-amber-400/80" />
-                }
-                <div class="truncate font-medium leading-tight">{{ chat.name ?? 'Chat' }}</div>
-              </div>
-              @if (chat.lastMessageSentAt) {
-                <div class="text-text-muted mt-0.5 text-[10px] pl-1">
-                  {{ chat.lastMessageSentAt | date: 'dd MMM, HH:mm' }}
-                </div>
-              }
-            </button>
+              <ng-icon
+                name="heroChatBubbleOvalLeft"
+                class="w-8 h-8 text-text-disabled animate-float"
+              />
+              <span class="text-[10px] text-text-disabled uppercase tracking-wider">{{
+                'sidebar.noChats' | translate
+              }}</span>
+            </div>
           }
-        }
-      </div>
+
+          @for (chat of filteredChats; track chat._id) {
+            @if (renamingChatId() === chat._id) {
+              <div class="px-1 py-1">
+                <input
+                  #renameInput
+                  type="text"
+                  [value]="renameValue()"
+                  (input)="renameValue.set($any($event.target).value)"
+                  (keydown)="onRenameKeydown($event, chat._id!)"
+                  (blur)="
+                    commitRename.emit({ chatId: chat._id!, name: renameValue() });
+                    renamingChatId.set(null)
+                  "
+                  class="w-full bg-surface-base border border-accent rounded-lg px-2.5 py-1.5 text-xs text-text-primary focus:outline-none focus:ring-1 focus:ring-accent"
+                  [placeholder]="'sidebar.chatNamePlaceholder' | translate"
+                />
+              </div>
+            } @else {
+              <button
+                type="button"
+                (click)="chatOpened.emit(chat._id!)"
+                (contextmenu)="onContextMenu($event, chat)"
+                class="w-full text-left px-2.5 py-2 text-xs rounded-xl group relative active:scale-[0.98] transition-all duration-200"
+                @chatItemAnim
+                [class]="
+                  currentChatId() === chat._id
+                    ? 'bg-accent-subtle text-text-primary shadow-depth-sm'
+                    : 'text-text-secondary hover:bg-surface-overlay hover:text-text-primary'
+                "
+              >
+                <!-- Active indicator -->
+                @if (currentChatId() === chat._id) {
+                  <div
+                    class="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-r-full bg-accent"
+                  ></div>
+                }
+                <div class="flex items-center gap-1.5 pl-1">
+                  @if (chat.useCrypto) {
+                    <ng-icon name="heroLockClosed" class="w-2.5 h-2.5 shrink-0 text-amber-400/80" />
+                  }
+                  <div class="truncate font-medium leading-tight">{{ chat.name ?? 'Chat' }}</div>
+                </div>
+                @if (chat.lastMessageSentAt) {
+                  <div class="text-text-muted mt-0.5 text-[10px] pl-1">
+                    {{ chat.lastMessageSentAt | date: 'dd MMM, HH:mm' }}
+                  </div>
+                }
+              </button>
+            }
+          }
+        </div>
+      } @else {
+        <div class="flex-1 overflow-y-auto py-1 min-h-0 px-2 flex flex-col gap-0.5">
+          @if (generatedFilesModalContent()?.generatedAssets?.length === 0) {
+            <div
+              class="flex flex-col items-center justify-center h-full gap-2 text-center px-3 py-8"
+            >
+              <ng-icon name="heroPaperClip" class="w-8 h-8 text-text-disabled animate-float" />
+              <span class="text-[10px] text-text-disabled uppercase tracking-wider">{{
+                'sidebar.noGeneratedFiles' | translate
+              }}</span>
+            </div>
+          } @else {
+            @for (asset of generatedFilesModalContent()!.generatedAssets!; track asset._id) {
+              <button
+                type="button"
+                class="w-full flex text-left px-2.5 py-2 text-xs rounded-xl group relative active:scale-[0.98] transition-all duration-200"
+                @chatItemAnim
+                [class]="'text-text-secondary bg-surface-overlay/40 hover:bg-surface-overlay hover:text-text-primary'"
+              >
+                @if (asset.thumbnail) {
+                  <div>
+                    <img [attr.data-auth-src]="asset.thumbnail" class="rounded-md" src="" />
+                  </div>
+                }
+                <div class="flex items-center gap-1.5 pl-1">
+                  <div class="truncate font-medium leading-tight">
+                    {{ asset.filename }}
+                  </div>
+                </div>
+              </button>
+            }
+          }
+        </div>
+      }
     </div>
 
     <!-- Context menu -->
     @if (ctxMenu(); as menu) {
-      <div class="fixed inset-0 z-40" (click)="closeCtxMenu()" (contextmenu)="$event.preventDefault(); closeCtxMenu()"></div>
       <div
-        class="fixed z-50 w-52 bg-surface-raised border border-border-default rounded-2xl overflow-hidden py-1" @ctxMenuAnim
+        class="fixed inset-0 z-40"
+        (click)="closeCtxMenu()"
+        (contextmenu)="$event.preventDefault(); closeCtxMenu()"
+      ></div>
+      <div
+        class="fixed z-50 w-52 bg-surface-raised border border-border-default rounded-2xl overflow-hidden py-1"
+        @ctxMenuAnim
         style="box-shadow: var(--shadow-xl); left: {{ menu.x }}px; top: {{ menu.y }}px;"
         [style.left.px]="menu.x"
         [style.top.px]="menu.y"
       >
-        <div class="px-3 py-2 text-[10px] text-text-muted uppercase tracking-widest border-b border-border-subtle truncate font-semibold">
+        <div
+          class="px-3 py-2 text-[10px] text-text-muted uppercase tracking-widest border-b border-border-subtle truncate font-semibold"
+        >
           {{ chatNameById(menu.chat._id!) }}
         </div>
 
@@ -172,6 +289,17 @@ import InvokeAiModelToUseEnum = UpdateChatMetadataDto.InvokeAiModelToUseEnum;
         >
           <ng-icon name="heroPencilSquare" class="w-3.5 h-3.5 shrink-0 opacity-60" />
           {{ 'sidebar.rename' | translate }}
+        </button>
+        <div class="border-t border-border-subtle mx-2 my-1"></div>
+
+        <button
+          type="button"
+          (click)="openGeneratedFiles(menu.chat)"
+          class="w-full flex items-center gap-2.5 px-3 py-1.5 mb-1 text-xs text-text-secondary hover:bg-surface-overlay hover:text-text-primary transition-colors text-left"
+        >
+          <ng-icon name="heroPaperClip" class="w-3.5 h-3.5 shrink-0 opacity-60" />
+          {{ 'sidebar.generatedFiles' | translate }}
+          <ui-badge [variant]="'accent'">{{ menu.chat.generatedAssets?.length ?? 0 }}</ui-badge>
         </button>
 
         <div class="border-t border-border-subtle mx-2 my-1"></div>
@@ -198,7 +326,9 @@ import InvokeAiModelToUseEnum = UpdateChatMetadataDto.InvokeAiModelToUseEnum;
           </button>
         } @else {
           <div class="px-3 py-2 flex flex-col gap-2">
-            <span class="text-[10px] text-error-text uppercase tracking-widest font-semibold">{{ 'sidebar.deleteConfirm' | translate }}</span>
+            <span class="text-[10px] text-error-text uppercase tracking-widest font-semibold">{{
+              'sidebar.deleteConfirm' | translate
+            }}</span>
             <div class="flex gap-1.5">
               <button
                 type="button"
@@ -257,6 +387,7 @@ export class ChatSidebarComponent {
   readonly ctxRenameValue = signal('');
 
   readonly settingsModal = signal<ChatSettingsData | null>(null);
+  readonly generatedFilesModalContent = signal<ChatMetadataDto | null>(null);
   readonly settingsLoading = signal(false);
 
   chatNameById(chatId: string): string {
@@ -314,6 +445,11 @@ export class ChatSidebarComponent {
     setTimeout(() => this.renameInputRef?.nativeElement?.select(), 0);
   }
 
+  openGeneratedFiles(chat: ChatMetadataDto): void {
+    this.closeCtxMenu();
+    this.generatedFilesModalContent.set(chat);
+  }
+
   openSettings(chat: ChatMetadataDto): void {
     this.closeCtxMenu();
     this.settingsLoading.set(true);
@@ -335,7 +471,7 @@ export class ChatSidebarComponent {
     useCrypto: boolean,
     cryptoKey: string,
     useInvoke: boolean,
-    invokeAiModelToUse?:InvokeAiModelToUseEnum,
+    invokeAiModelToUse?: InvokeAiModelToUseEnum,
   ): void {
     this.settingsModal.update((m) =>
       m ? { ...m, name, useCrypto, cryptoKey, invokeAiModelToUse, useInvoke } : null,
@@ -346,6 +482,10 @@ export class ChatSidebarComponent {
   closeSettings(): void {
     this.settingsModal.set(null);
     this.settingsLoading.set(false);
+  }
+
+  closeGeneratedFiles(): void {
+    this.generatedFilesModalContent.set(null);
   }
 
   onSettingsSaved(event: ChatSettingsSaveEvent): void {

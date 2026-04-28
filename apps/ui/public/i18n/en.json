@@ -16,14 +16,17 @@
     "loginFailed": "Login failed. Check your credentials."
   },
   "sidebar": {
+    "back": "Back",
     "history": "History",
     "newChat": "New Chat",
     "newChatSubtitle": "Setup new Chat",
     "noChats": "No chats yet",
+    "noGeneratedFiles": "No generated files yet",
     "chatNamePlaceholder": "Chat name…",
     "rename": "Rename",
     "settings": "Settings",
     "deleteChat": "Delete chat",
+    "generatedFiles": "Generated Files",
     "deleteConfirm": "Delete this chat?",
     "delete": "Delete",
     "cancel": "Cancel",

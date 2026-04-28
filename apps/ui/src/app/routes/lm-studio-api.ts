@@ -1,31 +1,17 @@
 import { animate, style, transition, trigger } from '@angular/animations';
-import {
-  Component,
-  computed,
-  effect,
-  ElementRef,
-  inject,
-  OnDestroy,
-  OnInit,
-  signal,
-  ViewChild,
-} from '@angular/core';
+import { Component, computed, effect, ElementRef, inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { ChatRequestDto, ChatMetadataService, ChatsService, ModelDto } from '../client';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ChatMetadataService, ChatRequestDto, ChatsService, ModelDto } from '../client';
 import { LMStudioService } from '../client/api/lMStudio.service';
 import { ChatService } from './lm-studio-api/chat.service';
 import { ChatSidebarComponent } from './lm-studio-api/chat-sidebar.component';
 import { ChatMessagesComponent } from './lm-studio-api/chat-messages.component';
 import { ChatInputComponent } from './lm-studio-api/chat-input.component';
-import { EventLogComponent, EventEntry } from './lm-studio-api/event-log.component';
-import {
-  ModelSelectorComponent,
-  ModelReasoningCapability,
-} from './lm-studio-api/model-selector.component';
+import { EventEntry, EventLogComponent } from './lm-studio-api/event-log.component';
+import { ModelReasoningCapability, ModelSelectorComponent } from './lm-studio-api/model-selector.component';
 import { InfoComponent } from './lm-studio-api/info.component';
-import { LmStudioEvent } from '../lmstudio-stream.service';
 import { IconButtonComponent } from '../shared/components/ui/icon-button.component';
 import { ButtonComponent } from '../shared/components/ui/button.component';
 import { TranslateModule } from '@ngx-translate/core';
@@ -37,7 +23,6 @@ import { heroBars3, heroUser, heroXMark } from '@ng-icons/heroicons/outline';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    RouterLink,
     ChatSidebarComponent,
     ChatMessagesComponent,
     ChatInputComponent,
