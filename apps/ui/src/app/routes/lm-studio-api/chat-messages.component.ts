@@ -483,9 +483,33 @@ import { SpinnerComponent } from '../../shared';
               }
             </div>
           </div>
-          @if (msg.stats) {
-            <span class="text-[10px] text-text-disabled font-mono ml-8">{{ msg.stats }}</span>
-          }
+          <div class="flex items-center gap-3 ml-8">
+            @if (msg.stats) {
+              <span class="text-[10px] text-text-disabled font-mono">{{ msg.stats }}</span>
+            }
+            @if (!msg.streaming) {
+              <button
+                type="button"
+                (click)="reply.emit($index)"
+                class="flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium text-text-disabled hover:text-accent border border-transparent hover:border-accent/40 rounded-md transition-all duration-150 active:scale-95"
+              >
+                <svg
+                  class="w-3 h-3"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
+                  />
+                </svg>
+                {{ 'messages.reply' | translate }}
+              </button>
+            }
+          </div>
         </div>
       }
     }
@@ -499,6 +523,7 @@ export class ChatMessagesComponent implements OnInit {
   readonly client = input.required<ClientEnum>();
   readonly toggleCollapsed = output<number>();
   readonly resend = output<void>();
+  readonly reply = output<number>();
   ngOnInit() {
     setTimeout(() => {
       console.log(this.messages());

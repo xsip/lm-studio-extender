@@ -70,6 +70,7 @@
     "toolUse": "Unterstützt Tool-Nutzung"
   },
   "messages": {
+    "reply": "Antworten",
     "noMessages": "Noch keine Nachrichten",
     "resend": "↺ Erneut senden",
     "toolArguments": "Argumente",

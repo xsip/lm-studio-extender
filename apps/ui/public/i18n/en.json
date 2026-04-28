@@ -70,6 +70,7 @@
     "toolUse": "Tool use capable"
   },
   "messages": {
+    "reply": "Reply",
     "noMessages": "No messages yet",
     "resend": "↺ Resend",
     "toolArguments": "Arguments",
