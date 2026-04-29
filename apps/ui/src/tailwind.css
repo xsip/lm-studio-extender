@@ -612,12 +612,34 @@ input.input-error, textarea.input-error {
 }
 
 
+/* ─────────────────────────────────────────────────────
+   Markdown body — overflow containment
+───────────────────────────────────────────────────── */
+.markdown-body {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Code blocks scroll horizontally, never expand the bubble */
+.markdown-body pre {
+  overflow-x: auto;
+  max-width: 100%;
+  white-space: pre;
+}
+
+/* Inline code wraps rather than pushing layout */
+.markdown-body code:not(pre > code) {
+  word-break: break-all;
+}
+
 /* Prism*/
-     /* ─────────────────────────────────────────────────────
-     Prism syntax highlighting — mapped to code tokens
-  ───────────────────────────────────────────────────── */
-   .token.keyword,
-   .token.bold             { color: var(--color-code-keyword); font-weight: 500; }
+/* ─────────────────────────────────────────────────────
+Prism syntax highlighting — mapped to code tokens
+───────────────────────────────────────────────────── */
+.token.keyword,
+.token.bold             { color: var(--color-code-keyword); font-weight: 500; }
 
 .token.string,
 .token.char,

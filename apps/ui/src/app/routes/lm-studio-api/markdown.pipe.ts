@@ -97,7 +97,7 @@ const fencedCodeExtension: TokenizerExtension & RendererExtension = {
     }
     const id = `code-${Math.random().toString(36).slice(2, 8)}`;
     return `
-<div class="my-4 rounded-lg overflow-hidden border border-code-border bg-code-bg text-[13.5px]">
+<div class="my-4 rounded-lg overflow-x-auto border border-code-border bg-code-bg text-[13.5px]">
   <div class="flex items-center justify-between px-3.5 py-1.5 bg-code-header border-b border-code-border">
     <span class="font-mono text-[11px] tracking-wide text-text-muted lowercase">${lang}</span>
     <button
@@ -105,7 +105,7 @@ const fencedCodeExtension: TokenizerExtension & RendererExtension = {
       data-copy-id="${id}"
     >Copy</button>
   </div>
-  <pre class="m-0 px-4 py-3.5 overflow-x-auto bg-transparent language-${lang}"><code
+  <pre class="m-0 px-4 py-3.5 overflow-x-auto max-w-full whitespace-pre bg-transparent language-${lang}"><code
     id="${id}"
     class="font-mono text-[13.5px] leading-[1.65] bg-transparent language-${lang} text-code-variable"
     data-raw="${encodeURIComponent(token.text)}"
@@ -585,9 +585,9 @@ export class AuthImagesDirective implements OnInit, OnDestroy {
   // the request is pending, so concurrent calls share one HTTP request).
   private static readonly cache = new Map<string, string | Observable<string>>();
 
-  private readonly ownedBlobUrls = new Set<string>();  // only URLs created by THIS instance
-  private readonly clickListeners    = new Map<HTMLImageElement, () => void>();
-  private readonly ctxMenuListeners  = new Map<HTMLImageElement, (e: MouseEvent) => void>();
+  private readonly ownedBlobUrls = new Set<string>(); // only URLs created by THIS instance
+  private readonly clickListeners = new Map<HTMLImageElement, () => void>();
+  private readonly ctxMenuListeners = new Map<HTMLImageElement, (e: MouseEvent) => void>();
 
   ngOnInit() {
     this.processImages(this.el.nativeElement);
@@ -624,7 +624,9 @@ export class AuthImagesDirective implements OnInit, OnDestroy {
 
     this.clickListeners.forEach((listener, img) => img.removeEventListener('click', listener));
     this.clickListeners.clear();
-    this.ctxMenuListeners.forEach((listener, img) => img.removeEventListener('contextmenu', listener));
+    this.ctxMenuListeners.forEach((listener, img) =>
+      img.removeEventListener('contextmenu', listener),
+    );
     this.ctxMenuListeners.clear();
   }
 
@@ -653,7 +655,8 @@ export class AuthImagesDirective implements OnInit, OnDestroy {
   // ── Image loading ─────────────────────────────────────────────────────────
 
   private processImages(root: HTMLElement) {
-    root.querySelectorAll<HTMLImageElement>('img[data-auth-src]')
+    root
+      .querySelectorAll<HTMLImageElement>('img[data-auth-src]')
       .forEach((img) => this.loadImage(img));
   }
 
@@ -674,21 +677,23 @@ export class AuthImagesDirective implements OnInit, OnDestroy {
     const token = localStorage.getItem('jwt_token') ?? '';
 
     const blobUrl$ = this.getOrSetInflight(src, () =>
-      this.http.get(src, {
-        responseType: 'blob',
-        headers: { Authorization: `Bearer ${token}` },
-      }).pipe(
-        map((blob) => {
-          const blobUrl = URL.createObjectURL(blob);
-          this.setCached(src, blobUrl);
-          return blobUrl;
-        }),
-        // Share the single HTTP request among all concurrent subscribers.
-        // publishReplay(1) + refCount() keeps the result cached in the
-        // Observable layer until the static Map is populated.
-        publishReplay(1),
-        refCount(),
-      )
+      this.http
+        .get(src, {
+          responseType: 'blob',
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .pipe(
+          map((blob) => {
+            const blobUrl = URL.createObjectURL(blob);
+            this.setCached(src, blobUrl);
+            return blobUrl;
+          }),
+          // Share the single HTTP request among all concurrent subscribers.
+          // publishReplay(1) + refCount() keeps the result cached in the
+          // Observable layer until the static Map is populated.
+          publishReplay(1),
+          refCount(),
+        ),
     );
 
     blobUrl$.subscribe({

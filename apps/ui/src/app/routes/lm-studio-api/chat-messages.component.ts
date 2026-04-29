@@ -7,7 +7,14 @@ import { AuthImagesDirective, MarkdownPipe, StripMarkdownPipe } from './markdown
 import { CreateChatMetadataDto } from '../../client';
 import { SpinnerComponent } from '../../shared';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { heroExclamationTriangle, heroInformationCircle, heroXMark, heroWrenchScrewdriver, heroChevronDown, heroArrowUturnLeft } from '@ng-icons/heroicons/outline';
+import {
+  heroExclamationTriangle,
+  heroInformationCircle,
+  heroXMark,
+  heroWrenchScrewdriver,
+  heroChevronDown,
+  heroArrowUturnLeft,
+} from '@ng-icons/heroicons/outline';
 import ClientEnum = CreateChatMetadataDto.ClientEnum;
 
 @Component({
@@ -66,7 +73,16 @@ import ClientEnum = CreateChatMetadataDto.ClientEnum;
     SpinnerComponent,
     NgIconComponent,
   ],
-  viewProviders: [provideIcons({ heroExclamationTriangle, heroInformationCircle, heroXMark, heroWrenchScrewdriver, heroChevronDown, heroArrowUturnLeft })],
+  viewProviders: [
+    provideIcons({
+      heroExclamationTriangle,
+      heroInformationCircle,
+      heroXMark,
+      heroWrenchScrewdriver,
+      heroChevronDown,
+      heroArrowUturnLeft,
+    }),
+  ],
   template: `
     @if (messages().length === 0 && !streaming()) {
       @if (client() === 'OPENAI') {
@@ -124,11 +140,11 @@ import ClientEnum = CreateChatMetadataDto.ClientEnum;
         } @else if (msg.text) {
           <div class="flex flex-col items-end gap-1" @userMsgAnim>
             <div
-              class="max-w-[75%] text-text-primary rounded-2xl rounded-br-sm px-4 py-2.5 text-sm leading-relaxed"
+              class="min-w-0 max-w-[75%] text-text-primary rounded-2xl rounded-br-sm px-4 py-2.5 text-sm leading-relaxed overflow-hidden"
               style="background: var(--color-accent-subtle); border: 1px solid var(--color-accent-glow); box-shadow: var(--shadow-sm);"
             >
               <div
-                class="markdown-body break-all"
+                class="markdown-body"
                 authImages
                 [innerHTML]="msg.text | markdown: msg.streaming"
               ></div>
@@ -139,7 +155,6 @@ import ClientEnum = CreateChatMetadataDto.ClientEnum;
               }}</span>
             }
           </div>
-
         }
       } @else if (msg.role === 'error') {
         <div class="flex flex-col items-start gap-1" @msgAnim>
@@ -147,7 +162,10 @@ import ClientEnum = CreateChatMetadataDto.ClientEnum;
             class="max-w-[80%] text-error-text rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm leading-relaxed flex items-start gap-2"
             style="background: var(--color-error-bg); border: 1px solid var(--color-error-border); box-shadow: var(--shadow-sm);"
           >
-            <ng-icon name="heroExclamationTriangle" class="w-3.5 h-3.5 shrink-0 mt-0.5 text-error-muted" />
+            <ng-icon
+              name="heroExclamationTriangle"
+              class="w-3.5 h-3.5 shrink-0 mt-0.5 text-error-muted"
+            />
             <span>{{ msg.text }}</span>
           </div>
           @if (msg.date) {
@@ -159,7 +177,10 @@ import ClientEnum = CreateChatMetadataDto.ClientEnum;
           <div
             class="mt-1 max-w-[80%] bg-info-bg border border-info-border text-info-text rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm leading-relaxed flex items-start gap-2"
           >
-            <ng-icon name="heroInformationCircle" class="w-3.5 h-3.5 shrink-0 mt-0.5 text-info-muted" />
+            <ng-icon
+              name="heroInformationCircle"
+              class="w-3.5 h-3.5 shrink-0 mt-0.5 text-info-muted"
+            />
             <span>{{ msg.text }}</span>
           </div>
           <div class="flex items-center gap-2 ml-1">
@@ -211,7 +232,8 @@ import ClientEnum = CreateChatMetadataDto.ClientEnum;
                 <span class="text-tool-muted/60 shrink-0 text-[10px]">{{ msg.progress }} %</span>
               }
 
-              <ng-icon name="heroChevronDown"
+              <ng-icon
+                name="heroChevronDown"
                 class="ml-auto w-3 h-3 opacity-40 shrink-0 transition-transform"
                 [class.rotate-180]="!msg.collapsed"
               />
@@ -371,7 +393,8 @@ import ClientEnum = CreateChatMetadataDto.ClientEnum;
                 >{{ msg.text | stripMarkdown | slice: 0 : 60 }}…</span
               >
             }
-            <ng-icon name="heroChevronDown"
+            <ng-icon
+              name="heroChevronDown"
               class="ml-auto w-3 h-3 opacity-40 shrink-0 transition-transform"
               [class.rotate-180]="!msg.collapsed"
             />
@@ -408,7 +431,7 @@ import ClientEnum = CreateChatMetadataDto.ClientEnum;
         <!-- AI message -->
         <div class="flex flex-col items-start gap-1.5" @msgAnim>
           <!-- Avatar -->
-          <div class="flex items-start gap-2.5">
+          <div class="flex items-start gap-2.5 min-w-0 w-full">
             <div
               class="w-6 h-6 rounded-lg shrink-0 mt-0.5 flex items-center justify-center animate-scale-in"
               style="border: 1px solid var(--color-border-default); box-shadow: 0 2px 8px var(--color-accent-glow);"
@@ -416,12 +439,12 @@ import ClientEnum = CreateChatMetadataDto.ClientEnum;
               <img src="logo-cropped.png" class="w-full h-full text-white" alt="logo" />
             </div>
             <div
-              class="max-w-[80%] text-text-primary rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed"
+              class="min-w-0 max-w-[80%] text-text-primary rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed overflow-hidden"
               style="background: var(--color-surface-raised); border: 1px solid var(--color-border-default); box-shadow: var(--shadow-md);"
             >
               @if (msg.streaming) {
                 <div
-                  class="markdown-body break-all "
+                  class="markdown-body"
                   authImages
                   [innerHTML]="msg.text | markdown: msg.streaming"
                 ></div>
@@ -430,7 +453,7 @@ import ClientEnum = CreateChatMetadataDto.ClientEnum;
                 ></span>
               } @else {
                 <div
-                  class="markdown-body break-all"
+                  class="markdown-body"
                   authImages
                   [innerHTML]="msg.text | markdown: msg.streaming"
                 ></div>
