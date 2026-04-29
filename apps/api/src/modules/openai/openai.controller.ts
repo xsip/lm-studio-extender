@@ -273,6 +273,7 @@ export class OpenaiController {
     @Query('internalChatId') internalChatId?: string,
     @Query('chatName') chatName?: string,
     @Query('useCrypto') useCrypto?: boolean,
+    @Query('letAiDecideChatName') letAiDecideChatName?: boolean,
     @Query('cryptoKey') cryptoKey?: string,
     @Query('openAiEndpointPreference')
     openAiEndpointPreference?: OpenAiEndpointPreference,
@@ -315,6 +316,7 @@ export class OpenaiController {
       internalChatId,
       {
         useCrypto,
+        letAiDecideChatName,
         cryptoKey,
         chatName,
         openAiEndpointPreference,

@@ -41,7 +41,7 @@ import {
   ResponseCustomToolCallOutputDto,
   ResponseFileSearchToolCallDto,
   ResponseFunctionToolCallDto,
-  ResponseFunctionWebSearchDto,
+  ResponseFunctionWebSearchDto, ResponseInputTextDto,
   ResponseOutputMessageDto,
   ResponseReasoningItemDto,
   ResponseToolSearchOutputItemParamDto,
@@ -49,7 +49,11 @@ import {
   ShellCallOutputDto,
   ToolSearchCallDto,
 } from './dto/create-response-dtos';
-import { ResponseStreamEvent } from 'openai/resources/responses/responses';
+import {
+  ResponseInputText,
+  ResponseOutputMessage,
+  ResponseStreamEvent,
+} from 'openai/resources/responses/responses';
 import { Stream } from 'openai/streaming';
 import dayjs from 'dayjs';
 import {
@@ -141,6 +145,51 @@ export class OpenAiService {
     }
   }
 
+  async getChatTitleDependingOnContext(
+    userMessage: string | undefined,
+    model: string | undefined,
+  ): Promise<string | undefined> {
+    if(!userMessage)
+      return undefined;
+
+    if (!model) return undefined;
+
+    const mappedDto:
+      | ResponseCreateParamsNonStreamingDto
+      | ResponseCreateParamsStreamingDto = {
+      model: model,
+      input: `
+      The user says: "${userMessage}".
+      Dont answer to that, only give me ONE chat title name matching the context above with a max char length of 70`,
+      reasoning: {
+        effort: 'low',
+      },
+      instructions: '',
+      stream: true,
+
+      store: false,
+    };
+    let title: string | undefined = undefined;
+
+    try {
+      const stream: Stream<ResponseStreamEvent> =
+        (await this.openAi.responses.create(mappedDto as any)) as any;
+      for await (const event of stream) {
+        if (event.type === 'response.completed') {
+          const resObj = event.response.output.find(
+            (r) => r.type === 'message' && r.status === 'completed',
+          ) as ResponseOutputMessage;
+          if (resObj) {
+            title = resObj.content.find((c) => c.type === 'output_text')?.text;
+          }
+        }
+      }
+    } catch (error: any) {
+      console.error(error);
+    }
+    return title;
+  }
+
   async chatStream(
     userId: Types.ObjectId,
     dto: ResponseCreateParamsNonStreamingDto | ResponseCreateParamsStreamingDto,
@@ -152,6 +201,7 @@ export class OpenAiService {
       useCrypto?: boolean;
       cryptoKey?: string;
       chatName?: string;
+      letAiDecideChatName?: boolean;
       useInvoke?: boolean;
       invokeModel?: InvokeAiModel;
     },
@@ -194,6 +244,16 @@ export class OpenAiService {
 
     let resolvedChatMetaId: string | undefined = internalChatId;
     if (isNewChat && !resolvedChatMetaId) {
+      if (newChatConfig && newChatConfig.letAiDecideChatName) {
+        newChatConfig.chatName = await this.getChatTitleDependingOnContext(
+          (
+            (mappedDto.input as any as EasyInputMessageDto[]).find(
+              (iim) => iim.role === 'user',
+            )?.content as ResponseInputText[]
+          )?.find((rit) => rit.type === 'input_text')?.text,
+          mappedDto.model,
+        );
+      }
       resolvedChatMetaId = await this.chatMetadataService.createAndReturnId(
         userId,
         {
