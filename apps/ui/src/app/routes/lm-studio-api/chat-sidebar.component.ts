@@ -25,6 +25,7 @@ import ClientEnum = CreateChatMetadataDto.ClientEnum;
 import InvokeAiModelToUseEnum = UpdateChatMetadataDto.InvokeAiModelToUseEnum;
 import { BadgeComponent, IconButtonComponent } from '../../shared';
 import { AuthImagesDirective } from './markdown.pipe';
+import { ChatAttachmentsSidebarComponent } from '../../shared/components/chat-attachments-sidebar.component';
 
 @Component({
   selector: 'app-chat-sidebar',
@@ -71,6 +72,7 @@ import { AuthImagesDirective } from './markdown.pipe';
     BadgeComponent,
     IconButtonComponent,
     AuthImagesDirective,
+    ChatAttachmentsSidebarComponent,
   ],
   viewProviders: [
     provideIcons({
@@ -87,7 +89,7 @@ import { AuthImagesDirective } from './markdown.pipe';
   template: `
     <div
       authImages
-      class="flex flex-col w-60 border-r border-border-default shrink-0 h-full bg-surface-raised"
+      class="flex flex-col w-70 border-r border-border-default shrink-0 h-full bg-surface-raised"
       style="box-shadow: 2px 0 12px rgba(0,0,0,0.06);"
     >
       <!-- Header -->
@@ -115,6 +117,7 @@ import { AuthImagesDirective } from './markdown.pipe';
           <app-spinner />
         }
       </div>
+
       @if (!generatedFilesModalContent()) {
         <!-- New chat button -->
         <div class="px-2 pt-2 pb-1 shrink-0">
@@ -196,7 +199,7 @@ import { AuthImagesDirective } from './markdown.pipe';
                 <!-- Active indicator -->
                 @if (currentChatId() === chat._id) {
                   <div
-                    class="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-r-full bg-accent"
+                    class="absolute left-0 top-1/4 -translate-y-1/4 w-0.5 h-3/4 rounded-r-full bg-accent"
                   ></div>
                 }
                 <div class="flex items-center gap-1.5 pl-1">
@@ -210,50 +213,29 @@ import { AuthImagesDirective } from './markdown.pipe';
                     {{ chat.lastMessageSentAt | date: 'dd MMM, HH:mm' }}
                   </div>
                 }
-              </button>
-            }
-          }
-        </div>
-      } @else {
-        <div class="flex-1 overflow-y-auto py-1 min-h-0 px-2 flex flex-col gap-0.5">
-          @if (generatedFilesModalContent()?.generatedAssets?.length === 0) {
-            <div
-              class="flex flex-col items-center justify-center h-full gap-2 text-center px-3 py-8"
-            >
-              <ng-icon name="heroPaperClip" class="w-8 h-8 text-text-disabled animate-float" />
-              <span class="text-[10px] text-text-disabled uppercase tracking-wider">{{
-                'sidebar.noGeneratedFiles' | translate
-              }}</span>
-            </div>
-          } @else {
-            @for (asset of generatedFilesModalContent()!.generatedAssets!; track asset._id) {
-              <button
-                type="button"
-                class="w-full flex flex-col gap-2 text-left px-2.5 py-2 text-xs rounded-xl group relative active:scale-[0.98] transition-all duration-200"
-                @chatItemAnim
-                [class]="'text-text-secondary bg-surface-overlay/40 hover:bg-surface-overlay hover:text-text-primary'"
-              >
-                @if (asset.thumbnail) {
-                  <div class="relative">
-                    <img
-                      #img
-                      [attr.data-auth-src]="asset.thumbnail"
-                      class="rounded-md w-full h-auto"
-                      src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mO89x8AAsEB3+IGkhwAAAAASUVORK5CYII="
-                    />
-                    <div
-                      class="flex absolute bottom-0 left-0 w-full bg-surface-overlay/80 items-center gap-1.5 pl-1"
-                    >
-                      <div class="truncate font-medium leading-tight">
-                        {{ asset.filename }}
-                      </div>
-                    </div>
-                  </div>
+                @if (currentChatId() === chat._id) {
+                  <div class="border-t border-border-subtle mx-2 my-1"></div>
+
+                  <button
+                    @chatItemAnim
+                    type="button"
+                    (click)="$event.stopPropagation(); openGeneratedFiles(chat)"
+                    class="w-full flex items-center rounded-md gap-2.5 px-3 py-1.5 mb-1 text-xs text-text-secondary hover:bg-secondary-accent-subtle hover:text-text-primary transition-colors text-left"
+                  >
+                    <ng-icon name="heroPaperClip" class="w-3.5 h-3.5 shrink-0 opacity-60" />
+                    {{ 'sidebar.generatedFiles' | translate }}
+                    <ui-badge [variant]="'accent'"
+                      >{{ chat.generatedAssets?.length ?? 0 }}
+                    </ui-badge>
+                  </button>
                 }
               </button>
             }
           }
         </div>
+      } @else {
+        <!-- Generated files panel -->
+        <app-chat-attachments-sidebar [chat]="generatedFilesModalContent()" />
       }
     </div>
 
