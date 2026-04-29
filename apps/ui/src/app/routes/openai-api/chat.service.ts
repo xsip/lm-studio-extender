@@ -45,9 +45,9 @@ export type { ChatMessage };
 
 @Injectable()
 export class ChatService {
-  private readonly streamService   = inject(OpenAiStreamService);
-  private readonly location        = inject(Location);
-  private readonly router          = inject(Router);
+  private readonly streamService = inject(OpenAiStreamService);
+  private readonly location = inject(Location);
+  private readonly router = inject(Router);
   private readonly chatMetaService = inject(ChatMetadataService);
   readonly fb = inject(FormBuilder);
 
@@ -55,8 +55,8 @@ export class ChatService {
     input: ['', [Validators.required, Validators.minLength(1)]],
   });
 
-  readonly streaming     = signal(false);
-  readonly chatMessages  = signal<ChatMessage[]>([]);
+  readonly streaming = signal(false);
+  readonly chatMessages = signal<ChatMessage[]>([]);
   readonly currentChatId = signal<string | null>(null);
 
   private readonly lastUserInput = signal<string>('');
@@ -95,7 +95,6 @@ export class ChatService {
     this.chatMessages.update((msgs) => patchByItemId(msgs, itemId, patch));
   }
 
-
   lastCreatedMcpCallItem: any;
 
   submit(
@@ -106,13 +105,14 @@ export class ChatService {
     onChatListRefresh: () => void,
     newChatOptions?: {
       name?: string;
+      letAiDecideChatName?: boolean;
       useCrypto?: boolean;
       cryptoKey?: string;
       openAiEndpointPreference?: CreateChatMetadataDto.OpenAiEndpointPreferenceEnum;
       useInvoke?: boolean;
-      invokeAiModelToUse?: InvokeAiModelToUseEnum
+      invokeAiModelToUse?: InvokeAiModelToUseEnum;
     },
-    afterPromptProcessing?: () => void
+    afterPromptProcessing?: () => void,
   ): void {
     this.lastCreatedMcpCallItem = undefined;
     if (this.form.invalid || this.streaming()) return;
@@ -123,12 +123,11 @@ export class ChatService {
     this.streaming.set(true);
     this.mcpTracking.clear();
 
-    for(const f of appendedFiles ?? []) {
+    for (const f of appendedFiles ?? []) {
       this.chatMessages.update((msgs) => [
         ...msgs,
         { role: 'user', image: f.image_url, date: new Date() },
       ]);
-
     }
 
     this.chatMessages.update((msgs) => [...msgs, { role: 'user', text: input, date: new Date() }]);
@@ -256,16 +255,13 @@ export class ChatService {
             const tracking = this.mcpTracking.get(
               this.lastCreatedMcpCallItem.item_id ?? this.lastCreatedMcpCallItem.id,
             );
-            if(tracking) {
-
+            if (tracking) {
               this.chatMessages.update((msgs) => [
-
-                ...msgs.map(msg => {
-
-                  if(msg.itemId === tracking.itemId) {
+                ...msgs.map((msg) => {
+                  if (msg.itemId === tracking.itemId) {
                     return {
                       role: 'tool_call' as any,
-                        text: '',
+                      text: '',
                       streaming: true,
                       collapsed: false,
                       date: new Date(),
@@ -279,7 +275,6 @@ export class ChatService {
                   }
                   return msg;
                 }),
-
               ]);
 
               this.patchByItemId(
@@ -348,11 +343,11 @@ export class ChatService {
         }
       },
       complete: () => {
-        this.streaming.set(false)
+        this.streaming.set(false);
         afterPromptProcessing?.();
       },
-      error:    () => {
-        this.streaming.set(false)
+      error: () => {
+        this.streaming.set(false);
         afterPromptProcessing?.();
       },
     });
@@ -390,7 +385,7 @@ export class ChatService {
           {
             role: 'user',
             content: [
-              ...(appendedFiles as any[] ?? []),
+              ...((appendedFiles as any[]) ?? []),
               {
                 type: 'input_text',
                 text: input,
@@ -418,7 +413,7 @@ export class ChatService {
     appendedFiles: AppendedFile[] | undefined,
     encryptionKey: string | undefined,
     onChatListRefresh: () => void,
-    afterPromptProcessing?: () => void
+    afterPromptProcessing?: () => void,
   ): void {
     const input = this.lastUserInput();
     if (!input || this.streaming()) return;

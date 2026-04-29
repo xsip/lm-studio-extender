@@ -43,6 +43,12 @@
     "invokeHint": "Bild Generator",
     "invokeModel": "Invoke Model",
     "encryptionKeyPlaceholder": "Verschlüsselungsschlüssel eingeben…",
+    "chatNameAi": "AI Entscheiden lassen",
+    "chatNameCustom": "Eigener",
+    "chatNameNone": "Keiner",
+    "chatNameAiHint": "AI erstellt einen namen anhand der ersten Nachricht.",
+    "chatNameCustomHint": "Namen für den Chat eingeben",
+    "chatNameNoneHint": "Chat wird ohne Name erstellt",
     "save": "Speichern",
     "cancel": "Abbrechen"
   },

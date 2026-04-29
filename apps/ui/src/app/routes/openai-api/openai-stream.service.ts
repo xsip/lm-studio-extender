@@ -336,6 +336,7 @@ export class OpenAiStreamService {
     chatId?: string,
     newChatOptions?: {
       name?: string;
+      letAiDecideChatName?: boolean;
       useCrypto?: boolean;
       cryptoKey?: string;
       openAiEndpointPreference?: CreateChatMetadataDto.OpenAiEndpointPreferenceEnum;
@@ -348,12 +349,12 @@ export class OpenAiStreamService {
       const params = new URLSearchParams();
       if (chatId) params.set('internalChatId', chatId);
       if (!chatId && newChatOptions) {
-
         if (newChatOptions.useInvoke && newChatOptions.invokeAiModelToUse) {
           params.set('useInvoke', String(newChatOptions.useInvoke));
           params.set('invokeModel', newChatOptions.invokeAiModelToUse);
-
         }
+
+        if(newChatOptions.letAiDecideChatName) params.set('letAiDecideChatName', String(newChatOptions.letAiDecideChatName));
         if (newChatOptions.name) params.set('chatName', newChatOptions.name);
         if (newChatOptions.useCrypto != null)
           params.set('useCrypto', String(newChatOptions.useCrypto));

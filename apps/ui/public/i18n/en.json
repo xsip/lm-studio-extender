@@ -43,6 +43,12 @@
     "invokeHint": "Image generator",
     "invoke": "InvokeAI",
     "invokeModel": "Invoke Model To Use",
+    "chatNameAi": "Let AI Decide",
+    "chatNameCustom": "Custom",
+    "chatNameNone": "None",
+    "chatNameAiHint": "AI will generate a name from your first message.",
+    "chatNameCustomHint": "Enter a name for this chat.",
+    "chatNameNoneHint": "Chat will be created without a name.",
     "save": "Save",
     "cancel": "Cancel"
   },

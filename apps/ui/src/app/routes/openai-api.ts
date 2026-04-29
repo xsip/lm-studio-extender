@@ -50,8 +50,17 @@ import { TextInputComponent } from '../shared/components/ui/text-input.component
 import { ToggleComponent } from '../shared/components/ui/toggle.component';
 import { TranslateModule } from '@ngx-translate/core';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { heroBars3, heroUser, heroPlus, heroXMark } from '@ng-icons/heroicons/outline';
+import {
+  heroBars3,
+  heroUser,
+  heroPlus,
+  heroXMark,
+  heroSparkles,
+} from '@ng-icons/heroicons/outline';
 import InvokeAiModelToUseEnum = ChatMetadataDto.InvokeAiModelToUseEnum;
+
+/** How the chat name is determined when creating a new chat. */
+type ChatNameMode = 'ai' | 'custom' | 'none';
 
 @Component({
   selector: 'app-openai-api',
@@ -72,7 +81,7 @@ import InvokeAiModelToUseEnum = ChatMetadataDto.InvokeAiModelToUseEnum;
     TranslateModule,
     NgIconComponent,
   ],
-  viewProviders: [provideIcons({ heroBars3, heroUser, heroPlus, heroXMark })],
+  viewProviders: [provideIcons({ heroBars3, heroUser, heroPlus, heroXMark, heroSparkles })],
   animations: [
     trigger('sidebarAnim', [
       transition(':enter', [
@@ -101,6 +110,21 @@ import InvokeAiModelToUseEnum = ChatMetadataDto.InvokeAiModelToUseEnum;
         animate(
           '180ms cubic-bezier(0.4, 0, 1, 1)',
           style({ opacity: 0, transform: 'translateX(100%)' }),
+        ),
+      ]),
+    ]),
+    trigger('slideDown', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(-6px)', height: 0, overflow: 'hidden' }),
+        animate(
+          '180ms cubic-bezier(0.16, 1, 0.3, 1)',
+          style({ opacity: 1, transform: 'translateY(0)', height: '*' }),
+        ),
+      ]),
+      transition(':leave', [
+        animate(
+          '140ms cubic-bezier(0.4, 0, 1, 1)',
+          style({ opacity: 0, transform: 'translateY(-4px)', height: 0, overflow: 'hidden' }),
         ),
       ]),
     ]),
@@ -213,13 +237,80 @@ import InvokeAiModelToUseEnum = ChatMetadataDto.InvokeAiModelToUseEnum;
 
                     <!-- Chat Name -->
                     <div>
-                      <ui-label class="mb-1.5">{{
+                      <ui-label class="mb-2">{{
                         'chatSettings.chatNameLabel' | translate
                       }}</ui-label>
-                      <ui-text-input
-                        [(ngModel)]="newChatName"
-                        [placeholder]="'toolbar.optionalName' | translate"
-                      />
+
+                      <!-- 3-way segmented control -->
+                      <div
+                        class="flex rounded-lg border border-border-default overflow-hidden bg-surface-base"
+                      >
+                        <!-- AI Decides -->
+                        <button
+                          type="button"
+                          class="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-xs font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                          [class.bg-accent]="newChatNameMode() === 'ai'"
+                          [class.text-white]="newChatNameMode() === 'ai'"
+                          [class.text-text-muted]="newChatNameMode() !== 'ai'"
+                          [class.hover:bg-surface-overlay]="newChatNameMode() !== 'ai'"
+                          (click)="newChatNameMode.set('ai')"
+                        >
+                          <ng-icon name="heroSparkles" class="w-3 h-3 shrink-0" />
+                          <span>{{ 'chatSettings.chatNameAi' | translate }}</span>
+                        </button>
+
+                        <div class="w-px bg-border-default self-stretch"></div>
+
+                        <!-- Custom -->
+                        <button
+                          type="button"
+                          class="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-xs font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                          [class.bg-accent]="newChatNameMode() === 'custom'"
+                          [class.text-white]="newChatNameMode() === 'custom'"
+                          [class.text-text-muted]="newChatNameMode() !== 'custom'"
+                          [class.hover:bg-surface-overlay]="newChatNameMode() !== 'custom'"
+                          (click)="newChatNameMode.set('custom')"
+                        >
+                          <span>{{ 'chatSettings.chatNameCustom' | translate }}</span>
+                        </button>
+
+                        <div class="w-px bg-border-default self-stretch"></div>
+
+                        <!-- None -->
+                        <button
+                          type="button"
+                          class="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-xs font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                          [class.bg-accent]="newChatNameMode() === 'none'"
+                          [class.text-white]="newChatNameMode() === 'none'"
+                          [class.text-text-muted]="newChatNameMode() !== 'none'"
+                          [class.hover:bg-surface-overlay]="newChatNameMode() !== 'none'"
+                          (click)="newChatNameMode.set('none')"
+                        >
+                          <span>{{ 'chatSettings.chatNameNone' | translate }}</span>
+                        </button>
+                      </div>
+
+                      <!-- Mode hint -->
+                      <p class="mt-1.5 text-[10px] text-text-muted leading-relaxed">
+                        @if (newChatNameMode() === 'ai') {
+                          {{ 'chatSettings.chatNameAiHint' | translate }}
+                        } @else if (newChatNameMode() === 'custom') {
+                          {{ 'chatSettings.chatNameCustomHint' | translate }}
+                        } @else {
+                          {{ 'chatSettings.chatNameNoneHint' | translate }}
+                        }
+                      </p>
+
+                      <!-- Custom name input — only visible in 'custom' mode -->
+                      @if (newChatNameMode() === 'custom') {
+                        <div @slideDown class="mt-2">
+                          <ui-text-input
+                            [(ngModel)]="newChatName"
+                            [placeholder]="'toolbar.optionalName' | translate"
+                            [autofocus]="true"
+                          />
+                        </div>
+                      }
                     </div>
 
                     <!-- Endpoint Preference -->
@@ -412,6 +503,14 @@ export class OpenAiApi implements OnDestroy, OnInit {
   newChatUseCryptoModel = false;
   newChatUseInvokeFeature = true;
 
+  /**
+   * Controls how the new chat's name is determined.
+   *  'ai'     – backend / AI generates a name from the first message
+   *  'custom' – user types a name in the text input below the selector
+   *  'none'   – chat is created without a name
+   */
+  readonly newChatNameMode = signal<ChatNameMode>('ai');
+
   readonly models = signal<ModelOpenAiDto[]>([]);
   readonly modelsLoading = signal(false);
   readonly selectedModel = signal<ModelOpenAiDto | null>(this.loadStoredModel());
@@ -505,7 +604,6 @@ export class OpenAiApi implements OnDestroy, OnInit {
         if (!this.selectedModel() && models.length > 0) {
           this.selectModel(models[0]);
         } else if (this.selectedModel()) {
-          // Re-validate stored selection still exists
           const match = models.find((m) => m.id === this.selectedModel()!.id);
           if (match) this.selectModel(match);
         }
@@ -543,76 +641,30 @@ export class OpenAiApi implements OnDestroy, OnInit {
     createdAt: string,
   ): ChatMessage[] {
     if (typeof content === 'string') {
-      return [
-        {
-          role: 'user',
-          text: content,
-          date: new Date(createdAt),
-        },
-      ];
+      return [{ role: 'user', text: content, date: new Date(createdAt) }];
     }
     if (typeof content === 'object' && Array.isArray(content)) {
       return content.map((c) => {
         if (typeof c === 'string') {
-          return {
-            role: 'user',
-            text: c,
-            date: new Date(createdAt),
-          };
+          return { role: 'user', text: c, date: new Date(createdAt) };
         }
         if (c.type === ResponseInputTextDto.TypeEnum.InputText) {
-          return {
-            role: 'user',
-            text: c.text,
-            date: new Date(createdAt),
-          };
+          return { role: 'user', text: c.text, date: new Date(createdAt) };
         } else if (c.type === ResponseOutputRefusalDto.TypeEnum.Refusal) {
-          return {
-            role: 'user',
-            text: c.refusal,
-            date: new Date(createdAt),
-          };
+          return { role: 'user', text: c.refusal, date: new Date(createdAt) };
         } else if (c.type === ContentDto.TypeEnum.ReasoningText) {
-          return {
-            role: 'user',
-            text: c.text,
-            date: new Date(createdAt),
-          };
+          return { role: 'user', text: c.text, date: new Date(createdAt) };
         } else if (c.type === ResponseInputImageDto.TypeEnum.InputImage) {
-          return {
-            role: 'user',
-            type: 'image',
-            image: c.image_url,
-            date: new Date(createdAt),
-          };
+          return { role: 'user', type: 'image', image: c.image_url, date: new Date(createdAt) };
         } else if (c.type === ResponseOutputTextDto.TypeEnum.OutputText) {
-          return {
-            role: 'user',
-            text: c.text,
-            date: new Date(createdAt),
-          };
+          return { role: 'user', text: c.text, date: new Date(createdAt) };
         } else if (c.type === ResponseInputFileDto.TypeEnum.InputFile) {
-          return {
-            role: 'user',
-            file: c.file_data ?? c.file_url,
-            date: new Date(createdAt),
-          };
+          return { role: 'user', file: c.file_data ?? c.file_url, date: new Date(createdAt) };
         }
-        return {
-          role: 'user',
-          text: JSON.stringify(c),
-          date: new Date(createdAt),
-        };
+        return { role: 'user', text: JSON.stringify(c), date: new Date(createdAt) };
       });
     }
-
-    return [
-      {
-        role: 'user',
-        text: JSON.stringify(content),
-        date: new Date(createdAt),
-      },
-    ];
+    return [{ role: 'user', text: JSON.stringify(content), date: new Date(createdAt) }];
   }
 
   private loadChatHistory(chatId: string): void {
@@ -631,7 +683,6 @@ export class OpenAiApi implements OnDestroy, OnInit {
             if (
               inputEntry.type === 'message' ||
               (!inputEntry.type && (inputEntry as any).role !== 'developer')
-
             ) {
               if ((inputEntry as any).role !== 'system')
                 messages.push(...this.fromContentToText(inputEntry.content, entry.createdAt));
@@ -646,7 +697,6 @@ export class OpenAiApi implements OnDestroy, OnInit {
 
         for (const output of entry.response.output) {
           if (output.type === 'reasoning') {
-            // Reasoning content is in content[0].text for OpenAI Responses API
             const content =
               (output as any).content?.[0]?.text ?? (output as any).summary?.[0]?.text ?? '';
             messages.push({
@@ -693,9 +743,32 @@ export class OpenAiApi implements OnDestroy, OnInit {
         }
       }
       this.isLoadingMessages.set(false);
-
       this.chatService.chatMessages.set(messages);
     });
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+
+  /**
+   * Resolves the effective chat name to pass to submit() based on the
+   * currently selected naming mode.
+   *
+   *  'ai'     → undefined  (backend interprets absence as "please auto-name")
+   *             You may want to pass a dedicated flag instead — adjust to match
+   *             your CreateChatMetadataDto contract.
+   *  'custom' → trimmed user input (or undefined if left blank)
+   *  'none'   → '' empty string, or a sentinel your backend recognises as
+   *             "no name". Adjust as needed.
+   */
+  private resolvedChatName(): string | undefined {
+    switch (this.newChatNameMode()) {
+      case 'ai':
+        return undefined; // backend auto-names
+      case 'custom':
+        return this.newChatName.trim() || undefined;
+      case 'none':
+        return ''; // explicit blank — adjust if your API needs a different sentinel
+    }
   }
 
   // ── Navigation ────────────────────────────────────────────────────────────
@@ -721,6 +794,7 @@ export class OpenAiApi implements OnDestroy, OnInit {
     this.newChatUseCryptoModel = false;
     this.newChatCryptoKey = '';
     this.newChatName = '';
+    this.newChatNameMode.set('ai'); // reset to AI-decides default
   }
 
   // ── Messaging ─────────────────────────────────────────────────────────────
@@ -753,7 +827,8 @@ export class OpenAiApi implements OnDestroy, OnInit {
       this.newChatUseCrypto() && this.newChatCryptoKey ? this.newChatCryptoKey : undefined,
       () => this.loadChatList(),
       {
-        name: this.newChatName.trim() || undefined,
+        name: this.resolvedChatName(),
+        letAiDecideChatName: this.newChatNameMode() === 'ai',
         useCrypto: this.newChatUseCrypto(),
         cryptoKey: this.newChatCryptoKey || undefined,
         openAiEndpointPreference: this.newChatEndpointPreference(),
