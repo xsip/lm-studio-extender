@@ -41,6 +41,8 @@
     "encryptionKey": "Encryption Key",
     "encryptionKeyPlaceholder": "Enter encryption key…",
     "invokeHint": "Image generator",
+    "model": "AI Model",
+    "modelHint": "The model you want to chat with",
     "invoke": "InvokeAI",
     "invokeModel": "Invoke Model To Use",
     "chatNameAi": "Let AI Decide",
@@ -137,7 +139,8 @@
     "newChatOptions": "New Chat Options",
     "optionalName": "Optional name…",
     "endpoint": "Endpoint",
-    "model": "Model",
+    "invokeModel": "Image AI Model",
+    "invokeModelHint": "The model to use for image creation",
 
     "responsesApi": "Responses API",
     "chatCompletions": "Chat Completions",

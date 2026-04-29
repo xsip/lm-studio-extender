@@ -341,10 +341,27 @@ type ChatNameMode = 'ai' | 'custom' | 'none';
                         }
                       </p>
                     </div>
-
+                    <!-- Model selector -->
+                    <div class="flex items-center justify-between">
+                      <div class="flex flex-col items-start">
+                        <ui-label>{{ 'chatSettings.model' | translate }}</ui-label>
+                        <span class="text-[10px] text-text-muted mt-0.5 block">{{
+                          'chatSettings.modelHint' | translate
+                        }}</span>
+                      </div>
+                      <div class="relative ml-auto">
+                        <app-openai-model-selector
+                          [models]="models()"
+                          [modelsLoading]="modelsLoading()"
+                          [selectedModel]="selectedModel()"
+                          [hasChatOpen]="chatService.hasChatOpen()"
+                          (modelSelected)="selectModel($event)"
+                        />
+                      </div>
+                    </div>
                     <!-- Encryption toggle -->
                     <div class="flex items-center justify-between">
-                      <div>
+                      <div class="flex flex-col items-start">
                         <ui-label>{{ 'chatSettings.encryption' | translate }}</ui-label>
                         <span class="text-[10px] text-text-muted mt-0.5 block">{{
                           'chatSettings.encryptionHint' | translate
@@ -356,13 +373,15 @@ type ChatNameMode = 'ai' | 'custom' | 'none';
                         (checkedChange)="newChatUseCrypto.set($event)"
                       />
                     </div>
+
                     <!-- Crypto key input -->
                     @if (newChatUseCrypto()) {
-                      <div>
+                      <div class="flex flex-col items-start">
                         <ui-label class="mb-1.5 ">{{
                           'chatSettings.encryptionKey' | translate
                         }}</ui-label>
                         <ui-text-input
+                          class="w-full"
                           type="password"
                           [showToggle]="true"
                           [mono]="true"
@@ -373,7 +392,7 @@ type ChatNameMode = 'ai' | 'custom' | 'none';
                     }
                     <!-- Invoke AI toggle -->
                     <div class="flex items-center justify-between">
-                      <div>
+                      <div class="flex flex-col items-start">
                         <ui-label>{{ 'chatSettings.invoke' | translate }}</ui-label>
                         <span class="text-[10px] text-text-muted mt-0.5 block">{{
                           'chatSettings.invokeHint' | translate
@@ -386,11 +405,14 @@ type ChatNameMode = 'ai' | 'custom' | 'none';
                       />
                     </div>
                     @if (newChatUseInvoke()) {
-                      <div class="self-center w-full">
+                      <div class="flex flex-col items-start">
                         <ui-label class="mb-1.5 {{ !newChatUseInvoke() ? 'opacity-0.5' : '' }}">{{
-                          'toolbar.model' | translate
+                          'toolbar.invokeModel' | translate
                         }}</ui-label>
-                        <div class="flex w-full gap-2">
+                        <span class="text-[10px] text-text-muted mt-0.5 block">{{
+                          'toolbar.invokeModelHint' | translate
+                        }}</span>
+                        <div class="flex w-full gap-2 mt-5">
                           <ui-button
                             [disabled]="!newChatUseInvoke()"
                             class="flex-1"
