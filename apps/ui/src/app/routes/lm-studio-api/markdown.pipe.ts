@@ -152,8 +152,164 @@ renderer.image = ({ href, title, text }) => {
   return `<img data-auth-src="${href}"${altAttr}${titleAttr} src="" class="rounded-md max-w-full cursor-pointer transition-all ease-in-out duration-500" />`;
 };
 
+// ── File card extension: ::file[name](url){size=X type=Y} ───────────────────
+// Renders a styled download card for files returned by MCP tools.
+// Usage in MCP response:
+//   ::file[a-practical-guide.pdf](https://cdn.example.com/file.pdf){size=3.2MB type=pdf}
+const fileCardExtension: TokenizerExtension & RendererExtension = {
+  name: 'fileCard',
+  level: 'block',
+  start(src: string) {
+    return src.indexOf('::file[');
+  },
+  tokenizer(src: string) {
+    // ::file[filename](url){size=X type=Y}
+    // attrs block {...} is optional
+    const match = src.match(/^::file\[([^\]]*)\]\(([^)]*)\)(?:\{([^}]*)\})?[ \t]*(?:\n|$)/);
+    if (match) {
+      const attrs: Record<string, string> = {};
+      if (match[3]) {
+        for (const part of match[3].split(/\s+/)) {
+          const [k, v] = part.split('=');
+          if (k && v !== undefined) attrs[k.trim()] = v.trim();
+        }
+      }
+      return {
+        type: 'fileCard',
+        raw: match[0],
+        filename: match[1].trim(),
+        url: match[2].trim(),
+        attrs,
+      };
+    }
+    return undefined;
+  },
+  renderer(token: any) {
+    const { filename, url, attrs } = token as {
+      filename: string;
+      url: string;
+      attrs: Record<string, string>;
+    };
+
+    const ext = (attrs['type'] ?? filename.split('.').pop() ?? 'file').toLowerCase();
+    const size = attrs['size'] ?? '';
+
+    // ── Pick icon + accent colour based on file type ────────────────────────
+    const typeMap: Record<string, { icon: string; colour: string }> = {
+      pdf: { icon: fileIconPdf, colour: 'var(--color-error-text)' },
+      doc: { icon: fileIconDoc, colour: 'var(--color-accent-text)' },
+      docx: { icon: fileIconDoc, colour: 'var(--color-accent-text)' },
+      xls: { icon: fileIconSheet, colour: 'var(--color-success-text)' },
+      xlsx: { icon: fileIconSheet, colour: 'var(--color-success-text)' },
+      csv: { icon: fileIconSheet, colour: 'var(--color-success-text)' },
+      zip: { icon: fileIconArchive, colour: 'var(--color-tertiary-accent-text)' },
+      tar: { icon: fileIconArchive, colour: 'var(--color-tertiary-accent-text)' },
+      gz: { icon: fileIconArchive, colour: 'var(--color-tertiary-accent-text)' },
+      mp4: { icon: fileIconVideo, colour: 'var(--color-secondary-accent-text)' },
+      mov: { icon: fileIconVideo, colour: 'var(--color-secondary-accent-text)' },
+      mp3: { icon: fileIconAudio, colour: 'var(--color-secondary-accent-text)' },
+      wav: { icon: fileIconAudio, colour: 'var(--color-secondary-accent-text)' },
+      png: { icon: fileIconImage, colour: 'var(--color-secondary-accent-text)' },
+      jpg: { icon: fileIconImage, colour: 'var(--color-secondary-accent-text)' },
+      jpeg: { icon: fileIconImage, colour: 'var(--color-secondary-accent-text)' },
+      gif: { icon: fileIconImage, colour: 'var(--color-secondary-accent-text)' },
+      svg: { icon: fileIconImage, colour: 'var(--color-secondary-accent-text)' },
+    };
+    const { icon, colour } = typeMap[ext] ?? {
+      icon: fileIconGeneric,
+      colour: 'var(--color-text-muted)',
+    };
+
+    const sizeHtml = size
+      ? `<span class="text-[11px] font-medium px-1.5 py-0.5 rounded"
+               style="background:var(--color-surface-overlay);color:var(--color-text-muted)"
+          >${size}</span>`
+      : '';
+
+    const extBadge = `<span class="text-[10px] font-mono font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded"
+        style="background:var(--color-surface-overlay);color:${colour}"
+      >${ext}</span>`;
+
+    // data-auth-href / data-auth-filename are picked up by AuthFilesDirective,
+    // which fetches with a Bearer token and swaps in a blob URL before the user
+    // can interact with the card.
+    return `
+<div class="group my-3 flex items-center gap-3 rounded-xl px-4 py-3 border transition-all duration-200 cursor-pointer hover-lift"
+     style="background:var(--color-surface-raised);border-color:var(--color-border-default);box-shadow:var(--shadow-sm)"
+     data-auth-href="${url}"
+     data-auth-filename="${filename}"
+>
+  <!-- File type icon -->
+  <div class="flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center"
+       style="background:var(--color-surface-overlay);color:${colour}">
+    ${icon}
+  </div>
+
+  <!-- Filename + meta -->
+  <div class="flex-1 min-w-0">
+    <div class="flex items-center gap-2 flex-wrap">
+      <span class="text-[14px] font-medium truncate max-w-[280px]"
+            style="color:var(--color-text-primary)"
+            title="${filename}">${filename}</span>
+      ${extBadge}
+      ${sizeHtml}
+    </div>
+    <p class="text-[11px] mt-0.5 truncate"
+       style="color:var(--color-text-muted)">${url}</p>
+  </div>
+
+  <!-- Download arrow — href/download injected by AuthFilesDirective once blob is ready -->
+  <a data-auth-download
+     onclick="event.stopPropagation()"
+     title="Download ${filename}"
+     class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center border opacity-0 group-hover:opacity-100 transition-all duration-150 hover:scale-105 active:scale-95"
+     style="background:var(--color-accent-subtle);border-color:var(--color-accent-text);color:var(--color-accent-text)"
+  >
+    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M7.5 1.5v8M4.5 7l3 3 3-3M2.5 11.5h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </a>
+</div>`;
+  },
+};
+
+// ── SVG icon helpers ─────────────────────────────────────────────────────────
+const _svgWrap = (path: string) =>
+  `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
+
+const fileIconPdf = _svgWrap(
+  '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/>',
+);
+const fileIconDoc = _svgWrap(
+  '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/>',
+);
+const fileIconSheet = _svgWrap(
+  '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/>',
+);
+const fileIconArchive = _svgWrap(
+  '<path d="M21 8v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8"/><rect x="1" y="3" width="22" height="5" rx="2"/><line x1="10" y1="12" x2="14" y2="12"/>',
+);
+const fileIconVideo = _svgWrap(
+  '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M10 9l5 3-5 3V9z"/>',
+);
+const fileIconAudio = _svgWrap(
+  '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+);
+const fileIconImage = _svgWrap(
+  '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>',
+);
+const fileIconGeneric = _svgWrap(
+  '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>',
+);
+
 marked.use({
-  extensions: [blockMathExtension, inlineMathExtension, fencedCodeExtension, inlineCodeExtension],
+  extensions: [
+    blockMathExtension,
+    inlineMathExtension,
+    fencedCodeExtension,
+    inlineCodeExtension,
+    fileCardExtension,
+  ],
   renderer,
 });
 
@@ -741,6 +897,147 @@ export class AuthImagesDirective implements OnInit, OnDestroy {
       if (typeof entry === 'string') URL.revokeObjectURL(entry);
     });
     AuthImagesDirective.cache.clear();
+  }
+}
+
+// ── AuthFilesDirective ────────────────────────────────────────────────────────
+// Apply to any element that contains markdown-rendered HTML (same host element
+// as authImages). Watches for file cards rendered by fileCardExtension:
+//
+//   <div data-auth-href="api/assets/…" data-auth-filename="report.pdf">
+//     …
+//     <a data-auth-download>…</a>   ← download button inside the card
+//   </div>
+//
+// For each card it fetches the file with a Bearer token, creates a blob URL,
+// then wires up:
+//   • card  onclick → window.open(blobUrl)
+//   • <a>   href + download → blobUrl / filename  (makes the button functional)
+//
+// Blob URLs are cached statically across all directive instances (same strategy
+// as AuthImagesDirective) so large files are only fetched once per session.
+@Directive({ selector: '[authFiles]', standalone: true })
+export class AuthFilesDirective implements OnInit, OnDestroy {
+  private readonly el = inject(ElementRef<HTMLElement>);
+  private readonly http = inject(HttpClient);
+  private observer: MutationObserver | null = null;
+
+  // Maps remote URL → resolved blob URL or in-flight Observable
+  private static readonly cache = new Map<string, string | Observable<string>>();
+  private readonly ownedBlobUrls = new Set<string>();
+  private readonly clickListeners = new Map<HTMLElement, (e: MouseEvent) => void>();
+
+  ngOnInit() {
+    this.attachListeners(this.el.nativeElement);
+
+    this.observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        mutation.addedNodes.forEach((node) => {
+          if (node instanceof HTMLElement) this.attachListeners(node);
+        });
+      }
+    });
+
+    this.observer.observe(this.el.nativeElement, { childList: true, subtree: true });
+  }
+
+  ngOnDestroy() {
+    this.observer?.disconnect();
+
+    this.ownedBlobUrls.forEach((blobUrl) => URL.revokeObjectURL(blobUrl));
+    this.ownedBlobUrls.clear();
+
+    this.clickListeners.forEach((listener, el) => el.removeEventListener('click', listener));
+    this.clickListeners.clear();
+  }
+
+  // ── Listener attachment ──────────────────────────────────────────────────
+  // Called once per card, on render and on DOM mutations. Does NOT fetch —
+  // just registers click handlers that will fetch lazily when the user acts.
+
+  private attachListeners(root: HTMLElement) {
+    root.querySelectorAll<HTMLElement>('[data-auth-href]').forEach((card) => this.attachCard(card));
+  }
+
+  private attachCard(card: HTMLElement) {
+    if (this.clickListeners.has(card)) return; // already wired up
+
+    const src = card.dataset['authHref']!;
+    const filename = card.dataset['authFilename'] ?? 'download';
+
+    // Card body click → open/view
+    const cardListener = (e: MouseEvent) => {
+      // Let the download button's own listener handle its click
+      if ((e.target as HTMLElement).closest('[data-auth-download]')) return;
+      e.preventDefault();
+      this.fetchBlobUrl(src).subscribe({
+        next: (blobUrl) => window.open(blobUrl, '_blank', 'noopener,noreferrer'),
+        error: () => console.warn(`[AuthFilesDirective] Failed to open: ${src}`),
+      });
+    };
+    card.addEventListener('click', cardListener);
+    this.clickListeners.set(card, cardListener);
+
+    // Download button click → fetch then trigger save
+    const anchor = card.querySelector<HTMLElement>('[data-auth-download]');
+    if (anchor) {
+      const dlListener = (e: MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.fetchBlobUrl(src).subscribe({
+          next: (blobUrl) => {
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = filename;
+            a.click();
+          },
+          error: () => console.warn(`[AuthFilesDirective] Failed to download: ${src}`),
+        });
+      };
+      anchor.addEventListener('click', dlListener);
+      this.clickListeners.set(anchor, dlListener);
+    }
+  }
+
+  // ── Fetch helper — cached, deduped ───────────────────────────────────────
+
+  private fetchBlobUrl(src: string): Observable<string> {
+    const cached = AuthFilesDirective.cache.get(src);
+    if (typeof cached === 'string')
+      return new Observable((o) => {
+        o.next(cached);
+        o.complete();
+      });
+    if (cached instanceof Observable) return cached;
+
+    const token = localStorage.getItem('jwt_token') ?? '';
+
+    const blobUrl$ = this.http
+      .get(src, {
+        responseType: 'blob',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .pipe(
+        map((blob) => {
+          const blobUrl = URL.createObjectURL(blob);
+          AuthFilesDirective.cache.set(src, blobUrl);
+          this.ownedBlobUrls.add(blobUrl);
+          return blobUrl;
+        }),
+        publishReplay(1),
+        refCount(),
+      );
+
+    AuthFilesDirective.cache.set(src, blobUrl$);
+    return blobUrl$;
+  }
+
+  /** Call on logout to purge all cached file blob URLs. */
+  static clearCache(): void {
+    AuthFilesDirective.cache.forEach((entry) => {
+      if (typeof entry === 'string') URL.revokeObjectURL(entry);
+    });
+    AuthFilesDirective.cache.clear();
   }
 }
 

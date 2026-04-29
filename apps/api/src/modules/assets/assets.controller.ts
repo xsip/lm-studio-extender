@@ -127,11 +127,11 @@ export class AssetsController {
       thumbnail,
     );
 
-    // Validate stored MIME type
+    /* Validate stored MIME type
     const allowed = /^image\/(jpeg|jpg|png|webp|gif|avif)$/;
     if (!allowed.test(blob.mimeType)) {
       throw new NotFoundException('Invalid image type');
-    }
+    }*/
 
     res.setHeader('Content-Type', blob.mimeType);
     res.setHeader('Cache-Control', 'public, max-age=86400'); // 1 day

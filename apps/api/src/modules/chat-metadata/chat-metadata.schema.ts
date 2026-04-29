@@ -17,6 +17,7 @@ export enum ChatClient {
 
 export enum GeneratedAssetType {
   IMAGE = 'IMAGE',
+  FILE = 'FILE'
 }
 
 export enum OpenAiEndpointPreference {

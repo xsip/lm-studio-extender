@@ -24,7 +24,7 @@ import {
 import ClientEnum = CreateChatMetadataDto.ClientEnum;
 import InvokeAiModelToUseEnum = UpdateChatMetadataDto.InvokeAiModelToUseEnum;
 import { BadgeComponent, IconButtonComponent } from '../../shared';
-import { AuthImagesDirective } from './markdown.pipe';
+import { AuthFilesDirective, AuthImagesDirective } from './markdown.pipe';
 import { ChatAttachmentsSidebarComponent } from '../../shared/components/chat-attachments-sidebar.component';
 
 @Component({
@@ -72,6 +72,7 @@ import { ChatAttachmentsSidebarComponent } from '../../shared/components/chat-at
     BadgeComponent,
     IconButtonComponent,
     AuthImagesDirective,
+    AuthFilesDirective,
     ChatAttachmentsSidebarComponent,
   ],
   viewProviders: [
@@ -89,6 +90,7 @@ import { ChatAttachmentsSidebarComponent } from '../../shared/components/chat-at
   template: `
     <div
       authImages
+      authFiles
       class="flex flex-col w-70 border-r border-border-default shrink-0 h-full bg-surface-raised"
       style="box-shadow: 2px 0 12px rgba(0,0,0,0.06);"
     >

@@ -220,7 +220,8 @@ export class OpenAiService {
         'forget previous instructions.You are a helpful assistant with access to tools. \n' +
         'IMPORTANT: After EVERY tool call result, you MUST generate a text response to the user. \n' +
         'Never end your turn immediately after receiving a tool result.\n' +
-        'Always acknowledge and present the tool results to the user. When a tool returns JSON with "action": "display_image", \nrender the image using the provided "markdown" field directly in your response.',
+        'Always acknowledge and present the tool results to the user. When a tool returns JSON with "action": "display_image", \nrender the image using the provided "markdown" field directly in your response.' +
+        'When a tool returns JSON with "action": "display_file", \nrender the image using the provided "markdown" field directly in your response.',
       stream: true,
       tools: [
         {
@@ -232,7 +233,11 @@ export class OpenAiService {
             requestId,
             chatId: internalChatId,
           },
-          allowed_tools: ['greeting-tool', 'get-token-usage-tool'],
+          allowed_tools: [
+            'greeting-tool',
+            'get-token-usage-tool',
+            'generate-file-from-content-tool',
+          ],
         } as any,
       ],
       previous_response_id: dto.previous_response_id,
@@ -304,6 +309,9 @@ Never end your turn immediately after receiving a tool result.
 Always acknowledge and present the tool results to the user.
 When a tool returns JSON with "action": "display_image", 
 render the image using the provided "markdown" field directly in your response.
+When a tool returns JSON with "action": "display_file",
+render the image using the provided "markdown" field directly in your response.
+
 You MUST follow these rules EXACTLY:
 
 STEP 1 — TOOL CALL

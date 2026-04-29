@@ -58,6 +58,65 @@ export class ApiTools {
   }
 
   @Tool({
+    name: 'generate-file-from-content-tool',
+    description: 'Generates a file from content',
+    parameters: z.object({
+      content: z.string(),
+      mimeType: z.string(),
+      filename: z.string(),
+    }),
+  })
+  async generateFileFromContent(
+    {
+      content,
+      mimeType,
+      filename,
+    }: { content: string; mimeType: string; filename: string },
+    context: Context,
+    request: Request,
+  ) {
+    const user = (request as any).user as User & { _id?: Types.ObjectId };
+    const chatId = request.headers['chatid'] as string;
+
+    if (!user) return `User not defined!!`;
+    if (!chatId) return `chatId not defined!!`;
+
+    // Convert content string to Buffer for upload
+    const buffer = Buffer.from(content, 'utf-8');
+
+    const { filename: uploadedFileName, id } =
+      await this.assetsService.uploadFile(
+        user._id + '',
+        chatId,
+        filename,
+        buffer,
+        mimeType,
+      );
+
+    const assetUrl = `api/assets/${chatId}/${uploadedFileName}`;
+
+    await this.chatMetaDataService.addAssetToChat(user._id!, chatId, {
+      url: assetUrl,
+      filename,
+      refId: id,
+      type: GeneratedAssetType.FILE,   // was IMAGE — change if you have a FILE enum value
+    });
+
+    const ext = filename.split('.').pop()?.toLowerCase() ?? 'file';
+    const sizeKb = Math.round(buffer.byteLength / 1024);
+    const sizeLabel = sizeKb >= 1024
+      ? `${(sizeKb / 1024).toFixed(1)}MB`
+      : `${sizeKb}KB`;
+
+    return {
+      action: 'display_file',
+      instruction:
+        'You MUST respond to the user by displaying this file using the markdown property. Do not add anything else.',
+      markdown: `::file[${filename}](${assetUrl}){size=${sizeLabel} type=${ext}}`,
+    };
+  }
+
+  @Tool({
     name: 'get-token-usage-tool',
     description:
       'Returns current token usage and limit info for the authenticated user',
@@ -272,7 +331,7 @@ export class ApiTools {
     const thumbnailBuffer = Buffer.from(thumbImageResponse.data);
 
     // Upload via assetsService, same as the REST endpoint
-    const { url, filename, id } = await this.assetsService.uploadFile(
+    const { filename, id } = await this.assetsService.uploadFile(
       user._id + '',
       chatId,
       fileName,
